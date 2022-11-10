@@ -1279,6 +1279,16 @@
       }
     },
 
+    "bottom-left": {
+      "desc": "Bottom left slot",
+      "scope": {
+        "cols": {
+          "type": "Object",
+          "desc": "Column definitions"
+        }
+      }
+    },
+
     "bottom-row": {
       "desc": "Slot to define how bottom extra row looks like",
       "scope": {

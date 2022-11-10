@@ -761,15 +761,20 @@ export default createComponent({
         return h('div', { class: bottomClass }, [ bottom(marginalsScope.value) ])
       }
 
-      const child = props.hideSelectedBanner !== true && hasSelectionMode.value === true && rowsSelectedNumber.value > 0
-        ? [
-            h('div', { class: 'q-table__control' }, [
-              h('div', [
-                (props.selectedRowsLabel || $q.lang.table.selectedRecords)(rowsSelectedNumber.value)
-              ])
-            ])
-          ]
-        : []
+      const bottomLeft = slots[ 'bottom-left' ]
+
+      const child = []
+
+      if (bottomLeft !== void 0) {
+        child.push(h('div', { class: 'q-table__control' }, [ bottomLeft(marginalsScope.value) ]))
+      }
+      else if (props.hideSelectedBanner !== true && hasSelectionMode.value === true && rowsSelectedNumber.value > 0) {
+        child.push(h('div', { class: 'q-table__control' }, [
+          h('div', [
+            (props.selectedRowsLabel || $q.lang.table.selectedRecords)(rowsSelectedNumber.value)
+          ])
+        ]))
+      }
 
       if (props.hidePagination !== true) {
         return h('div', {
