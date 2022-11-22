@@ -732,9 +732,17 @@ export default createComponent({
         return
       }
 
+      const bottomLeft = slots[ 'bottom-left' ]
+
       if (nothingToDisplay.value === true) {
         if (props.hideNoData === true) {
           return
+        }
+
+        const child = []
+
+        if (bottomLeft !== void 0) {
+          child.push(h('div', { class: 'q-table__control q-mr-sm' }, [ bottomLeft(marginalsScope.value) ]))
         }
 
         const message = props.loading === true
@@ -742,7 +750,7 @@ export default createComponent({
           : (props.filter ? props.noResultsLabel || $q.lang.table.noResults : props.noDataLabel || $q.lang.table.noData)
 
         const noData = slots[ 'no-data' ]
-        const children = noData !== void 0
+        child.push(noData !== void 0
           ? [ noData({ message, icon: $q.iconSet.table.warning, filter: props.filter }) ]
           : [
               h(QIcon, {
@@ -750,9 +758,8 @@ export default createComponent({
                 name: $q.iconSet.table.warning
               }),
               message
-            ]
-
-        return h('div', { class: bottomClass + ' q-table__bottom--nodata' }, children)
+            ])
+        return h('div', { class: bottomClass + ' q-table__bottom--nodata' }, child)
       }
 
       const bottom = slots.bottom
@@ -760,8 +767,6 @@ export default createComponent({
       if (bottom !== void 0) {
         return h('div', { class: bottomClass }, [ bottom(marginalsScope.value) ])
       }
-
-      const bottomLeft = slots[ 'bottom-left' ]
 
       const child = []
 
