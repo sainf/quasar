@@ -1,6 +1,6 @@
 {
   "name": "@quasar/extras",
-  "version": "1.16.0",
+  "version": "1.16.1",
   "description": "Quasar Framework fonts, icons and animations",
   "scripts": {
     "build": "node build/index.js"
@@ -8,6 +8,11 @@
   "main": "index.js",
   "exports": {
     ".": "./index.js",
+    "./animate/animate-list.common": {
+      "types": "./animate/animate-list.d.ts",
+      "import": "./animate/animate-list.mjs",
+      "require": "./animate/animate-list.common.js"
+    },
     "./bootstrap-icons": {
       "types": "./bootstrap-icons/index.d.ts",
       "import": "./bootstrap-icons/index.mjs",
@@ -78,10 +83,10 @@
       "import": "./material-symbols-outlined/index.mjs",
       "require": "./material-symbols-outlined/index.js"
     },
-    "./material-symbols-round": {
-      "types": "./material-symbols-round/index.d.ts",
-      "import": "./material-symbols-round/index.mjs",
-      "require": "./material-symbols-round/index.js"
+    "./material-symbols-rounded": {
+      "types": "./material-symbols-rounded/index.d.ts",
+      "import": "./material-symbols-rounded/index.mjs",
+      "require": "./material-symbols-rounded/index.js"
     },
     "./material-symbols-sharp": {
       "types": "./material-symbols-sharp/index.d.ts",
@@ -107,6 +112,11 @@
       "types": "./mdi-v6/index.d.ts",
       "import": "./mdi-v6/index.mjs",
       "require": "./mdi-v6/index.js"
+    },
+    "./mdi-v7": {
+      "types": "./mdi-v7/index.d.ts",
+      "import": "./mdi-v7/index.mjs",
+      "require": "./mdi-v7/index.js"
     },
     "./themify": {
       "types": "./themify/index.d.ts",
