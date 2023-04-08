@@ -75,9 +75,11 @@ const currentReleaseBody = computed(() => {
 
 .release__tab-label
   font-size: $font-size
-  font-weight: bold
+  font-weight: 700
+  line-height: ($font-size + 3px)
 .release__tab-date
   font-size: ($font-size - 3px)
+  line-height: ($font-size + 3px)
 
 .release__body
   h1, h2, h3, h4, h5, h6
@@ -112,7 +114,7 @@ const currentReleaseBody = computed(() => {
       text-align: left
       padding: 8px 16px
     th
-      font-weight: bold
+      font-weight: 700
       letter-spacing: $letter-spacing-brand
       border-bottom: 1px solid $separator-color
     tr:not(:first-child) td

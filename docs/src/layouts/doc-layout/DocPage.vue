@@ -3,14 +3,14 @@
     <div v-if="props.overline" class="doc-page__overline text-brand-primary">{{ props.overline }}</div>
 
     <div class="doc-h1 row items-center no-wrap" v-if="props.heading">
-      <div class="doc-heading q-mr-xs" id="introduction">
+      <div class="doc-heading" id="introduction">
         <span>{{ props.title }}</span>
-        <q-badge class="q-ml-sm doc-page__badge" v-if="props.badge" :label="props.badge" />
+        <q-badge class="doc-page__badge" v-if="props.badge" :label="props.badge" />
       </div>
       <q-space />
       <q-btn
         v-if="props.editLink"
-        class="self-start"
+        class="self-start q-ml-sm"
         :href="editHref" target="_blank" rel="noopener noreferrer"
         flat
         round
@@ -27,18 +27,15 @@
     <div class="doc-page__nav" v-if="props.related">
       <div class="q-gutter-sm flex">
         <router-link
-          class="q-link doc-page__related rounded-borders q-px-md q-py-md cursor-pointer column justify-center"
+          class="q-link doc-page__related rounded-borders cursor-pointer column justify-center"
           v-for="link in props.related"
           :key="link.category + link.path"
           :to="link.path"
         >
-          <div class="row no-wrap items-center">
-            <div class="col">
-              <div class="doc-page__nav-categ text-uppercase">{{ link.category || 'Docs' }}</div>
-              <div class="doc-page__nav-name text-weight-bold">{{ link.name }}</div>
-            </div>
-
-            <q-icon class="q-ml-md" :name="mdiLaunch" />
+          <div class="doc-page__nav-categ">{{ link.category || 'Docs' }}</div>
+          <div class="doc-page__nav-name text-weight-bold row items-center no-wrap">
+            <div class="q-mr-xs">{{ link.name }}</div>
+            <q-icon :name="mdiLaunch" />
           </div>
         </router-link>
       </div>
@@ -50,23 +47,14 @@
       <div class="text-h6 q-pb-md">Ready for more?</div>
       <div class="q-gutter-sm flex">
         <router-link
-          class="q-link doc-page__related rounded-borders q-px-md q-py-md cursor-pointer column justify-center"
           v-for="link in props.nav"
           :key="link.category + link.path"
           :to="link.path"
+          class="q-link doc-page__related rounded-borders cursor-pointer column justify-center"
+          :class="link.classes"
         >
-          <div class="row no-wrap items-center">
-            <q-icon
-              :name="link.dir === 'left' ? mdiChevronLeft : mdiChevronRight"
-              v-if="link.dir !== void 0"
-              :class="link.dir === 'right' ? 'order-last q-ml-md' : 'order-first q-mr-md'"
-            />
-
-            <div class="col">
-              <div class="doc-page__nav-categ text-uppercase">{{ link.category || 'Docs' }}</div>
-              <div class="doc-page__nav-name text-weight-bold">{{ link.name }}</div>
-            </div>
-          </div>
+          <div class="doc-page__nav-categ">{{ link.category || 'Docs' }}</div>
+          <div class="doc-page__nav-name text-weight-bold">{{ link.name }}</div>
         </router-link>
       </div>
     </div>
@@ -93,9 +81,9 @@ import { useMeta } from 'quasar'
 import { computed } from 'vue'
 
 import {
-  mdiPencil, mdiLaunch,
-  mdiChevronLeft, mdiChevronRight,
-  mdiFlash
+  mdiPencil,
+  mdiFlash,
+  mdiLaunch
 } from '@quasar/extras/mdi-v6'
 
 import DocLink from 'src/components/DocLink.vue'
@@ -142,7 +130,7 @@ const tocClass = computed(() =>
 .doc-page
   &__content
     padding: 80px 42px
-    line-height: 30px
+    line-height: 1.5em
 
     @media (max-width: 1300px)
       padding: 32px
@@ -152,7 +140,7 @@ const tocClass = computed(() =>
     > .q-btn
       background: $brand-accent
       color: #fff
-      font-weight: bold
+      font-weight: 700
       font-size: $font-size
       letter-spacing: $letter-spacing-brand
       padding: 8px 16px
@@ -193,8 +181,24 @@ const tocClass = computed(() =>
     transition: color $header-transition
     word-break: break-word
     line-height: 1.4em
+    padding: 16px 20px
+
     &:hover
       color: $brand-primary !important
+
+    &--left
+      justify-content: flex-start
+      text-align: left
+      .doc-page__nav-name:before
+        content: '« '
+        font-size: 1.2em
+
+    &--right
+      justify-content: flex-end
+      text-align: right
+      .doc-page__nav-name:after
+        content: ' »'
+        font-size: 1.2em
 
   &__nav
     color: $brand-primary
@@ -206,11 +210,10 @@ const tocClass = computed(() =>
     & + &
       margin-top: 0
 
-    .q-icon
-      font-size: 1.75em
-
     &-categ
-      font-size: .8em
+      font-size: .9em
+
+    &-name
       letter-spacing: $letter-spacing-brand
 
 body.body--light .doc-page
@@ -221,8 +224,6 @@ body.body--light .doc-page
 
   &__toc-container .q-item
     color: $header-btn-color--light
-    &:hover
-      color: $header-btn-hover-color--light
 
 body.body--dark .doc-page
   &__related
@@ -230,8 +231,9 @@ body.body--dark .doc-page
     background: $dark-pill
     border: 1px solid $brand-primary
 
+  &__nav-name
+    color: $brand-primary
+
   &__toc-container .q-item
     color: $header-btn-color--dark
-    &:not(.disabled):hover
-      color: $header-btn-hover-color--dark
 </style>

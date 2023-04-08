@@ -29,14 +29,14 @@
   text-rendering: optimizeLegibility
   -webkit-font-smoothing: auto
 
-.doc-marketing
-  font-size: $font-size-marketing
+.doc-brand
+  font-size: $font-size-brand
   line-height: 1.5
 
-.doc-marketing,
+.doc-brand,
 .doc-header-menu
-  font-family: $font-family-marketing
-  font-weight: $font-weight-marketing
+  font-family: $font-family-brand
+  font-weight: $font-weight-brand
 
 // resets .doc-technical above to Quasar original
 .doc-example-typography
@@ -44,7 +44,7 @@
   line-height: 1.5em
 
 strong
-  font-weight: bold
+  font-weight: 700
 
 ul
   margin: 0 0 16px
@@ -189,8 +189,8 @@ ul
   padding: 0
   line-height: 1.1em
   margin: 2.5em 0 1em
-  > *
-    margin: 0 8px
+  .q-badge
+    margin-left: 8px
 
 .doc-img
   max-width: 100%
@@ -215,7 +215,11 @@ kbd
   box-shadow: inset 0 -2px 0 0 #cdcde6,inset 0 0 1px 1px #fff,0 1px 2px 1px rgba(30,35,90,0.4)
 
 .doc-gdpr
+  font-family: $font-family-brand
   max-width: 360px
+  &,
+  .q-btn
+    font-weight: 700
 
 .q-page > .q-badge + .doc-example
   margin-top: 0
@@ -278,7 +282,7 @@ body.q-scroll--lock .q-page
   &--medium
     color: $brand-primary
     font-size: 18px
-    font-weight: bold
+    font-weight: 700
     letter-spacing: 4.5px
 
     @media (min-width: $breakpoint-sm-min)
@@ -322,7 +326,7 @@ body.q-scroll--lock .q-page
 .call-to-action-btn
   background: $brand-accent
   color: #fff
-  font-weight: bold
+  font-weight: 700
   font-size: $font-size
   letter-spacing: 2.63px
 
