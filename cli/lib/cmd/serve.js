@@ -20,8 +20,8 @@ const argv = parseArgs(process.argv.slice(2), {
     P: 'proxy',
     h: 'help'
   },
-  boolean: ['g', 'https', 'colors', 'history', 'h', 'cors'],
-  string: ['H', 'C', 'K', 'i'],
+  boolean: [ 'g', 'https', 'colors', 'history', 'h', 'cors' ],
+  string: [ 'H', 'C', 'K', 'i' ],
   default: {
     p: process.env.PORT || 4000,
     H: process.env.HOSTNAME || '0.0.0.0',
@@ -88,7 +88,9 @@ if (argv.help) {
 import { readFileSync, writeFileSync, existsSync, statSync } from 'node:fs'
 import path from 'node:path'
 
-const root = getAbsolutePath(argv._[0] || '.')
+const { fatal } = await import('../logger.js')
+
+const root = getAbsolutePath(argv._[ 0 ] || '.')
 const resolve = p => path.resolve(root, p)
 
 function getAbsolutePath (pathParam) {
@@ -130,12 +132,12 @@ if (ssrDetected === false) {
     ? parseInt(argv.micro, 10)
     : false
 
-  function serve (path, cache) {
+  const serve = (path, cache) => {
     const opts = {
       maxAge: cache ? parseInt(argv.cache, 10) * 1000 : 0,
       setHeaders (res, path) {
         if (res.req.method === 'GET' && path === resolvedIndex) {
-          res.set('Cache-Control', 'no-store, no-cache, must-revalidate, proxy-revalidate');
+          res.set('Cache-Control', 'no-store, no-cache, must-revalidate, proxy-revalidate')
           res.set('Pragma', 'no-cache')
           res.set('Expires', '0')
           res.set('Surrogate-Control', 'no-store')
@@ -160,7 +162,7 @@ if (ssrDetected === false) {
   if (!argv.silent) {
     app.get('*', (req, _, next) => {
       console.log(
-        `GET ${green(req.url)} ${gray('[' + req.ip + ']')} ${new Date()}`
+        `GET ${ green(req.url) } ${ gray('[' + req.ip + ']') } ${ new Date() }`
       )
       next()
     })
@@ -179,8 +181,7 @@ if (ssrDetected === false) {
   if (argv.proxy) {
     let file = argv.proxy = getAbsolutePath(argv.proxy)
     if (!existsSync(file)) {
-      console.error('Proxy definition file not found! ' + file)
-      process.exit(1)
+      fatal('Proxy definition file not found! ' + file)
     }
     file = await import(file)
 
@@ -218,49 +219,17 @@ if (ssrDetected === false) {
     res.setHeader('Content-Type', 'text/html')
     res.status(404).send('404 | Page Not Found')
     if (!argv.silent) {
-      console.log(red(`  404 on ${req.url}`))
+      console.log(red(`  404 on ${ req.url }`))
     }
   })
 
-  function getHostname (host) {
+  const getHostname = host => {
     return host === '0.0.0.0'
       ? 'localhost'
       : host
   }
 
-  const server = await getServer(app)
-  server.listen(argv.port, argv.hostname, async () => {
-    const url = `http${argv.https ? 's' : ''}://${getHostname(argv.hostname)}:${argv.port}`
-    const { version } = await import('../version.js')
-
-    const info = [
-      ['Quasar CLI', `v${version}`],
-      ['Listening at', url],
-      ['Web server root', root],
-      argv.https ? ['HTTPS', 'enabled'] : '',
-      argv.gzip ? ['Gzip', 'enabled'] : '',
-      ['Cache (max-age)', argv.cache || 'disabled'],
-      microCacheSeconds ? ['Micro-cache', microCacheSeconds + 's'] : '',
-      argv.history ? ['History mode', 'enabled'] : '',
-      ['Index file', argv.index],
-      argv.cors ? ['CORS', 'enabled'] : '',
-      argv.proxy ? ['Proxy definitions', argv.proxy] : ''
-    ]
-    .filter(msg => msg)
-    .map(msg => ' ' + msg[0].padEnd(20, '.') + ' ' + green(msg[1]))
-
-    console.log('\n' + info.join('\n') + '\n')
-
-    if (argv.open) {
-      const { isMinimalTerminal } = await import('../is-minimal-terminal.js')
-      if (!isMinimalTerminal) {
-        const { default: open } = await import('open')
-        open(url, { url: true })
-      }
-    }
-  })
-
-  async function getServer (app) {
+  const getServer = async app => {
     if (!argv.https) {
       return app
     }
@@ -275,16 +244,14 @@ if (ssrDetected === false) {
         key = readFileSync(key)
       }
       else {
-        console.error('SSL key file not found!' + key)
-        process.exit(1)
+        fatal('SSL key file not found!' + key)
       }
 
       if (existsSync(cert)) {
         cert = readFileSync(cert)
       }
       else {
-        console.error('SSL cert file not found!' + cert)
-        process.exit(1)
+        fatal('SSL cert file not found!' + cert)
       }
     }
     else {
@@ -313,12 +280,12 @@ if (ssrDetected === false) {
 
         const selfsigned = await import('selfsigned')
         const pems = selfsigned.generate(
-          [{ name: 'commonName', value: 'localhost' }],
+          [ { name: 'commonName', value: 'localhost' } ],
           {
             algorithm: 'sha256',
             days: 30,
             keySize: 2048,
-            extensions: [{
+            extensions: [ {
               name: 'basicConstraints',
               cA: true
             }, {
@@ -362,7 +329,7 @@ if (ssrDetected === false) {
                   ip: 'fe80::1'
                 }
               ]
-            }]
+            } ]
           }
         )
 
@@ -370,9 +337,7 @@ if (ssrDetected === false) {
           writeFileSync(certPath, pems.private + pems.cert, { encoding: 'utf-8' })
         }
         catch (err) {
-          console.error(' Cannot write certificate file ' + certPath)
-          console.error(' Aborting...')
-          process.exit(1)
+          fatal(' Cannot write certificate file ' + certPath + '. Aborting...')
         }
       }
 
@@ -385,4 +350,36 @@ if (ssrDetected === false) {
       cert: cert || fakeCert
     }, app)
   }
+
+  const server = await getServer(app)
+  server.listen(argv.port, argv.hostname, async () => {
+    const url = `http${ argv.https ? 's' : '' }://${ getHostname(argv.hostname) }:${ argv.port }`
+    const { version } = await import('../version.js')
+
+    const info = [
+      [ 'Quasar CLI', `v${ version }` ],
+      [ 'Listening at', url ],
+      [ 'Web server root', root ],
+      argv.https ? [ 'HTTPS', 'enabled' ] : '',
+      argv.gzip ? [ 'Gzip', 'enabled' ] : '',
+      [ 'Cache (max-age)', argv.cache || 'disabled' ],
+      microCacheSeconds ? [ 'Micro-cache', microCacheSeconds + 's' ] : '',
+      argv.history ? [ 'History mode', 'enabled' ] : '',
+      [ 'Index file', argv.index ],
+      argv.cors ? [ 'CORS', 'enabled' ] : '',
+      argv.proxy ? [ 'Proxy definitions', argv.proxy ] : ''
+    ]
+      .filter(msg => msg)
+      .map(msg => ' ' + msg[ 0 ].padEnd(20, '.') + ' ' + green(msg[ 1 ]))
+
+    console.log('\n' + info.join('\n') + '\n')
+
+    if (argv.open) {
+      const { isMinimalTerminal } = await import('../is-minimal-terminal.js')
+      if (!isMinimalTerminal) {
+        const { default: open } = await import('open')
+        open(url, { url: true })
+      }
+    }
+  })
 }

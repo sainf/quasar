@@ -1,6 +1,6 @@
 {
   "name": "@quasar/extras",
-  "version": "1.16.2",
+  "version": "1.16.3",
   "description": "Quasar Framework fonts, icons and animations",
   "scripts": {
     "build": "node build/index.js"
@@ -92,11 +92,6 @@
       "types": "./material-symbols-sharp/index.d.ts",
       "import": "./material-symbols-sharp/index.mjs",
       "require": "./material-symbols-sharp/index.js"
-    },
-    "./mdi-v3": {
-      "types": "./mdi-v3/index.d.ts",
-      "import": "./mdi-v3/index.mjs",
-      "require": "./mdi-v3/index.js"
     },
     "./mdi-v4": {
       "types": "./mdi-v4/index.d.ts",

@@ -3,13 +3,13 @@ const getPackageJson = require('./get-package-json')
 
 function getMajorVersion (version) {
   const matches = version.match(/^(\d)\./)
-  return parseInt(matches[1], 10)
+  return parseInt(matches[ 1 ], 10)
 }
 
 /**
  * Get major version of a host package.
  */
-module.exports = function getPackageMajorVersion(pkgName, folder = appPaths.appDir) {
+module.exports = function getPackageMajorVersion (pkgName, folder = appPaths.appDir) {
   const pkg = getPackageJson(pkgName, folder)
 
   return pkg ? getMajorVersion(pkg.version) : undefined

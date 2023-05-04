@@ -1,11 +1,11 @@
 #!/usr/bin/env node
 
-require('../lib/utils/node-version-check')
+import '../lib/utils/node-version-check.js'
 
-const updateNotifier = require('update-notifier')
-const pkg = require('../package.json')
+import updateNotifier from 'update-notifier'
+import { packageJson } from '../lib/utils/package-json.js'
 
-updateNotifier({ pkg }).notify()
+updateNotifier({ pkg: packageJson }).notify()
 
 const commands = [
   'generate',
@@ -14,7 +14,7 @@ const commands = [
   'help'
 ]
 
-let cmd = process.argv[2]
+let cmd = process.argv[ 2 ]
 
 if (cmd && cmd.length === 1) {
   const mapToCmd = {
@@ -23,8 +23,10 @@ if (cmd && cmd.length === 1) {
     p: 'profile',
     h: 'help'
   }
-  cmd = mapToCmd[cmd]
+  cmd = mapToCmd[ cmd ]
 }
+
+import { warn } from '../lib/utils/logger.js'
 
 if (cmd) {
   if (commands.includes(cmd)) {
@@ -32,11 +34,9 @@ if (cmd) {
   }
   else {
     if (cmd === '-v' || cmd === '--version') {
-      console.log(require('../package.json').version)
+      console.log(packageJson.version)
       process.exit(0)
     }
-
-    const { warn } = require('../lib/utils/logger')
 
     if (cmd === '-h' || cmd === '--help') {
       cmd = 'help'
@@ -48,7 +48,7 @@ if (cmd) {
     }
     else {
       warn()
-      warn(`Unknown command specified: "${cmd}"`)
+      warn(`Unknown command specified: "${ cmd }"`)
       cmd = 'help'
     }
   }
@@ -58,4 +58,4 @@ else {
 }
 
 console.log()
-require(`../lib/cmd/${cmd}`)
+import(`../lib/cmd/${ cmd }.js`)

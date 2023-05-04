@@ -103,11 +103,27 @@ export function setCssVar(
   element?: Element
 ): void;
 
-export class EventBus {
-  on(event: string, callback: Function, ctx?: any): this;
-  once(event: string, callback: Function, ctx?: any): this;
-  emit(event: string, ...args: any[]): this;
-  off(event: string, callback?: Function): this;
+interface Callbacks {
+  [key: string]: (...args: any[]) => void;
+}
+
+export class EventBus<T extends Callbacks = Callbacks> {
+  on<K extends keyof T>(
+    event: K,
+    callback: T[K],
+    ...ctx: unknown extends ThisParameterType<T[K]>
+      ? []
+      : [ctx: ThisParameterType<T[K]>]
+  ): this;
+  once<K extends keyof T>(
+    event: K,
+    callback: T[K],
+    ...ctx: unknown extends ThisParameterType<T[K]>
+      ? []
+      : [ctx: ThisParameterType<T[K]>]
+  ): this;
+  emit<K extends keyof T>(event: K, ...args: Parameters<T[K]>): this;
+  off<K extends keyof T>(event: K, callback?: T[K]): this;
 }
 
 interface CreateMetaMixinContext extends ComponentPublicInstance {
