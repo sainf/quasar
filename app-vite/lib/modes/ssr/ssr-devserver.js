@@ -1,18 +1,17 @@
-const { readFileSync } = require('fs')
-const { join } = require('path')
+const { readFileSync } = require('node:fs')
+const { join } = require('node:path')
 const { createServer } = require('vite')
 const chokidar = require('chokidar')
-const debounce = require('lodash/debounce')
-const Ouch = require('ouch')
+const debounce = require('lodash/debounce.js')
 const serialize = require('serialize-javascript')
 
-const AppDevserver = require('../../app-devserver')
-const appPaths = require('../../app-paths')
-const getPackage = require('../../helpers/get-package')
-const openBrowser = require('../../helpers/open-browser')
-const config = require('./ssr-config')
-const { log, warn, info, dot, progress } = require('../../helpers/logger')
-const { entryPointMarkup, getDevSsrTemplateFn } = require('../../helpers/html-template')
+const appPaths = require('../../app-paths.js')
+const { AppDevserver } = require('../../app-devserver.js')
+const { getPackage } = require('../../utils/get-package.js')
+const { openBrowser } = require('../../utils/open-browser.js')
+const { quasarSsrConfig } = require('./ssr-config.js')
+const { log, warn, info, dot, progress } = require('../../utils/logger.js')
+const { entryPointMarkup, getDevSsrTemplateFn } = require('../../utils/html-template.js')
 
 const { renderToString } = getPackage('vue/server-renderer')
 
@@ -22,7 +21,7 @@ const templatePath = appPaths.resolve.app('index.html')
 const serverFile = appPaths.resolve.app('.quasar/ssr/compiled-dev-webserver.js')
 const serverEntryFile = appPaths.resolve.app('.quasar/server-entry.js')
 
-const { injectPwaManifest, buildPwaServiceWorker } = require('../pwa/utils')
+const { injectPwaManifest, buildPwaServiceWorker } = require('../pwa/utils.js')
 
 function resolvePublicFolder () {
   return join(publicFolder, ...arguments)
@@ -31,24 +30,26 @@ function resolvePublicFolder () {
 const doubleSlashRE = /\/\//g
 const autoRemove = 'document.currentScript.remove()'
 
-const ouchInstance = (new Ouch()).pushHandler(
-  new Ouch.handlers.PrettyPageHandler('orange', null, 'sublime')
-)
-
 function logServerMessage (title, msg, additional) {
   log()
   info(`${ msg }${ additional !== void 0 ? ` ${ dot } ${ additional }` : '' }`, title)
 }
 
+let renderSSRError
 function renderError ({ err, req, res }) {
-  ouchInstance.handleException(err, req, res, () => {
-    log()
-    warn(req.url, 'Render failed')
-  })
+  log()
+  warn(req.url, 'Render failed')
+
+  renderSSRError({ err, req, res })
 }
 
 async function warmupServer (viteClient, viteServer) {
   const done = progress('Warming up...')
+
+  if (renderSSRError === void 0) {
+    const { default: render } = await import('@quasar/render-ssr-error')
+    renderSSRError = render
+  }
 
   try {
     await viteServer.ssrLoadModule(serverEntryFile)
@@ -72,7 +73,7 @@ function renderStoreState (ssrContext) {
   return `<script${ nonce }>window.__INITIAL_STATE__=${ state };${ autoRemove }</script>`
 }
 
-class SsrDevServer extends AppDevserver {
+module.exports.QuasarModeDevserver = class QuasarModeDevserver extends AppDevserver {
   #closeWebserver
   #viteClient
   #viteServer
@@ -162,16 +163,16 @@ class SsrDevServer extends AppDevserver {
       await this.#webserverWatcher.close()
     }
 
-    const esbuildConfig = await config.webserver(quasarConf)
-    await this.buildWithEsbuild('SSR Webserver', esbuildConfig, () => {
+    const esbuildConfig = await quasarSsrConfig.webserver(quasarConf)
+    await this.watchWithEsbuild('SSR Webserver', esbuildConfig, () => {
       if (this.#closeWebserver !== void 0) {
         queue(async () => {
           await this.#closeWebserver()
           return this.#bootWebserver(quasarConf)
         })
       }
-    }).then(result => {
-      this.#webserverWatcher = { close: result.stop }
+    }).then(esbuildCtx => {
+      this.#webserverWatcher = { close: esbuildCtx.dispose }
     })
   }
 
@@ -190,8 +191,8 @@ class SsrDevServer extends AppDevserver {
       ? url => url || '/'
       : url => (url ? (publicPath + url).replace(doubleSlashRE, '/') : publicPath)
 
-    const viteClient = this.#viteClient = await createServer(await config.viteClient(quasarConf))
-    const viteServer = this.#viteServer = await createServer(await config.viteServer(quasarConf))
+    const viteClient = this.#viteClient = await createServer(await quasarSsrConfig.viteClient(quasarConf))
+    const viteServer = this.#viteServer = await createServer(await quasarSsrConfig.viteServer(quasarConf))
 
     if (quasarConf.ssr.pwa === true) {
       injectPwaManifest(quasarConf, true)
@@ -268,8 +269,8 @@ class SsrDevServer extends AppDevserver {
   async #bootWebserver (quasarConf) {
     const done = progress(`${ this.#closeWebserver !== void 0 ? 'Restarting' : 'Starting' } webserver...`)
 
-    delete require.cache[ serverFile ]
     const { create, listen, close, injectMiddlewares, serveStaticContent } = require(serverFile)
+    delete require.cache[ serverFile ]
 
     const { publicPath } = this.#appOptions
 
@@ -287,7 +288,7 @@ class SsrDevServer extends AppDevserver {
       },
       render: this.#appOptions.render,
       serve: {
-        static: (path, opts = {}) => serveStaticContent(resolvePublicFolder(path), opts),
+        static: (pathToServe, opts = {}) => serveStaticContent(resolvePublicFolder(pathToServe), opts),
         error: renderError
       }
     }
@@ -349,6 +350,11 @@ class SsrDevServer extends AppDevserver {
 
     const isReady = () => Promise.resolve()
 
+    if (quasarConf.devServer.https) {
+      const https = await import('node:https')
+      middlewareParams.devHttpsApp = https.createServer(quasarConf.devServer.https, app)
+    }
+
     const listenResult = await listen({
       isReady,
       ssrHandler: (req, res, next) => {
@@ -401,19 +407,17 @@ class SsrDevServer extends AppDevserver {
       await this.#pwaServiceWorkerWatcher.close()
     }
 
-    const workboxConfig = await config.workbox(quasarConf)
+    const workboxConfig = await quasarSsrConfig.workbox(quasarConf)
 
     if (quasarConf.pwa.workboxMode === 'injectManifest') {
-      const esbuildConfig = await config.customSw(quasarConf)
-      await this.buildWithEsbuild('injectManifest Custom SW', esbuildConfig, () => {
+      const esbuildConfig = await quasarSsrConfig.customSw(quasarConf)
+      await this.watchWithEsbuild('injectManifest Custom SW', esbuildConfig, () => {
         queue(() => buildPwaServiceWorker(quasarConf.pwa.workboxMode, workboxConfig))
-      }).then(result => {
-        this.#pwaServiceWorkerWatcher = { close: result.stop }
+      }).then(esbuildCtx => {
+        this.#pwaServiceWorkerWatcher = { close: esbuildCtx.dispose }
       })
     }
 
     await buildPwaServiceWorker(quasarConf.pwa.workboxMode, workboxConfig)
   }
 }
-
-module.exports = SsrDevServer

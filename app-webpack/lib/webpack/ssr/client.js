@@ -1,12 +1,17 @@
-const path = require('path')
+const path = require('node:path')
+const webpack = require('webpack')
 
-const injectHtml = require('../inject.html')
-const { QuasarSSRClientPlugin } = require('./plugin.client-side')
+const { injectHtml } = require('../inject.html.js')
+const { QuasarSSRClientPlugin } = require('./plugin.client-side.js')
 
-module.exports = function (chain, cfg) {
+module.exports.injectSSRClient = function injectSSRClient (chain, cfg) {
   if (cfg.ctx.prod) {
     chain.output
       .path(path.join(cfg.build.distDir, 'www'))
+  }
+  else if (cfg.devServer.hot) {
+    chain.plugin('hot-module-replacement')
+      .use(webpack.HotModuleReplacementPlugin)
   }
 
   if (cfg.ctx.mode.pwa) {

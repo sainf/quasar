@@ -1,8 +1,9 @@
 ---
 title: Supporting TypeScript
 desc: (@quasar/app-webpack) How to enable support for TypeScript in a Quasar app.
+badge: "@quasar/app-webpack v4+"
 related:
-  - /quasar-cli-webpack/quasar-config-js
+  - /quasar-cli-webpack/quasar-config-file
 ---
 
 The Typescript support is not added by default to your project (unless you selected TS when you created your project folder), but it can be easily integrated by following the guide on this page.
@@ -13,15 +14,16 @@ The following steps are only required when you **have not** selected TypeScript 
 
 ## Installation of TypeScript Support
 
-In order to support TypeScript, you'll need to edit `/quasar.config.js`:
+In order to support TypeScript, you'll need to change the extension of your quasar.config file: `/quasar.config.ts` (notice the `.ts` ending):
 
 ```js
-module.exports = function (ctx) {
+import { configure } from "quasar/wrappers";
+
+export default configure((ctx) => {
   return {
-    supportTS: true,
-    ....
+    // ...
   }
-}
+});
 ```
 
 Then create `/tsconfig.json` file at the root of you project with this content:
@@ -42,23 +44,23 @@ Remember that you must change the extension of your JavaScript files to `.ts` to
 :::
 
 ::: warning
-If you enable the `supportTS` flag but fail to add the `tsconfig.json` file, the application will break at compile time!
+If you fail to add the `tsconfig.json` file, the application will break at compile time!
 :::
 
-## Handling TS Webpack loaders
+## Handling TS Webpack loaders <q-badge label="@quasar/app-webpack v4+" />
 
-Behind the curtains, Quasar uses `ts-loader` and `fork-ts-checker-webpack-plugin` (provided by `@quasar/app-webpack` package) to manage TS files. If you ever need to provide a custom configuration for these libs you can do so by making `supportTS` property like so:
+Behind the curtains, Quasar uses `ts-loader` and `fork-ts-checker-webpack-plugin` (provided by `@quasar/app-webpack` package) to manage TS files. If you ever need to provide a custom configuration for these libs you can do so by making `build` property like so:
 
 ```js
-// quasar.config.js
-module.exports = function (ctx) {
+// quasar.config file
+export default function (ctx) {
   return {
-    supportTS: {
-      tsLoaderConfig: {
+    build: {
+      tsLoaderOptions: {
         // `appendTsSuffixTo: [/\.vue$/]` and `transpileOnly: true` are added by default and cannot be overridden
         ...
       },
-      tsCheckerConfig: {
+      tsCheckerOptions: {
         // `vue: true` is added by default and cannot be overridden
         ...
       }
@@ -80,7 +82,7 @@ Then update your ESLint configuration accordingly, like in the following example
 
 ```js
 // .eslintrc.cjs
-const { resolve } = require('path');
+const { resolve } = require('node:path');
 
 module.exports = {
   // https://eslint.org/docs/user-guide/configuring#configuration-cascading-and-hierarchy
@@ -99,7 +101,7 @@ module.exports = {
     parser: '@typescript-eslint/parser',
     project: resolve(__dirname, './tsconfig.json'),
     tsconfigRootDir: __dirname,
-    ecmaVersion: 2018, // Allows for the parsing of modern ECMAScript features
+    ecmaVersion: 2021, // Allows for the parsing of modern ECMAScript features
     sourceType: 'module', // Allows for the use of imports
   },
 
@@ -152,17 +154,17 @@ If anything goes wrong, read the [typescript-eslint guide](https://github.com/ty
 As a last step, update your `yarn lint` command to also lint `.ts` files.
 
 ::: tip
-TypeScript Linting is really slow due to type-checking overhead, we suggest you to disable Webpack lint extension into `quasar.config.js` for dev builds.
+TypeScript Linting is really slow due to type-checking overhead, we suggest you to disable Webpack lint extension into the `/quasar.config` file for dev builds.
 :::
 
 If you setup TypeScript linting and want `fork-ts-checker-webpack-plugin` (provided by `@quasar/app-webpack` package) to take it into account then you should make use of `tsCheckerConfig` property:
 
 ```js
-// quasar.config.js
-module.exports = function (ctx) {
+// quasar.config file
+export default function (ctx) {
   return {
-    supportTS: {
-      tsCheckerConfig: {
+    build: {
+      tsCheckerOptions: {
         eslint: {
           enabled: true,
           files: './src/**/*.{ts,tsx,js,jsx,vue}'

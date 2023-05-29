@@ -1,13 +1,14 @@
-const fs = require('fs')
+const fs = require('node:fs')
 const fse = require('fs-extra')
-const compileTemplate = require('lodash/template')
+const compileTemplate = require('lodash/template.js')
 
-const appPaths = require('../app-paths')
-const { log, warn } = require('../helpers/logger')
-const { spawnSync } = require('../helpers/spawn')
-const nodePackager = require('../helpers/node-packager')
+const appPaths = require('../app-paths.js')
+const { appPkg } = require('../app-pkg.js')
+const { log, warn } = require('../utils/logger.js')
+const { spawnSync } = require('../utils/spawn.js')
+const { nodePackager } = require('../utils/node-packager.js')
 
-class Mode {
+module.exports.QuasarMode = class QuasarMode {
   get isInstalled () {
     return fs.existsSync(appPaths.capacitorDir)
   }
@@ -18,9 +19,7 @@ class Mode {
       return
     }
 
-    const pkgPath = appPaths.resolve.app('package.json')
-    const pkg = require(pkgPath)
-    const appName = pkg.productName || pkg.name || 'Quasar App'
+    const appName = appPkg.productName || appPkg.name || 'Quasar App'
 
     if (/^[0-9]/.test(appName)) {
       warn(
@@ -50,7 +49,7 @@ class Mode {
     const scope = {
       appName,
       appId: answer.appId,
-      pkg,
+      pkg: appPkg,
       nodePackager
     }
 
@@ -63,10 +62,10 @@ class Mode {
       fs.writeFileSync(dest, compileTemplate(content)(scope), 'utf-8')
     })
 
-    const { ensureDeps } = require('../capacitor/ensure-consistency')
+    const { ensureDeps } = require('../capacitor/ensure-consistency.js')
     ensureDeps()
 
-    const { capBin } = require('../capacitor/cap-cli')
+    const { capBin } = require('../capacitor/cap-cli.js')
 
     log('Initializing capacitor...')
     spawnSync(
@@ -98,18 +97,18 @@ class Mode {
   }
 
   addPlatform (target) {
-    const ensureConsistency = require('../capacitor/ensure-consistency')
+    const { ensureConsistency } = require('../capacitor/ensure-consistency.js')
     ensureConsistency()
 
     if (this.hasPlatform(target)) {
       return
     }
 
-    const { capBin, capVersion } = require('../capacitor/cap-cli')
+    const { capBin, capVersion } = require('../capacitor/cap-cli.js')
 
     if (capVersion >= 3) {
       nodePackager.installPackage(
-        `@capacitor/${ target }@^${ capVersion }.0.0-beta.0`,
+        `@capacitor/${ target }@^${ capVersion }.0.0`,
         { displayName: 'Capacitor platform', cwd: appPaths.capacitorDir }
       )
     }
@@ -134,5 +133,3 @@ class Mode {
     log('Capacitor support was removed')
   }
 }
-
-module.exports = Mode

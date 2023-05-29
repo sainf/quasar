@@ -1,16 +1,23 @@
 const fse = require('fs-extra')
 
-const { log, fatal } = require('../helpers/logger')
-const CordovaConfig = require('./cordova-config')
-const { spawn } = require('../helpers/spawn')
-const onShutdown = require('../helpers/on-shutdown')
-const appPaths = require('../app-paths')
-const openIde = require('../helpers/open-ide')
+const appPaths = require('../app-paths.js')
+const { log, fatal } = require('../utils/logger.js')
+const { CordovaConfig } = require('./cordova-config.js')
+const { spawn } = require('../utils/spawn.js')
+const { onShutdown } = require('../utils/on-shutdown.js')
+const { openIDE } = require('../utils/open-ide.js')
+const { fixAndroidCleartext } = require('../utils/fix-android-cleartext.js')
 
 class CordovaRunner {
+  #pid
+  #cordovaConfig
+  #url
+  #ctx
+  #target
+
   constructor () {
-    this.pid = 0
-    this.cordovaConfig = new CordovaConfig()
+    this.#pid = 0
+    this.#cordovaConfig = new CordovaConfig()
 
     onShutdown(() => {
       this.stop()
@@ -18,11 +25,11 @@ class CordovaRunner {
   }
 
   init (ctx) {
-    this.ctx = ctx
-    this.target = ctx.targetName
+    this.#ctx = ctx
+    this.#target = ctx.targetName
 
-    if (this.target === 'android') {
-      require('../helpers/fix-android-cleartext')('cordova')
+    if (this.#target === 'android') {
+      fixAndroidCleartext('cordova')
     }
   }
 
@@ -30,33 +37,33 @@ class CordovaRunner {
     const cfg = quasarConfFile.quasarConf
     const url = cfg.build.APP_URL
 
-    if (this.url === url) {
+    if (this.#url === url) {
       return
     }
 
-    if (this.pid) {
+    if (this.#pid) {
       this.stop()
     }
 
-    this.url = url
+    this.#url = url
 
     if (argv.ide) {
-      await this.__runCordovaCommand(
+      await this.#runCordovaCommand(
         cfg,
-        [ 'prepare', this.target ].concat(argv._)
+        [ 'prepare', this.#target ].concat(argv._)
       )
 
-      await openIde('cordova', cfg.bin, this.target, true)
+      await openIDE('cordova', cfg.bin, this.#target, true)
       return
     }
 
-    const args = [ 'run', this.target ]
+    const args = [ 'run', this.#target ]
 
-    if (this.ctx.emulator) {
-      args.push(`--target=${ this.ctx.emulator }`)
+    if (this.#ctx.emulator) {
+      args.push(`--target=${ this.#ctx.emulator }`)
     }
 
-    await this.__runCordovaCommand(
+    await this.#runCordovaCommand(
       cfg,
       args.concat(argv._)
     )
@@ -65,7 +72,7 @@ class CordovaRunner {
   async build (quasarConfFile, argv) {
     const cfg = quasarConfFile.quasarConf
     const buildPath = appPaths.resolve.cordova(
-      this.target === 'android'
+      this.#target === 'android'
         ? 'platforms/android/app/build/outputs'
         : 'platforms/ios/build/emulator'
     )
@@ -74,10 +81,10 @@ class CordovaRunner {
     fse.removeSync(buildPath)
 
     const args = argv[ 'skip-pkg' ] || argv.ide
-      ? [ 'prepare', this.target ]
-      : [ 'build', this.ctx.debug ? '--debug' : '--release', this.target ]
+      ? [ 'prepare', this.#target ]
+      : [ 'build', this.#ctx.debug ? '--debug' : '--release', this.#target ]
 
-    await this.__runCordovaCommand(
+    await this.#runCordovaCommand(
       cfg,
       args.concat(argv._)
     )
@@ -87,7 +94,7 @@ class CordovaRunner {
     }
 
     if (argv.ide) {
-      await openIde('cordova', cfg.bin, this.target)
+      await openIDE('cordova', cfg.bin, this.#target)
       process.exit(0)
     }
 
@@ -95,27 +102,27 @@ class CordovaRunner {
   }
 
   stop () {
-    if (!this.pid) { return }
+    if (!this.#pid) { return }
 
     log('Shutting down Cordova process...')
-    process.kill(this.pid)
-    this.__cleanup()
+    process.kill(this.#pid)
+    this.#cleanup()
   }
 
-  __runCordovaCommand (cfg, args) {
-    this.cordovaConfig.prepare(cfg)
+  #runCordovaCommand (cfg, args) {
+    this.#cordovaConfig.prepare(cfg)
 
-    if (this.target === 'ios' && cfg.cordova.noIosLegacyBuildFlag !== true) {
+    if (this.#target === 'ios' && cfg.cordova.noIosLegacyBuildFlag !== true) {
       args.push('--buildFlag=-UseModernBuildSystem=0')
     }
 
     return new Promise(resolve => {
-      this.pid = spawn(
+      this.#pid = spawn(
         'cordova',
         args,
         { cwd: appPaths.cordovaDir },
         code => {
-          this.__cleanup()
+          this.#cleanup()
           if (code) {
             fatal('Cordova CLI has failed', 'FAIL')
           }
@@ -125,9 +132,9 @@ class CordovaRunner {
     })
   }
 
-  __cleanup () {
-    this.pid = 0
-    this.cordovaConfig.reset()
+  #cleanup () {
+    this.#pid = 0
+    this.#cordovaConfig.reset()
   }
 }
 

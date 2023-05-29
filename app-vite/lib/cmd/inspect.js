@@ -6,7 +6,7 @@ const argv = parseArgs(process.argv.slice(2), {
     m: 'mode',
 
     d: 'depth',
-    p: 'path',
+    p: 'node:path',
 
     t: 'thread',
 
@@ -45,20 +45,23 @@ if (argv.help) {
   process.exit(0)
 }
 
-require('../helpers/ensure-argv')(argv, 'inspect')
-require('../helpers/banner-global')(argv, argv.cmd)
+const { ensureArgv } = require('../utils/ensure-argv.js')
+ensureArgv(argv, 'inspect')
 
-const { log, fatal } = require('../helpers/logger')
-const { isInstalled } = require(`../modes/${ argv.mode }/${ argv.mode }-installation`)
+const { displayBanner } = require('../utils/banner-global.js')
+displayBanner(argv, argv.cmd)
 
-if (isInstalled() !== true) {
+const { log, fatal } = require('../utils/logger.js')
+const { isModeInstalled } = require(`../modes/${ argv.mode }/${ argv.mode }-installation.js`)
+
+if (isModeInstalled() !== true) {
   fatal('Requested mode for inspection is NOT installed.')
 }
 
 const depth = parseInt(argv.depth, 10) || Infinity
 
 async function inspect () {
-  const getQuasarCtx = require('../helpers/get-quasar-ctx')
+  const { getQuasarCtx } = require('../utils/get-quasar-ctx.js')
   const ctx = getQuasarCtx({
     mode: argv.mode,
     target: argv.mode === 'cordova' || argv.mode === 'capacitor'
@@ -69,10 +72,10 @@ async function inspect () {
     prod: argv.cmd === 'build'
   })
 
-  const extensionRunner = require('../app-extension/extensions-runner')
+  const { extensionRunner } = require('../app-extension/extensions-runner.js')
   await extensionRunner.registerExtensions(ctx)
 
-  const QuasarConfFile = require('../quasar-config-file')
+  const { QuasarConfFile } = require('../quasar-config-file.js')
   const quasarConfFile = new QuasarConfFile({
     ctx,
     port: argv.port,
@@ -80,14 +83,11 @@ async function inspect () {
   })
 
   const quasarConf = await quasarConfFile.read()
-  if (quasarConf.error !== void 0) {
-    fatal(quasarConf.error, 'FAIL')
-  }
 
-  const generateConfig = require(`../modes/${ argv.mode }/${ argv.mode }-config`)
+  const { modeConfig } = require(`../modes/${ argv.mode }/${ argv.mode }-config.js`)
 
   const cfgEntries = []
-  let threadList = Object.keys(generateConfig)
+  let threadList = Object.keys(modeConfig)
 
   if (argv.thread) {
     if (threadList.includes(argv.thread) === false) {
@@ -100,7 +100,7 @@ async function inspect () {
   for (const name of threadList) {
     cfgEntries.push({
       name,
-      object: await generateConfig[ name ](quasarConf)
+      object: await modeConfig[ name ](quasarConf)
     })
   }
 
@@ -111,7 +111,7 @@ async function inspect () {
     })
   }
 
-  const util = require('util')
+  const util = require('node:util')
 
   cfgEntries.forEach(cfgEntry => {
     const tool = cfgEntry.object.configFile !== void 0

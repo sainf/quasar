@@ -1,13 +1,17 @@
-const fs = require('fs')
-const path = require('path')
+const fs = require('node:fs')
+const path = require('node:path')
 
-const appPaths = require('../../app-paths')
-const { log, warn } = require('../../helpers/logger')
-const ensureConsistency = require('./ensure-consistency')
-const { capVersion } = require('./cap-cli')
+const appPaths = require('../../app-paths.js')
+const { appPkg } = require('../../app-pkg.js')
+const { log, warn } = require('../../utils/logger.js')
+const { ensureConsistency } = require('./ensure-consistency.js')
+const { capVersion } = require('./cap-cli.js')
 
-const pkg = require(appPaths.resolve.app('package.json'))
+// necessary for Capacitor 4+
+const { nodePackager } = require('../../utils/node-packager.js')
+const { getPackageJson } = require('../../utils/get-package-json.js')
 
+// Capacitor 1 & 2
 function getAndroidMainActivity (capVersion, appId) {
   if (capVersion === 1) {
     return `
@@ -29,7 +33,7 @@ public class EnableHttpsSelfSigned {
 }`
   }
 
-  // capVersion > 1
+  // capVersion 2+
   return `
 package ${ appId };
 import android.net.http.SslError;
@@ -49,13 +53,14 @@ public class EnableHttpsSelfSigned {
   }
 }`
 }
-class CapacitorConfigFile {
+
+module.exports.CapacitorConfigFile = class CapacitorConfigFile {
   #tamperedFiles = []
 
-  prepare (quasarConf) {
+  prepare (quasarConf, target) {
     ensureConsistency()
 
-    this.#updateCapPkg(quasarConf, pkg)
+    this.#updateCapPkg(quasarConf)
     log('Updated src-capacitor/package.json')
 
     this.#tamperedFiles = []
@@ -71,6 +76,7 @@ class CapacitorConfigFile {
     })
 
     this.#save()
+    this.#updateSSL(quasarConf, target)
   }
 
   reset () {
@@ -96,7 +102,7 @@ class CapacitorConfigFile {
   #updateCapJson (quasarConf, originalCapCfg) {
     const capJson = { ...originalCapCfg }
 
-    capJson.appName = quasarConf.capacitor.appName || pkg.productName || 'Quasar App'
+    capJson.appName = quasarConf.capacitor.appName || appPkg.productName || 'Quasar App'
     capJson.bundledWebRuntime = false
 
     if (quasarConf.ctx.dev) {
@@ -115,21 +121,43 @@ class CapacitorConfigFile {
     return JSON.stringify(capJson, null, 2)
   }
 
-  #updateCapPkg (cfg, pkg) {
+  #updateCapPkg (cfg) {
     const capPkgPath = appPaths.resolve.capacitor('package.json')
     const capPkg = require(capPkgPath)
 
     Object.assign(capPkg, {
-      name: cfg.capacitor.appName || pkg.name,
-      version: cfg.capacitor.version || pkg.version,
-      description: cfg.capacitor.description || pkg.description,
-      author: pkg.author
+      name: cfg.capacitor.appName || appPkg.name,
+      version: cfg.capacitor.version || appPkg.version,
+      description: cfg.capacitor.description || appPkg.description,
+      author: appPkg.author
     })
 
     fs.writeFileSync(capPkgPath, JSON.stringify(capPkg, null, 2), 'utf-8')
   }
 
-  prepareSSL (add, target) {
+  #updateSSL (quasarConf, target) {
+    const add = quasarConf.ctx.dev ? quasarConf.devServer.https : false
+
+    if (capVersion >= 4) {
+      const hasPlugin = getPackageJson('@jcesarmobile/ssl-skip', appPaths.capacitorDir) !== void 0
+
+      if (add ? hasPlugin : !hasPlugin) {
+        // nothing to do
+        return
+      }
+
+      const fn = `${ add ? '' : 'un' }installPackage`
+      const nameParam = add ? '@jcesarmobile/ssl-skip@^0.2.0' : '@jcesarmobile/ssl-skip'
+
+      nodePackager[ fn ](nameParam, {
+        cwd: appPaths.capacitorDir,
+        displayName: 'Capacitor (DEVELOPMENT ONLY) SSL support'
+      })
+
+      // make sure "cap sync" is run before triggering IDE or build
+      return
+    }
+
     if (target === 'ios') {
       this.#handleSSLonIOS(add)
     }
@@ -186,7 +214,7 @@ class CapacitorConfigFile {
       warn()
       warn(`${ shortFilename } not found or content is unrecognized.`)
       warn('Your App will revoke the devserver\'s SSL certificate.')
-      warn('Please disable HTTPS from quasar.config.js > devServer > server > type: \'https\'')
+      warn('Please disable HTTPS from quasar.config file > devServer > server > type: \'https\'')
       warn()
       warn()
       warn()
@@ -262,13 +290,37 @@ class CapacitorConfigFile {
 
       if (add) {
         // Allow unsigned certificates in MainActivity
-        if (!/EnableHttpsSelfSigned\.enable/.test(mainActivity)) {
-          mainActivity = mainActivity.replace(
-            /this\.init\(.*}}\);/ms,
-            match => `${ match }
-${ sslString }
-              `
-          )
+        if (capVersion >= 4) {
+          if (!/super\.onCreate/.test(mainActivity)) {
+            mainActivity = mainActivity.replace('{}',
+            `{
+  @Override
+  public void onCreate(Bundle savedInstanceState) {
+    super.onCreate(savedInstanceState);
+  }
+}`
+            )
+            mainActivity = mainActivity.replace('import com.getcapacitor.BridgeActivity;',
+            `import android.os.Bundle;
+import com.getcapacitor.BridgeActivity;`)
+          }
+          if (!/EnableHttpsSelfSigned\.enable/.test(mainActivity)) {
+            mainActivity = mainActivity.replace(
+              /super\.onCreate\(.*\);/ms,
+              match => `${ match }
+              ${ sslString }`
+            )
+          }
+        }
+        else {
+          if (!/EnableHttpsSelfSigned\.enable/.test(mainActivity)) {
+            mainActivity = mainActivity.replace(
+              /this\.init\(.*}}\);/ms,
+              match => `${ match }
+  ${ sslString }
+                `
+            )
+          }
         }
 
         // Add helper file
@@ -295,5 +347,3 @@ ${ sslString }
     }
   }
 }
-
-module.exports = CapacitorConfigFile

@@ -1,10 +1,11 @@
-const path = require('path')
+const path = require('node:path')
 const webpack = require('webpack')
 const WebpackChain = require('webpack-chain')
 
-const appPaths = require('../../app-paths')
-const parseBuildEnv = require('../../helpers/parse-build-env')
-const WebpackProgressPlugin = require('../plugin.progress')
+const appPaths = require('../../app-paths.js')
+const { getBuildSystemDefine } = require('../../utils/env.js')
+const { WebpackProgressPlugin } = require('../plugin.progress.js')
+const { hasTypescript } = require('../../utils/has-typescript.js')
 
 function getDependenciesRegex (list) {
   const deps = list.map(dep => { // eslint-disable-line array-callback-return
@@ -20,7 +21,7 @@ function getDependenciesRegex (list) {
   return new RegExp(deps.join('|'))
 }
 
-module.exports = function (cfg, configName) {
+module.exports.createCustomSw = function createCustomSw (cfg, configName) {
   const chain = new WebpackChain()
 
   const resolveModules = [
@@ -48,7 +49,7 @@ module.exports = function (cfg, configName) {
 
   chain.resolve.extensions
     .merge(
-      cfg.supportTS !== false
+      hasTypescript === true
         ? [ '.mjs', '.ts', '.js', '.json', '.wasm' ]
         : [ '.mjs', '.js', '.json', '.wasm' ]
     )
@@ -95,7 +96,7 @@ module.exports = function (cfg, configName) {
       })
   }
 
-  if (cfg.supportTS !== false) {
+  if (hasTypescript === true) {
     chain.resolve.extensions
       .merge([ '.ts' ])
 
@@ -124,7 +125,11 @@ module.exports = function (cfg, configName) {
 
   chain.plugin('define')
     .use(webpack.DefinePlugin, [
-      parseBuildEnv(cfg.build.env, cfg.__rootDefines)
+      getBuildSystemDefine({
+        builEnv: cfg.build.env,
+        buildRawDefine: cfg.build.rawDefine,
+        fileEnv: cfg.__fileEnv
+      })
     ])
 
   // we include it already in cfg.build.env

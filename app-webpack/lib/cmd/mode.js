@@ -1,7 +1,7 @@
 
 const parseArgs = require('minimist')
 
-const { log, warn, fatal } = require('../helpers/logger')
+const { log, warn, fatal } = require('../utils/logger.js')
 
 const argv = parseArgs(process.argv.slice(2), {
   alias: {
@@ -42,8 +42,8 @@ if (argv._.length !== 0 && argv._.length !== 2) {
   process.exit(1)
 }
 
-const getMode = require('../mode')
-const { green, grey } = require('chalk')
+const { getQuasarMode } = require('../mode/index.js')
+const { green, gray } = require('kolorist')
 
 async function run () {
   const [ action, mode ] = argv._
@@ -59,7 +59,7 @@ async function run () {
     fatal(`Unknown mode "${ mode }" to ${ action }`)
   }
 
-  const cliMode = getMode(mode)
+  const cliMode = getQuasarMode(mode)
 
   if (action === 'remove' && argv.yes !== true && cliMode.isInstalled) {
     console.log()
@@ -90,7 +90,7 @@ function displayModes () {
   ;[ 'pwa', 'ssr', 'cordova', 'capacitor', 'electron', 'bex' ].forEach(mode => {
     info.push([
       `Mode ${ mode.toUpperCase() }`,
-      getMode(mode).isInstalled ? green('yes') : grey('no')
+      getQuasarMode(mode).isInstalled ? green('yes') : gray('no')
     ])
   })
 

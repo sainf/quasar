@@ -1,15 +1,16 @@
 const { createServer } = require('vite')
 
-const AppDevserver = require('../../app-devserver')
-const appPaths = require('../../app-paths')
-const CordovaConfigFile = require('./config-file')
-const { log, fatal } = require('../../helpers/logger')
-const { spawn } = require('../../helpers/spawn')
-const onShutdown = require('../../helpers/on-shutdown')
-const openIde = require('../../helpers/open-ide')
-const config = require('./cordova-config')
+const appPaths = require('../../app-paths.js')
+const { AppDevserver } = require('../../app-devserver.js')
+const { CordovaConfigFile } = require('./config-file.js')
+const { log, fatal } = require('../../utils/logger.js')
+const { spawn } = require('../../utils/spawn.js')
+const { onShutdown } = require('../../utils/on-shutdown.js')
+const { openIDE } = require('../../utils/open-ide.js')
+const { quasarCordovaConfig } = require('./cordova-config.js')
+const { fixAndroidCleartext } = require('../../utils/fix-android-cleartext.js')
 
-class CordovaDevServer extends AppDevserver {
+module.exports.QuasarModeDevserver = class QuasarModeDevserver extends AppDevserver {
   #pid = 0
   #server
   #ctx
@@ -28,7 +29,7 @@ class CordovaDevServer extends AppDevserver {
     this.#target = opts.quasarConf.ctx.targetName
 
     if (this.#target === 'android') {
-      require('../../helpers/fix-android-cleartext')('cordova')
+      fixAndroidCleartext('cordova')
     }
 
     onShutdown(() => {
@@ -53,7 +54,7 @@ class CordovaDevServer extends AppDevserver {
       this.#server.close()
     }
 
-    const viteConfig = await config.vite(quasarConf)
+    const viteConfig = await quasarCordovaConfig.vite(quasarConf)
 
     this.#server = await createServer(viteConfig)
     await this.#server.listen()
@@ -68,7 +69,7 @@ class CordovaDevServer extends AppDevserver {
         [ 'prepare', this.#target ].concat(this.argv._)
       )
 
-      await openIde('cordova', quasarConf.bin, this.#target, true)
+      await openIDE('cordova', quasarConf.bin, this.#target, true)
       return
     }
 
@@ -120,5 +121,3 @@ class CordovaDevServer extends AppDevserver {
     this.#cordovaConfigFile.reset()
   }
 }
-
-module.exports = CordovaDevServer

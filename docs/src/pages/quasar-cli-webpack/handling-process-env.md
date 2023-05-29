@@ -80,22 +80,22 @@ if (process.env.MODE === 'electron') {
 
 ## Adding to process.env
 
-You can add your own definitions to `process.env` through `/quasar.config.js` file.
+You can add your own definitions to `process.env` through the `/quasar.config` file.
 
-But first, there's two concepts that need to be understood here. The env variables from the terminal that are available in `/quasar.config.js` file itself and the environment variables that you pass to your UI code.
+But first, there's two concepts that need to be understood here. The env variables from the terminal that are available in the `/quasar.config` file itself and the environment variables that you pass to your UI code.
 
 ```js
-// quasar.config.js
+// quasar.config file
 
 // Accessing terminal variables
 console.log(process.env)
 
-module.exports = function (ctx) {
+export default function (ctx) {
   return {
     // ...
 
     build: {
-      // passing down to UI code from quasar.config.js
+      // passing down to UI code from the quasar.config file
       env: {
         API: ctx.dev
           ? 'https://dev.api.com'
@@ -116,13 +116,43 @@ $ MY_API=api.com quasar build
 ```
 
 ```js
-// then we pick it up in /quasar.config.js
+// then we pick it up in the /quasar.config file
 build: {
   env: {
     API: ctx.dev
       ? 'https://dev.' + process.env.MY_API
       : 'https://prod.' + process.env.MY_API
   }
+}
+```
+
+#### Using env dotfiles <q-badge label="@quasar/app-webpack v4+" />
+
+The following files (in your project root folder) will be picked up automatically (the order matters):
+
+```
+.env                                # loaded in all cases
+.env.local                          # loaded in all cases, ignored by git
+.env.[dev|prod]                     # loaded for dev or prod only
+.env.local.[dev|prod]               # loaded for dev or prod only, ignored by git
+.env.[quasarMode]                   # loaded for specific Quasar CLI mode only
+.env.local.[quasarMode]             # loaded for specific Quasar CLI mode only, ignored by git
+.env.[dev|prod].[quasarMode]        # loaded for specific Quasar CLI mode and dev|prod only
+.env.local.[dev|prod].[quasarMode]  # loaded for specific Quasar CLI mode and dev|prod only, ignored by git
+```
+
+...where "ignored by git" assumes that your `/.gitignore` file contains this entry: `.env.local*`. Project folders created after the `@quasar/app-webpack` v4 release have this by default.
+
+You can also configure the files above to be picked up from a different folder or even add more files to the list:
+
+```js
+// quasar.config file
+
+build: {
+  envFolder: '../' // absolute or relative path to root project folder
+  envFiles: [
+    // Path strings to your custom files --- absolute or relative path to root project folder
+  ]
 }
 ```
 
@@ -134,7 +164,7 @@ Should you wish to use `.env` file(s), you can use the [dotenv](https://www.npmj
 $ yarn add --dev dotenv
 ```
 
-Then, in your `/quasar.config.js`:
+Then, in your `/quasar.config` file:
 
 ```js
 build: {
@@ -149,7 +179,7 @@ Note that the approach above will pass only what's defined in the `.env` file an
 If you want to be able to override what's inside `.env` or want to make the `.env` file completely optional, you have to follow another approach. If you are using CI/CD, Docker, etc. you probably don't want to stay limited to the `.env` file. Here is an example:
 
 ```js
-// quasar.config.js
+// quasar.config file
 
 // This will load from `.env` if it exists, but not override existing `process.env.*` values
 require('dotenv').config()
@@ -181,7 +211,7 @@ You might be getting `process is not defined` errors in the browser console if y
 ### Wrong usage
 
 ```js
-// quasar.config.js > build
+// quasar.config file > build
 env: {
   FOO: 'hello',
 }
@@ -198,7 +228,7 @@ function getEnv(name) {
 console.log(process)     // ❌
 console.log(process.env) // ❌
 // If you want to see a list of available env variables,
-// you can log the object you are passing to `build > env` inside `quasar.config.js`
+// you can log the object you are passing to `build > env` inside the `/quasar.config` file
 
 console.log(process.env.FOO) // ✅
 console.log(process.env.foo) // ❌ Case sensitive
@@ -210,7 +240,7 @@ console.log(process.env.F0O) // ❌ Typo in the variable name (middle o is 0(zer
 #### Manual definition
 
 ```js
-// quasar.config.js > build
+// quasar.config file > build
 env: {
   FOO: 'hello',
 }
@@ -224,7 +254,7 @@ console.log(process.env.BAR) // ❌ It's not defined in `build > env`
 #### dotenv
 
 ```js
-// quasar.config.js > build
+// quasar.config file > build
 env: require('dotenv').config(/* ... */).parsed
 ```
 

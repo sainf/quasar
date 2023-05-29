@@ -1,17 +1,17 @@
 
-const { join } = require('path')
+const { join } = require('node:path')
 
-const appPaths = require('../../app-paths')
-const escapeRegexString = require('../../helpers/escape-regex-string')
+const appPaths = require('../../app-paths.js')
+const { appPkg } = require('../../app-pkg.js')
+const { escapeRegexString } = require('../../utils/escape-regex-string.js')
 const {
   createViteConfig, extendViteConfig,
   createBrowserEsbuildConfig, extendEsbuildConfig
-} = require('../../config-tools')
+} = require('../../config-tools.js')
 
-const quasarVitePluginPwaResources = require('./vite-plugin.pwa-resources')
-const appPkg = require(appPaths.resolve.app('package.json'))
+const { quasarVitePluginPwaResources } = require('./vite-plugin.pwa-resources.js')
 
-module.exports = {
+module.exports.quasarPwaConfig = {
   vite: quasarConf => {
     const cfg = createViteConfig(quasarConf)
 
@@ -136,3 +136,5 @@ module.exports = {
     return extendEsbuildConfig(cfg, quasarConf.pwa, 'CustomSW')
   }
 }
+
+module.exports.modeConfig = module.exports.quasarPwaConfig

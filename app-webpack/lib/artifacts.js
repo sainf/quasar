@@ -1,10 +1,11 @@
-const fs = require('fs')
-const path = require('path')
+const fs = require('node:fs')
+const path = require('node:path')
 const fse = require('fs-extra')
 
-const appPaths = require('./app-paths')
+const appPaths = require('./app-paths.js')
+const { log } = require('./utils/logger.js')
+
 const filePath = appPaths.resolve.app('.quasar/artifacts.json')
-const { log } = require('./helpers/logger')
 
 function exists () {
   return fs.existsSync(filePath)
@@ -21,7 +22,7 @@ function save (content) {
   fs.writeFileSync(filePath, JSON.stringify(content), 'utf-8')
 }
 
-module.exports.add = function (entry) {
+module.exports.addArtifacts = function addArtifacts (entry) {
   const content = getArtifacts()
 
   if (!content.folders.includes(entry)) {
@@ -31,7 +32,7 @@ module.exports.add = function (entry) {
   }
 }
 
-module.exports.clean = function (folder) {
+module.exports.cleanArtifacts = function cleanArtifacts (folder) {
   if (folder.endsWith(path.join('src-cordova', 'www'))) {
     fse.emptyDirSync(folder)
   }
@@ -49,7 +50,7 @@ module.exports.clean = function (folder) {
   log(`Cleaned build artifact: "${ folder }"`)
 }
 
-module.exports.cleanAll = function () {
+module.exports.cleanAllArtifacts = function cleanAllArtifacts () {
   getArtifacts().folders.forEach(folder => {
     if (folder.endsWith(path.join('src-cordova', 'www'))) {
       fse.emptyDirSync(folder)

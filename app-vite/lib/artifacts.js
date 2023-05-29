@@ -1,10 +1,10 @@
-const fs = require('fs')
-const path = require('path')
+const fs = require('node:fs')
+const path = require('node:path')
 const fse = require('fs-extra')
 
-const appPaths = require('./app-paths')
+const appPaths = require('./app-paths.js')
 const filePath = appPaths.resolve.app('.quasar/artifacts.json')
-const { log } = require('./helpers/logger')
+const { log } = require('./utils/logger.js')
 
 function exists () {
   return fs.existsSync(filePath)
@@ -24,7 +24,7 @@ function save (content) {
   delete require.cache[ filePath ]
 }
 
-module.exports.add = function (entry) {
+module.exports.addArtifacts = function addArtifacts (entry) {
   const content = getArtifacts()
 
   // add folder if it doesn't exist
@@ -40,7 +40,7 @@ module.exports.add = function (entry) {
   }
 }
 
-module.exports.clean = function (folder) {
+module.exports.cleanArtifacts = function cleanArtifacts (folder) {
   if (folder.endsWith(path.join('src-cordova', 'www'))) {
     fse.emptyDirSync(folder)
   }
@@ -56,7 +56,7 @@ module.exports.clean = function (folder) {
   }
 }
 
-module.exports.cleanAll = function () {
+module.exports.cleanAllArtifacts = function cleanAllArtifacts () {
   getArtifacts().folders.forEach(folder => {
     if (folder.endsWith(path.join('src-cordova', 'www'))) {
       fse.emptyDirSync(folder)

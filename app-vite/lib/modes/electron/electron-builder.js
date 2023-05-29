@@ -1,16 +1,15 @@
 
-const { join } = require('path')
+const { join } = require('node:path')
 
-const AppBuilder = require('../../app-builder')
-const config = require('./electron-config')
+const appPaths = require('../../app-paths.js')
+const { log, warn, progress } = require('../../utils/logger.js')
+const { AppBuilder } = require('../../app-builder.js')
+const { quasarElectronConfig } = require('./electron-config.js')
+const { nodePackager } = require('../../utils/node-packager.js')
+const { getPackageJson } = require('../../utils/get-package-json.js')
+const { getFixedDeps } = require('../../utils/get-fixed-deps.js')
 
-const { log, warn, progress } = require('../../helpers/logger')
-const appPaths = require('../../app-paths')
-const nodePackager = require('../../helpers/node-packager')
-const getPackageJson = require('../../helpers/get-package-json')
-const getFixedDeps = require('../../helpers/get-fixed-deps')
-
-class ElectronBuilder extends AppBuilder {
+module.exports.QuasarModeBuilder = class QuasarModeBuilder extends AppBuilder {
   async build () {
     await this.#buildFiles()
     await this.#writePackageJson()
@@ -24,14 +23,14 @@ class ElectronBuilder extends AppBuilder {
   }
 
   async #buildFiles () {
-    const viteConfig = await config.vite(this.quasarConf)
+    const viteConfig = await quasarElectronConfig.vite(this.quasarConf)
     await this.buildWithVite('Electron UI', viteConfig)
 
-    const mainConfig = await config.main(this.quasarConf)
+    const mainConfig = await quasarElectronConfig.main(this.quasarConf)
     await this.buildWithEsbuild('Electron Main', mainConfig)
     this.#replaceAppUrl(mainConfig.outfile)
 
-    const preloadConfig = await config.preload(this.quasarConf)
+    const preloadConfig = await quasarElectronConfig.preload(this.quasarConf)
     await this.buildWithEsbuild('Electron Preload', preloadConfig)
     this.#replaceAppUrl(preloadConfig.outfile)
   }
@@ -111,7 +110,7 @@ class ElectronBuilder extends AppBuilder {
 
     const bundlerName = this.quasarConf.electron.bundler
     const bundlerConfig = this.quasarConf.electron[ bundlerName ]
-    const bundler = require('./bundler').getBundler(bundlerName)
+    const bundler = require('./bundler.js').getBundler(bundlerName)
     const pkgName = `electron-${ bundlerName }`
 
     return new Promise((resolve, reject) => {
@@ -141,5 +140,3 @@ class ElectronBuilder extends AppBuilder {
     })
   }
 }
-
-module.exports = ElectronBuilder

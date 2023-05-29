@@ -1,7 +1,7 @@
-const compileTemplate = require('lodash/template')
+const compileTemplate = require('lodash/template.js')
 
-const { fillBaseTag } = require('../webpack/plugin.html-addons')
-const { fillPwaTags } = require('../webpack/pwa/plugin.html-pwa')
+const { fillBaseTag } = require('../webpack/plugin.html-addons.js')
+const { fillPwaTags } = require('../webpack/pwa/plugin.html-pwa.js')
 
 /*
  * _meta is initialized from ssr-helpers/create-renderer
@@ -118,7 +118,7 @@ function htmlTagObjectToString (tagDefinition) {
     + (tagDefinition.voidTag ? '' : '</' + tagDefinition.tagName + '>')
 }
 
-module.exports.getIndexHtml = function (template, cfg) {
+module.exports.getIndexHtml = function getIndexHtml (template, cfg) {
   const compiled = compileTemplate(template)
   let html = compiled(cfg.htmlVariables)
 

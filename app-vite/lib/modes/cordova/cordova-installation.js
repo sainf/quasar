@@ -1,17 +1,19 @@
 
-const fs = require('fs')
+const fs = require('node:fs')
 const fse = require('fs-extra')
 
-const appPaths = require('../../app-paths')
-const { log, warn, fatal } = require('../../helpers/logger')
-const { spawnSync } = require('../../helpers/spawn')
+const appPaths = require('../../app-paths.js')
+const { appPkg } = require('../../app-pkg.js')
+const { log, warn, fatal } = require('../../utils/logger.js')
+const { spawnSync } = require('../../utils/spawn.js')
 
-function isInstalled () {
+function isModeInstalled () {
   return fs.existsSync(appPaths.cordovaDir)
 }
+module.exports.isModeInstalled = isModeInstalled
 
-async function add (silent, target) {
-  if (isInstalled()) {
+module.exports.addMode = async function addMode (silent, target) {
+  if (isModeInstalled()) {
     if (target) {
       addPlatform(target)
     }
@@ -22,8 +24,7 @@ async function add (silent, target) {
     return
   }
 
-  const pkg = require(appPaths.resolve.app('package.json'))
-  const appName = pkg.productName || pkg.name || 'Quasar App'
+  const appName = appPkg.productName || appPkg.name || 'Quasar App'
 
   if (/^[0-9]/.test(appName)) {
     warn(
@@ -55,7 +56,7 @@ async function add (silent, target) {
     }
   )
 
-  const { ensureWWW } = require('./ensure-consistency')
+  const { ensureWWW } = require('./ensure-consistency.js')
   ensureWWW(true)
 
   log('Cordova support was installed')
@@ -80,8 +81,8 @@ async function add (silent, target) {
   addPlatform(target)
 }
 
-function remove () {
-  if (!isInstalled()) {
+module.exports.removeMode = function removeMode () {
+  if (!isModeInstalled()) {
     warn('No Cordova support detected. Aborting.')
     return
   }
@@ -91,7 +92,7 @@ function remove () {
 }
 
 function addPlatform (target) {
-  const ensureConsistency = require('./ensure-consistency')
+  const { ensureConsistency } = require('./ensure-consistency.js')
   ensureConsistency()
 
   // if it has the platform
@@ -109,10 +110,4 @@ function addPlatform (target) {
       process.exit(1)
     }
   )
-}
-
-module.exports = {
-  isInstalled,
-  add,
-  remove
 }

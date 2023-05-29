@@ -1,24 +1,25 @@
-const path = require('path')
-const { existsSync } = require('fs')
+const path = require('node:path')
+const { existsSync, readFileSync } = require('node:fs')
+const { removeSync } = require('fs-extra')
 const { merge } = require('webpack-merge')
-const chokidar = require('chokidar')
-const debounce = require('lodash/debounce')
+const debounce = require('lodash/debounce.js')
+const { build: esBuild, context: esContextBuild } = require('esbuild')
 const { transformAssetUrls } = require('@quasar/vite-plugin')
 
-const appPaths = require('./app-paths')
-const { log, warn, tip } = require('./helpers/logger')
-const extensionRunner = require('./app-extension/extensions-runner')
-const appFilesValidations = require('./helpers/app-files-validations')
-const cssVariables = require('./helpers/css-variables')
-const getPackageMajorVersion = require('./helpers/get-package-major-version')
-const resolveExtension = require('./helpers/resolve-extension')
-const storeProvider = require('./helpers/store-provider')
+const appPaths = require('./app-paths.js')
+const { log, warn, fatal, tip } = require('./utils/logger.js')
+const { extensionRunner } = require('./app-extension/extensions-runner.js')
+const { appFilesValidations } = require('./utils/app-files-validations.js')
+const { cssVariables } = require('./utils/css-variables.js')
+const { getPackageMajorVersion } = require('./utils/get-package-major-version.js')
+const { resolveExtension } = require('./utils/resolve-extension.js')
+const { storeProvider } = require('./utils/store-provider.js')
+const { appPkg } = require('./app-pkg.js')
 
 const urlRegex = /^http(s)?:\/\//i
-const { findClosestOpenPort } = require('../lib/helpers/net')
-const isMinimalTerminal = require('./helpers/is-minimal-terminal')
-
-const appPkg = require(appPaths.resolve.app('package.json'))
+const { findClosestOpenPort } = require('../lib/utils/net.js')
+const { isMinimalTerminal } = require('./utils/is-minimal-terminal.js')
+const { readFileEnv } = require('./utils/env.js')
 
 const defaultPortMapping = {
   spa: 9000,
@@ -27,6 +28,20 @@ const defaultPortMapping = {
   electron: 9300,
   cordova: 9400,
   capacitor: 9500
+}
+
+const tempFile = `${ appPaths.quasarConfigFilename }.temporary.compiled.cjs`
+
+function getEsbuildConfig () {
+  return {
+    platform: 'node',
+    format: 'cjs',
+    bundle: true,
+    packages: 'external',
+    entryPoints: [ appPaths.quasarConfigFilename ],
+    outfile: tempFile,
+    plugins: []
+  }
 }
 
 function escapeHTMLTagContent (str) {
@@ -98,7 +113,7 @@ async function onAddress ({ host, port }, mode) {
     [ 'cordova', 'capacitor' ].includes(mode)
     && (!host || [ '0.0.0.0', 'localhost', '127.0.0.1', '::1' ].includes(host.toLowerCase()))
   ) {
-    const getExternalIP = require('../lib/helpers/get-external-ip')
+    const { getExternalIP } = require('../lib/utils/get-external-ip.js')
     host = await getExternalIP()
     this.chosenHost = host
   }
@@ -140,22 +155,27 @@ async function onAddress ({ host, port }, mode) {
   return { host, port }
 }
 
-class QuasarConfFile {
+module.exports.QuasarConfFile = class QuasarConfFile {
   #ctx
   #opts
   #initialVersions = {}
   #address
+  #isWatching = false
 
-  constructor ({ ctx, host, port }) {
+  constructor ({ ctx, host, port, watch }) {
     this.#ctx = ctx
     this.#opts = { host, port }
+
+    if (watch !== void 0) {
+      this.#opts.watch = debounce(watch, 550)
+    }
 
     if (this.#ctx.mode.pwa) {
       // Enable this when workbox bumps version (as of writing these lines, we're handling v6)
       // this.#initialVersions.workbox = getPackageMajorVersion('workbox-build')
     }
     else if (this.#ctx.mode.capacitor) {
-      const { capVersion } = require('./modes/capacitor/cap-cli')
+      const { capVersion } = require('./modes/capacitor/cap-cli.js')
       const getCapPluginVersion = capVersion <= 2
         ? () => true
         : name => {
@@ -173,49 +193,162 @@ class QuasarConfFile {
     }
   }
 
-  watch (onChange) {
-    // Watch for quasar.conf(ig).js changes
-    chokidar
-      .watch(appPaths.quasarConfigFilename, { ignoreInitial: true })
-      .on('change', debounce(async () => {
-        console.log()
-        log('Reading quasar.config.js as it changed')
-
-        const result = await this.read()
-
-        if (result.error !== void 0) {
-          warn(result.error)
-          warn('Changes to quasar.config.js have NOT been applied due to error above')
-        }
-        else {
-          log('Applying quasar.config.js changes')
-          log()
-
-          onChange(result)
-        }
-      }, 550))
+  read () {
+    const esbuildConfig = getEsbuildConfig()
+    return this.#opts.watch !== void 0
+      ? this.#buildAndWatch(esbuildConfig)
+      : this.#build(esbuildConfig)
   }
 
-  async read () {
-    let quasarConfigFunction
+  // start watching for changes
+  watch () {
+    this.#isWatching = true
+  }
 
+  async #build (esbuildConfig) {
     try {
-      delete require.cache[ appPaths.quasarConfigFilename ]
-      quasarConfigFunction = require(appPaths.quasarConfigFilename)
+      await esBuild(esbuildConfig)
     }
     catch (e) {
+      removeSync(tempFile)
+      console.log()
       console.error(e)
-      return { error: 'quasar.config.js has JS errors' }
+      fatal('Could not compile quasar.config file because it has errors', 'FAIL')
+    }
+
+    let fnResult
+    try {
+      fnResult = require(tempFile)
+    }
+    catch (e) {
+      removeSync(tempFile)
+      console.log()
+      console.error(e)
+      fatal('The quasar.config file has runtime errors', 'FAIL')
+    }
+
+    removeSync(tempFile)
+
+    const quasarConfigFn = fnResult.default || fnResult
+    return this.#computeConfig(quasarConfigFn, true)
+  }
+
+  async #buildAndWatch (esbuildConfig) {
+    let firstBuildIsDone
+
+    esbuildConfig.plugins.push({
+      name: 'quasar:watcher',
+      setup: build => {
+        let isFirst = true
+
+        build.onStart(() => {
+          if (isFirst === false) {
+            log()
+            log('The quasar.config file changed. Reading it...')
+          }
+        })
+
+        build.onEnd(async result => {
+          if (isFirst === false && this.#isWatching === false) {
+            // not ready yet; watch() has not been issued yet
+            return
+          }
+
+          delete require.cache[ tempFile ]
+
+          if (result.errors.length !== 0) {
+            removeSync(tempFile)
+
+            if (isFirst === true) {
+              fatal('Could not compile quasar.config file because it has errors', 'FAIL')
+            }
+
+            warn('Could not compile quasar.config file because it has errors. Please fix them then save the file again.\n')
+            return
+          }
+
+          let quasarConfigFn
+
+          try {
+            const result = require(tempFile)
+            quasarConfigFn = result.default || result
+          }
+          catch (e) {
+            removeSync(tempFile)
+            console.log()
+            console.error(e)
+
+            if (isFirst === true) {
+              fatal('Importing quasar.config file results in error', 'FAIL')
+            }
+
+            warn('Importing quasar.config file results in error. Please review the file then save it again.\n')
+            return
+          }
+
+          removeSync(tempFile)
+          delete require.cache[ tempFile ]
+
+          const quasarConf = await this.#computeConfig(quasarConfigFn, isFirst)
+
+          if (isFirst === true) {
+            isFirst = false
+            firstBuildIsDone(quasarConf)
+            return
+          }
+
+          if (quasarConf !== void 0) {
+            log('Scheduled to apply quasar.config changes in 550ms')
+            this.#opts.watch(quasarConf)
+          }
+        })
+      }
+    })
+
+    const esbuildCtx = await esContextBuild(esbuildConfig)
+    await esbuildCtx.watch()
+
+    return new Promise(res => { // eslint-disable-line promise/param-names
+      firstBuildIsDone = res
+    })
+  }
+
+  // return void 0 if it encounters errors
+  // and quasarConf otherwise
+  async #computeConfig (quasarConfigFn, failOnError) {
+    if (typeof quasarConfigFn !== 'function') {
+      if (failOnError === true) {
+        fatal('The default export value of the quasar.config file is not a function', 'FAIL')
+      }
+
+      warn('The default export value of the quasar.config file is not a function. Please fix it then save the file again.\n')
+      return
     }
 
     let userCfg
 
     try {
-      userCfg = await quasarConfigFunction(this.#ctx)
+      userCfg = await quasarConfigFn(this.#ctx)
     }
     catch (e) {
+      console.log()
       console.error(e)
-      return { error: 'quasar.config.js has JS errors' }
+
+      if (failOnError === true) {
+        fatal('The quasar.config file has runtime errors', 'FAIL')
+      }
+
+      warn('The quasar.config file has runtime errors. Please fix them then save the file again.\n')
+      return
+    }
+
+    if (Object(userCfg) !== userCfg) {
+      if (failOnError === true) {
+        fatal('The quasar.config file does not default exports an Object', 'FAIL')
+      }
+
+      warn('The quasar.config file does not default exports an Object. Please fix it then save the file again.\n')
+      return
     }
 
     const rawQuasarConf = merge({
@@ -248,6 +381,7 @@ class QuasarConfFile {
         vitePlugins: [],
         env: {},
         rawDefine: {},
+        envFiles: [],
         resolve: {}
       },
 
@@ -278,18 +412,25 @@ class QuasarConfFile {
     }
 
     if (rawQuasarConf.animations === 'all') {
-      rawQuasarConf.animations = require('./helpers/animations')
+      rawQuasarConf.animations = require('./utils/animations.js')
     }
 
     try {
       await extensionRunner.runHook('extendQuasarConf', async hook => {
-        log(`Extension(${ hook.api.extId }): Extending quasar.config.js...`)
+        log(`Extension(${ hook.api.extId }): Extending quasar.config file configuration...`)
         await hook.fn(rawQuasarConf, hook.api)
       })
     }
     catch (e) {
+      console.log()
       console.error(e)
-      return { error: 'One of your installed App Extensions failed to run' }
+
+      if (failOnError === true) {
+        fatal('One of your installed App Extensions failed to run', 'FAIL')
+      }
+
+      warn('One of your installed App Extensions failed to run.\n')
+      return
     }
 
     const cfg = {
@@ -326,7 +467,7 @@ class QuasarConfFile {
           + (this.#ctx.mode.ssr === true && cfg.ssr.pwa === true ? 50 : 0)
       }
       else {
-        tip('You specified an explicit quasar.config.js > devServer > port. It is recommended to use a different devServer > port for each Quasar mode to avoid browser cache issues. Example: ctx.mode.ssr ? 9100 : ...')
+        tip('You specified an explicit quasar.config file > devServer > port. It is recommended to use a different devServer > port for each Quasar mode to avoid browser cache issues. Example: ctx.mode.ssr ? 9100 : ...')
       }
 
       if (
@@ -348,7 +489,12 @@ class QuasarConfFile {
 
         // if network error while running
         if (to === null) {
-          return { error: 'Network error encountered while following the quasar.config.js host/port config' }
+          if (failOnError === true) {
+            fatal('Network error encountered while following the quasar.config file host/port config', 'FAIL')
+          }
+
+          warn('Network error encountered while following the quasar.config file host/port config. Reconfigure and save the file again.\n')
+          return
         }
 
         cfg.devServer = merge({ open: true }, cfg.devServer, to)
@@ -492,8 +638,13 @@ class QuasarConfFile {
       electronPreload: 'src-electron/electron-preload'
     }, cfg.sourceFiles)
 
-    if (appFilesValidations(cfg) === false) {
-      return { error: 'Files validation not passed successfully' }
+    if (appFilesValidations() === false) {
+      if (failOnError === true) {
+        fatal('Files validation not passed successfully', 'FAIL')
+      }
+
+      warn('Files validation not passed successfully. Please fix the issues then save the file again.\n')
+      return
     }
 
     // do we have a store?
@@ -521,11 +672,42 @@ class QuasarConfFile {
 
       if (cfg.ssr.pwa === true) {
         // install pwa mode if it's missing
-        const { add } = require('../lib/modes/pwa/pwa-installation')
-        await add(true)
+        const { addMode } = require('../lib/modes/pwa/pwa-installation.js')
+        await addMode(true)
       }
 
       this.#ctx.mode.pwa = cfg.ctx.mode.pwa = cfg.ssr.pwa === true
+
+      if (this.#ctx.dev) {
+        if (cfg.devServer.https === true) {
+          const { getCertificate } = await import('@quasar/ssl-certificate')
+          const sslCertificate = getCertificate({ log, fatal })
+          cfg.devServer.https = {
+            key: sslCertificate,
+            cert: sslCertificate
+          }
+        }
+        else if (Object(cfg.devServer.https) === cfg.devServer.https) {
+          const { https } = cfg.devServer
+
+          // we now check if config is specifying a file path
+          // and we actually read the contents so we can later supply correct
+          // params to the node HTTPS server
+          ;[ 'ca', 'pfx', 'key', 'cert' ].forEach(prop => {
+            if (typeof https[ prop ] === 'string') {
+              try {
+                https[ prop ] = readFileSync(https[ prop ])
+              }
+              catch (e) {
+                console.error(e)
+                console.log()
+                delete https[ prop ]
+                warn(`The devServer.https.${ prop } file could not be read. Removed the config.`)
+              }
+            }
+          })
+        }
+      }
     }
 
     if (this.#ctx.dev) {
@@ -535,12 +717,6 @@ class QuasarConfFile {
           host: cfg.devServer.host === '0.0.0.0' ? 'localhost' : cfg.devServer.host,
           port: 8098
         }
-      }
-
-      if (this.#ctx.mode.ssr && cfg.devServer.https === true) {
-        // TODO SSR + HTTPS
-        warn('SSR on HTTPS is not currently supported, so disabling it.')
-        cfg.devServer.https = false
       }
 
       if (this.#ctx.mode.cordova || this.#ctx.mode.capacitor || this.#ctx.mode.electron) {
@@ -567,10 +743,15 @@ class QuasarConfFile {
       }, cfg.pwa)
 
       if (![ 'generateSW', 'injectManifest' ].includes(cfg.pwa.workboxMode)) {
-        return {
-          error: `Workbox strategy "${ cfg.pwa.workboxMode }" is invalid. `
-            + 'Valid quasar.config.js > pwa > workboxMode options are: generateSW or injectManifest\n'
+        const msg = `Workbox strategy "${ cfg.pwa.workboxMode }" is invalid. `
+          + 'Valid quasar.config file > pwa > workboxMode options are: generateSW or injectManifest.'
+
+        if (failOnError === true) {
+          fatal(msg, 'FAIL')
         }
+
+        warn(msg + ' Please fix it then save the file again.\n')
+        return
       }
 
       cfg.build.env.SERVICE_WORKER_FILE = `${ cfg.build.publicPath }${ cfg.pwa.swFilename }`
@@ -611,8 +792,22 @@ class QuasarConfFile {
       cfg.build.env.APP_URL = cfg.metaConf.APP_URL
     }
 
+    // get the env variables from host project env files
+    const { fileEnv, usedEnvFiles, envFromCache } = readFileEnv({
+      quasarMode: this.#ctx.modeName,
+      buildType: this.#ctx.dev ? 'dev' : 'prod',
+      envFolder: cfg.build.envFolder,
+      envFiles: cfg.build.envFiles
+    })
+
+    cfg.metaConf.fileEnv = fileEnv
+
+    if (envFromCache === false && usedEnvFiles.length !== 0) {
+      log(`Using .env files: ${ usedEnvFiles.join(', ') }`)
+    }
+
     if (this.#ctx.mode.electron && this.#ctx.prod) {
-      const bundler = require('./modes/electron/bundler')
+      const bundler = require('./modes/electron/bundler.js')
 
       const icon = appPaths.resolve.electron('icons/icon.png')
       const builderIcon = process.platform === 'linux'
@@ -656,7 +851,7 @@ class QuasarConfFile {
       }
 
       if (this.#opts.argv !== void 0) {
-        const { ensureElectronArgv } = require('./helpers/ensure-argv')
+        const { ensureElectronArgv } = require('./utils/ensure-argv.js')
         ensureElectronArgv(cfg.electron.bundler, this.#opts.argv)
       }
 
@@ -711,5 +906,3 @@ class QuasarConfFile {
     return cfg
   }
 }
-
-module.exports = QuasarConfFile

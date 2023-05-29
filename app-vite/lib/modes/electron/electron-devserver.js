@@ -1,11 +1,11 @@
 const { createServer } = require('vite')
 
-const AppDevserver = require('../../app-devserver')
-const appPaths = require('../../app-paths')
-const { log, warn, fatal } = require('../../helpers/logger')
-const { spawn } = require('../../helpers/spawn')
-const getPackage = require('../../helpers/get-package')
-const config = require('./electron-config')
+const appPaths = require('../../app-paths.js')
+const { AppDevserver } = require('../../app-devserver.js')
+const { log, warn, fatal } = require('../../utils/logger.js')
+const { spawn } = require('../../utils/spawn.js')
+const { getPackage } = require('../../utils/get-package.js')
+const { quasarElectronConfig } = require('./electron-config.js')
 
 function wait (time) {
   return new Promise(resolve => {
@@ -13,7 +13,7 @@ function wait (time) {
   })
 }
 
-class ElectronDevServer extends AppDevserver {
+module.exports.QuasarModeDevserver = class QuasarModeDevserver extends AppDevserver {
   #pid = 0
   #server
   #stopMain
@@ -55,7 +55,7 @@ class ElectronDevServer extends AppDevserver {
       this.#server.close()
     }
 
-    const viteConfig = await config.vite(quasarConf)
+    const viteConfig = await quasarElectronConfig.vite(quasarConf)
 
     this.#server = await createServer(viteConfig)
     await this.#server.listen()
@@ -75,26 +75,26 @@ class ElectronDevServer extends AppDevserver {
     let mainReady = false
     let preloadReady = false
 
-    const cfgMain = await config.main(quasarConf)
-    const cfgPreload = await config.preload(quasarConf)
+    const cfgMain = await quasarElectronConfig.main(quasarConf)
+    const cfgPreload = await quasarElectronConfig.preload(quasarConf)
 
     return Promise.all([
-      this.buildWithEsbuild('Electron Main', cfgMain, () => {
+      this.watchWithEsbuild('Electron Main', cfgMain, () => {
         if (preloadReady === true) {
           this.#runElectron(quasarConf)
         }
-      }).then(result => {
+      }).then(esbuildCtx => {
         mainReady = true
-        this.#stopMain = result.stop
+        this.#stopMain = esbuildCtx.dispose
       }),
 
-      this.buildWithEsbuild('Electron Preload', cfgPreload, () => {
+      this.watchWithEsbuild('Electron Preload', cfgPreload, () => {
         if (mainReady === true) {
           this.#runElectron(quasarConf)
         }
-      }).then(result => {
+      }).then(esbuildCtx => {
         preloadReady = true
-        this.#stopPreload = result.stop
+        this.#stopPreload = esbuildCtx.dispose
       })
     ]).then(() => {
       return this.#runElectron(quasarConf)
@@ -137,5 +137,3 @@ class ElectronDevServer extends AppDevserver {
     )
   }
 }
-
-module.exports = ElectronDevServer

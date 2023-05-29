@@ -1,9 +1,10 @@
-const { existsSync } = require('fs')
-const { join, sep, normalize } = require('path')
+const { existsSync } = require('node:fs')
+const { join, sep, normalize } = require('node:path')
 const nodeExternals = require('webpack-node-externals')
 
-const appPaths = require('../../app-paths')
-const { QuasarSSRServerPlugin } = require('./plugin.server-side')
+const appPaths = require('../../app-paths.js')
+const { QuasarSSRServerPlugin } = require('./plugin.server-side.js')
+const { getBuildSystemDefine } = require('../../utils/env.js')
 
 function getModuleDirs () {
   const folders = []
@@ -23,7 +24,7 @@ function getModuleDirs () {
 
 const additionalModuleDirs = getModuleDirs()
 
-module.exports = function (chain, cfg) {
+module.exports.injectSSRServer = function injectSSRServer (chain, cfg) {
   chain.entry('app')
     .clear()
     .add(appPaths.resolve.app('.quasar/server-entry.js'))
@@ -57,8 +58,12 @@ module.exports = function (chain, cfg) {
     .tap(args => {
       return [ {
         ...args[ 0 ],
-        'process.env.CLIENT': false,
-        'process.env.SERVER': true
+        ...getBuildSystemDefine({
+          buildEnv: {
+            CLIENT: false,
+            SERVER: true
+          }
+        })
       } ]
     })
 

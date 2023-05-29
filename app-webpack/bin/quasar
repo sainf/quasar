@@ -1,7 +1,9 @@
 #!/usr/bin/env node
 
-require('../lib/node-version-check')
-require('../lib/helpers/cli-error-handling')
+require('../lib/node-version-check.js')
+
+const { log, warn } = require('../lib/utils/logger.js')
+const { cliPkg } = require('../lib/app-pkg.js')
 
 const commands = [
   'dev',
@@ -42,21 +44,18 @@ if (cmd) {
   }
   else {
     if (cmd === '-v' || cmd === '--version') {
-      const pkg = require('../package.json')
       console.log(
-        `${ pkg.name } ${ pkg.version }`
+        `${ cliPkg.name } ${ cliPkg.version }`
         + (process.env.QUASAR_CLI_VERSION ? ` (@quasar/cli ${ process.env.QUASAR_CLI_VERSION })` : '')
       )
       process.exit(0)
     }
 
-    const { log, warn } = require('../lib/helpers/logger')
-
     if (cmd === '-h' || cmd === '--help') {
       cmd = 'help'
     }
     else if (cmd.indexOf('-') === 0) {
-      warn(`Command must come before the options`)
+      warn('Command must come before the options')
       cmd = 'help'
     }
     else {
@@ -65,7 +64,7 @@ if (cmd) {
       const exit = process.exit
       process.exit = (code, reason) => {
         if (reason === 'ext-missing') {
-          require('../lib/cmd/help')
+          require('../lib/cmd/help.js')
           exit(0)
         }
         else {
@@ -81,4 +80,4 @@ else {
   cmd = 'help'
 }
 
-require(`../lib/cmd/${ cmd }`)
+require(`../lib/cmd/${ cmd }.js`)

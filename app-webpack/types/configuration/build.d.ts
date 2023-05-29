@@ -126,12 +126,35 @@ interface QuasarStaticBuildConfiguration {
    * Source map [strategy](https://webpack.js.org/configuration/devtool/) to use.
    */
   devtool?: WebpackConfiguration["devtool"];
+
   /**
    * Add properties to `process.env` that you can use in your website/app JS code.
    *
    * @example { SOMETHING: 'someValue' }
    */
-  env?: { [index: string]: string };
+  env?: { [index: string]: string | undefined | null };
+  /**
+   * Defines constants that get replaced in your app.
+   * Unlike `env`, you will need to use JSON.stringify() on the values yourself except for booleans.
+   *
+   * @example { SOMETHING: JSON.stringify('someValue') } -> console.log(SOMETHING) // console.log('someValue')
+   */
+  rawDefine?: { [index: string]: string };
+  /**
+   * Folder where Quasar CLI should look for .env* files.
+   * Can be an absolute path or a relative path to project root directory.
+   *
+   * @default project root directory
+   */
+  envFolder?: string;
+  /**
+   * Additional .env* files to be loaded.
+   * Each entry can be an absolute path or a relative path to quasar.config > build > envFolder.
+   *
+   * @example ['.env.somefile', '../.env.someotherfile']
+   */
+  envFiles?: string[];
+
   /**
    * Gzip the distributables.
    * Could be either a boolean or compression plugin options object.
@@ -158,7 +181,12 @@ interface QuasarStaticBuildConfiguration {
   analyze?: boolean | BundleAnalyzerPlugin.Options;
   /** Include vue runtime + compiler version, instead of default Vue runtime-only. */
   vueCompiler?: boolean;
-  /** Include support for Vue Options API (default is: true) */
+  /**
+   * Should the Vue Options API be available? If all your components only use Composition API
+   * it would make sense performance-wise to disable Vue Options API for a compile speedup.
+   *
+   * @default true
+   */
   vueOptionsApi?: boolean;
   /**
    * Minification options. [Full list](https://github.com/webpack-contrib/terser-webpack-plugin/#minify).
@@ -174,6 +202,10 @@ interface QuasarStaticBuildConfiguration {
   lessLoaderOptions?: object;
   /** Options to supply to `vue-loader` */
   vueLoaderOptions?: object;
+  /** Options to supply to `ts-loader` */
+  tsLoaderOptions?: object;
+  /** Options to supply to `ts-checker` */
+  tsCheckerOptions?: object;
   /**
    * RTL options. [Full list](https://github.com/vkalinichev/postcss-rtl).
    * When providing an object, it is the configuration for postcss-rtl plugin, and if fromRTL is present it will only be used for client styles

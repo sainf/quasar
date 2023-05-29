@@ -7,7 +7,7 @@ const argv = parseArgs(process.argv.slice(2), {
     m: 'mode',
 
     d: 'depth',
-    p: 'path',
+    p: 'node:path',
 
     h: 'help'
   },
@@ -43,26 +43,29 @@ if (argv.help) {
   process.exit(0)
 }
 
-require('../helpers/ensure-argv')(argv, 'inspect')
-require('../helpers/banner')(argv, argv.cmd)
+const { ensureArgv } = require('../utils/ensure-argv.js')
+ensureArgv(argv, 'inspect')
 
-const { log, fatal } = require('../helpers/logger')
+const { displayBanner } = require('../utils/banner.js')
+displayBanner(argv, argv.cmd)
+
+const { log, fatal } = require('../utils/logger.js')
 
 if (argv.mode !== 'spa') {
-  const getMode = require('../mode/index')
-  if (getMode(argv.mode).isInstalled !== true) {
+  const { getQuasarMode } = require('../mode/index.js')
+  if (getQuasarMode(argv.mode).isInstalled !== true) {
     fatal('Requested mode for inspection is NOT installed.')
   }
 }
 
-const QuasarConfFile = require('../quasar-conf-file')
-const { splitWebpackConfig } = require('../webpack/symbols')
+const { QuasarConfigFile } = require('../quasar-config-file.js')
+const { splitWebpackConfig } = require('../webpack/symbols.js')
 
 const depth = parseInt(argv.depth, 10) || Infinity
 
 async function inspect () {
-  const extensionRunner = require('../app-extension/extensions-runner')
-  const getQuasarCtx = require('../helpers/get-quasar-ctx')
+  const { extensionsRunner } = require('../app-extension/extensions-runner.js')
+  const { getQuasarCtx } = require('../utils/get-quasar-ctx.js')
 
   const ctx = getQuasarCtx({
     mode: argv.mode,
@@ -75,22 +78,14 @@ async function inspect () {
   })
 
   // register app extensions
-  await extensionRunner.registerExtensions(ctx)
+  await extensionsRunner.registerExtensions(ctx)
 
-  const quasarConfFile = new QuasarConfFile(ctx)
+  const quasarConfFile = new QuasarConfigFile(ctx)
 
-  try {
-    await quasarConfFile.prepare()
-  }
-  catch (e) {
-    console.log(e)
-    fatal('quasar.config.js has JS errors', 'FAIL')
-  }
+  const { webpackConf } = await quasarConfFile.read()
 
-  await quasarConfFile.compile()
-
-  const util = require('util')
-  const cfgEntries = splitWebpackConfig(quasarConfFile.webpackConf, argv.mode)
+  const util = require('node:util')
+  const cfgEntries = splitWebpackConfig(webpackConf, argv.mode)
 
   if (argv.path) {
     const dot = require('dot-prop')

@@ -1,10 +1,10 @@
-const { join } = require('path')
-const appPaths = require('../../app-paths')
+const { join } = require('node:path')
 
-const { createViteConfig, extendViteConfig, extendEsbuildConfig, createNodeEsbuildConfig } = require('../../config-tools')
-const parseEnv = require('../../parse-env')
+const appPaths = require('../../app-paths.js')
+const { createViteConfig, extendViteConfig, extendEsbuildConfig, createNodeEsbuildConfig } = require('../../config-tools.js')
+const { getBuildSystemDefine } = require('../../utils/env.js')
 
-module.exports = {
+module.exports.quasarElectronConfig = {
   vite: quasarConf => {
     const cfg = createViteConfig(quasarConf)
 
@@ -25,14 +25,16 @@ module.exports = {
 
     cfg.define = {
       ...cfg.define,
-      ...parseEnv({
-        QUASAR_ELECTRON_PRELOAD: quasarConf.ctx.dev === true
-          ? appPaths.resolve.app('.quasar/electron/electron-preload.js')
-          : 'electron-preload.js',
-        QUASAR_PUBLIC_FOLDER: quasarConf.ctx.dev === true
-          ? appPaths.publicDir
-          : '.'
-      }, {})
+      ...getBuildSystemDefine({
+        buildEnv: {
+          QUASAR_ELECTRON_PRELOAD: quasarConf.ctx.dev === true
+            ? appPaths.resolve.app('.quasar/electron/electron-preload.js')
+            : 'electron-preload.js',
+          QUASAR_PUBLIC_FOLDER: quasarConf.ctx.dev === true
+            ? appPaths.publicDir
+            : '.'
+        }
+      })
     }
 
     return extendEsbuildConfig(cfg, quasarConf.electron, 'ElectronMain')
@@ -48,16 +50,20 @@ module.exports = {
 
     cfg.define = {
       ...cfg.define,
-      ...parseEnv({
-        QUASAR_ELECTRON_PRELOAD: quasarConf.ctx.dev === true
-          ? appPaths.resolve.app('.quasar/electron/electron-preload.js')
-          : 'electron-preload.js',
-        QUASAR_PUBLIC_FOLDER: quasarConf.ctx.dev === true
-          ? appPaths.publicDir
-          : '.'
-      }, {})
+      ...getBuildSystemDefine({
+        buildEnv: {
+          QUASAR_ELECTRON_PRELOAD: quasarConf.ctx.dev === true
+            ? appPaths.resolve.app('.quasar/electron/electron-preload.js')
+            : 'electron-preload.js',
+          QUASAR_PUBLIC_FOLDER: quasarConf.ctx.dev === true
+            ? appPaths.publicDir
+            : '.'
+        }
+      })
     }
 
     return extendEsbuildConfig(cfg, quasarConf.electron, 'ElectronPreload')
   }
 }
+
+module.exports.modeConfig = module.exports.quasarElectronConfig

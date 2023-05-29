@@ -1,11 +1,13 @@
 
-const { existsSync } = require('fs')
-const { normalize, resolve, join, sep } = require('path')
+const { existsSync } = require('node:fs')
+const { normalize, resolve, join, sep } = require('node:path')
 
 const quasarConfigFilenameList = [
   'quasar.config.js',
+  'quasar.config.mjs',
+  'quasar.config.ts',
   'quasar.config.cjs',
-  'quasar.conf.js' // legacy
+  'quasar.conf.js' // legacy (removed during v2)
 ]
 
 function getAppInfo () {
@@ -13,16 +15,16 @@ function getAppInfo () {
 
   while (appDir.length && appDir[ appDir.length - 1 ] !== sep) {
     for (const name of quasarConfigFilenameList) {
-      const filename = join(appDir, name)
-      if (existsSync(filename)) {
-        return { appDir, quasarConfigFilename: filename }
+      const quasarConfigFilename = join(appDir, name)
+      if (existsSync(quasarConfigFilename)) {
+        return { appDir, quasarConfigFilename }
       }
     }
 
     appDir = normalize(join(appDir, '..'))
   }
 
-  const { fatal } = require('./helpers/logger')
+  const { fatal } = require('./utils/logger.js')
   fatal('Error. This command must be executed inside a Quasar project folder.')
 }
 

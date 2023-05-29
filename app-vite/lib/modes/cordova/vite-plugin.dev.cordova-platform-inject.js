@@ -1,13 +1,13 @@
 
 const { static: serveStatic } = require('express')
-const appPaths = require('../../app-paths')
+const appPaths = require('../../app-paths.js')
 
-const { entryPointMarkup } = require('../../helpers/html-template')
+const { entryPointMarkup } = require('../../utils/html-template.js')
 
 /**
  * It is applied for dev only!
  */
-module.exports = quasarConf => {
+module.exports.quasarVitePluginDevCordovaPlatformInject = function quasarVitePluginDevCordovaPlatformInject (quasarConf) {
   return {
     name: 'quasar:cordova-platform-inject',
     enforce: 'pre',

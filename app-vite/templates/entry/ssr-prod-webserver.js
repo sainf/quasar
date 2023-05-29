@@ -4,7 +4,7 @@
  * DO NOT EDIT.
  **/
 
-import { join, basename } from 'path'
+import { join, basename } from 'node:path'
 import { renderToString } from 'vue/server-renderer'
 <% if (store && ssr.manualStoreSerialization !== true) { %>
 import serialize from 'serialize-javascript'
@@ -115,7 +115,7 @@ async function render (ssrContext) {
   }
 }
 
-const serveStatic = (path, opts = {}) => serveStaticContent(resolvePublicFolder(path), opts)
+const serveStatic = (pathToServe, opts = {}) => serveStaticContent(resolvePublicFolder(pathToServe), opts)
 
 const middlewareParams = {
   port,

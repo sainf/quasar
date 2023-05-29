@@ -1,13 +1,14 @@
 const { sources } = require('webpack')
+const { merge } = require('webpack-merge')
 
-const appPaths = require('../../app-paths')
-const getFixedDeps = require('../../helpers/get-fixed-deps')
+const { appPkg } = require('../../app-pkg.js')
+const { getFixedDeps } = require('../../utils/get-fixed-deps.js')
 
-module.exports = class ElectronPackageJson {
+module.exports.ElectronPackageJsonPlugin = class ElectronPackageJsonPlugin {
   constructor (cfg = {}) {
     this.cfg = cfg
 
-    const pkg = require(appPaths.resolve.app('package.json'))
+    const pkg = merge({}, appPkg)
 
     if (pkg.dependencies) {
       pkg.dependencies = getFixedDeps(pkg.dependencies)

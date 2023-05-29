@@ -1,13 +1,13 @@
 const parseArgs = require('minimist')
 
-const path = require('path')
-const fs = require('fs')
+const path = require('node:path')
+const fs = require('node:fs')
 const fse = require('fs-extra')
 
-const { log, warn } = require('../helpers/logger')
-const appPaths = require('../app-paths')
-const storeProvider = require('../helpers/store-provider')
-const hasTypescript = require('../helpers/has-typescript')
+const appPaths = require('../app-paths.js')
+const { log, warn } = require('../utils/logger.js')
+const { storeProvider } = require('../utils/store-provider.js')
+const { hasTypescript } = require('../utils/has-typescript.js')
 
 const argv = parseArgs(process.argv.slice(2), {
   alias: {
@@ -187,12 +187,12 @@ const mapping = {
   boot: {
     folder: 'src/boot',
     ext: isTypeScript ? '.ts' : '.js',
-    reference: 'quasar.config.js > boot'
+    reference: 'quasar.config file > boot'
   },
   ssrmiddleware: {
     folder: 'src-ssr/middlewares',
     ext: isTypeScript ? '.ts' : '.js',
-    reference: 'quasar.config.js > ssr > middlewares'
+    reference: 'quasar.config file > ssr > middlewares'
   }
 }
 

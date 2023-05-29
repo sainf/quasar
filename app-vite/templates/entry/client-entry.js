@@ -5,7 +5,7 @@
  *
  * You are probably looking on adding startup/initialization code.
  * Use "quasar new boot <name>" and add it there.
- * One boot file per concern. Then reference the file(s) in quasar.config.js > boot:
+ * One boot file per concern. Then reference the file(s) in quasar.config file > boot:
  * boot: ['file', ...] // do not add ".js" extension to it.
  *
  * Boot files are your "main.js"
@@ -57,15 +57,6 @@ import { addPreFetchHooks } from './client-prefetch.js'
 
 <% if (ctx.dev) { %>
 console.info('[Quasar] Running <%= ctx.modeName.toUpperCase() + (ctx.mode.ssr && ctx.mode.pwa ? ' + PWA' : '') %>.')
-<% } %>
-
-<% if (ctx.mode.cordova && ctx.target.ios) { %>
-import '@quasar/fastclick'
-<% } else if (ctx.mode.pwa) { %>
-// Needed only for iOS PWAs
-if (/iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream && window.navigator.standalone) {
-  import('@quasar/fastclick')
-}
 <% } %>
 
 const publicPath = `<%= build.publicPath %>`

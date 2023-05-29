@@ -1,7 +1,8 @@
-const fs = require('fs')
-const { log, fatal } = require('../helpers/logger')
-const chalk = require('chalk')
-const appPaths = require('../app-paths')
+const fs = require('node:fs')
+const { green } = require('kolorist')
+
+const { log, fatal } = require('../utils/logger.js')
+const appPaths = require('../app-paths.js')
 
 const extensionPath = appPaths.resolve.app('quasar.extensions.json')
 
@@ -32,7 +33,7 @@ class ExtensionJson {
     log()
 
     for (const ext in this.extensions) {
-      console.log('Extension name: ' + chalk.green(ext))
+      console.log('Extension name: ' + green(ext))
       console.log('Extension prompts: ' + JSON.stringify(this.extensions[ ext ], null, 2))
       console.log()
     }
@@ -89,4 +90,4 @@ class ExtensionJson {
   }
 }
 
-module.exports = new ExtensionJson()
+module.exports.extensionJson = new ExtensionJson()

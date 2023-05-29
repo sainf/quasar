@@ -1,8 +1,8 @@
 const parseArgs = require('minimist')
 const { green, red, italic, underline } = require('kolorist')
 
-const getApi = require('../helpers/get-api')
-const { fatal, dot } = require('../helpers/logger')
+const { getApi } = require('../utils/get-api.js')
+const { fatal, dot } = require('../utils/logger.js')
 
 const partArgs = {
   p: 'props',
@@ -428,7 +428,7 @@ function printQuasarConfOptions ({ quasarConfOptions }) {
     : {}
   const keys = Object.keys(conf)
 
-  console.log('\n ' + underline('quasar.config.js > framework > config'))
+  console.log('\n ' + underline('quasar.config file > framework > config'))
 
   if (keys.length === 0) {
     console.log('\n   ' + italic('*No configuration options*'))
@@ -495,7 +495,7 @@ async function run () {
 
     if (apiParts.docs) {
       if (api.meta && api.meta.docsUrl) {
-        const openBrowser = require('../helpers/open-browser')
+        const { openBrowser } = require('../utils/open-browser.js')
         openBrowser({ url: api.meta.docsUrl, wait: false })
       }
       else {
@@ -524,7 +524,7 @@ async function run () {
 }
 
 function listElements () {
-  const getPackage = require('../helpers/get-package')
+  const { getPackage } = require('../utils/get-package.js')
   let api = getPackage('quasar/dist/transforms/api-list.json')
 
   if (api === void 0) {

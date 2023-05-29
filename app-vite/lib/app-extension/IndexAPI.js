@@ -1,16 +1,16 @@
 const semver = require('semver')
 const { merge } = require('webpack-merge')
 
-const { fatal } = require('../helpers/logger')
-const getPackageJson = require('../helpers/get-package-json')
-const getCallerPath = require('../helpers/get-caller-path')
-const extensionJson = require('./extension-json')
-const BaseAPI = require('./BaseAPI')
+const { fatal } = require('../utils/logger.js')
+const { getPackageJson } = require('../utils/get-package-json.js')
+const { getCallerPath } = require('../utils/get-caller-path.js')
+const { extensionJson } = require('./extension-json.js')
+const { BaseAPI } = require('./BaseAPI.js')
 
 /**
  * API for extension's /index.js script
  */
-module.exports = class IndexAPI extends BaseAPI {
+module.exports.IndexAPI = class IndexAPI extends BaseAPI {
   ctx
 
   __hooks = {
@@ -143,7 +143,7 @@ module.exports = class IndexAPI extends BaseAPI {
   }
 
   /**
-   * Extend quasar.config.js
+   * Extend quasar.config file
    *
    * @param {function} fn
    *   (cfg: Object, ctx: Object) => undefined
@@ -294,7 +294,7 @@ module.exports = class IndexAPI extends BaseAPI {
    * @param {function} fn
    *   ({ arg, ...}) => ?Promise
    *      * arg - argument supplied to "--publish"/"-P" parameter
-   *      * quasarConf - quasar.config.js config object
+   *      * quasarConf - quasar.config file config object
    *      * distDir - folder where distributables were built
    */
   onPublish (fn) {

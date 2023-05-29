@@ -1,20 +1,22 @@
 const webpack = require('webpack')
 const WebpackChain = require('webpack-chain')
 
-const ExpressionDependency = require('./plugin.expression-dependency')
-const parseBuildEnv = require('../../helpers/parse-build-env')
-const injectNodeBabel = require('../inject.node-babel')
-const injectNodeTypescript = require('../inject.node-typescript')
-
-const appPaths = require('../../app-paths')
-const WebpackProgressPlugin = require('../plugin.progress')
+const appPaths = require('../../app-paths.js')
+const { appPkg, cliPkg } = require('../../app-pkg.js')
+const { getBuildSystemDefine } = require('../../utils/env.js')
+const { injectNodeBabel } = require('../inject.node-babel.js')
+const { injectNodeTypescript } = require('../inject.node-typescript.js')
+const { ExpressionDependencyPlugin } = require('./plugin.expression-dependency.js')
+const { WebpackProgressPlugin } = require('../plugin.progress.js')
 
 const tempElectronDir = '.quasar/electron'
 
-module.exports = (nodeType, cfg, configName) => {
-  const { dependencies: appDeps = {} } = require(appPaths.resolve.app('package.json'))
-  const { dependencies: cliDeps = {} } = require(appPaths.resolve.cli('package.json'))
+const externalsList = [
+  ...Object.keys(cliPkg.dependencies || {}),
+  ...Object.keys(appPkg.dependencies || {})
+]
 
+module.exports.createNodeChain = function createNodeChain (nodeType, cfg, configName) {
   const chain = new WebpackChain()
   const resolveModules = [
     'node_modules',
@@ -32,20 +34,16 @@ module.exports = (nodeType, cfg, configName) => {
 
   chain.output
     .filename(`electron-${ nodeType }.js`)
-    .libraryTarget('commonjs2')
     .path(
       cfg.ctx.dev
         ? appPaths.resolve.app(tempElectronDir)
         : cfg.build.distDir
     )
 
-  chain.externals([
-    ...Object.keys(cliDeps),
-    ...Object.keys(appDeps)
-  ])
+  chain.externals([ ...externalsList ])
 
   chain.plugin('expression-dependency')
-    .use(ExpressionDependency)
+    .use(ExpressionDependencyPlugin)
 
   injectNodeBabel(cfg, chain)
   injectNodeTypescript(cfg, chain)
@@ -79,7 +77,11 @@ module.exports = (nodeType, cfg, configName) => {
 
   chain.plugin('define')
     .use(webpack.DefinePlugin, [
-      parseBuildEnv(env, cfg.__rootDefines)
+      getBuildSystemDefine({
+        buildEnv: env,
+        buildRawDefine: cfg.build.rawDefine,
+        fileEnv: cfg.__fileEnv
+      })
     ])
 
   // we include it already in cfg.build.env

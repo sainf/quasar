@@ -2,10 +2,12 @@ const webpack = require('webpack')
 const WebpackChain = require('webpack-chain')
 const { existsSync } = require('fs-extra')
 
-const appPaths = require('../../app-paths')
-const WebserverAssetsPlugin = require('./plugin.webserver-assets')
-const injectNodeTypescript = require('../inject.node-typescript')
-const WebpackProgressPlugin = require('../plugin.progress')
+const appPaths = require('../../app-paths.js')
+const { appPkg, cliPkg } = require('../../app-pkg.js')
+const { WebserverAssetsPlugin } = require('./plugin.webserver-assets')
+const { injectNodeTypescript } = require('../inject.node-typescript.js')
+const { WebpackProgressPlugin } = require('../plugin.progress.js')
+const { getBuildSystemDefine } = require('../../utils/env.js')
 
 const nodeEnvBanner = 'if(process.env.NODE_ENV===void 0){process.env.NODE_ENV=\'production\'}'
 const prodExportFile = {
@@ -14,26 +16,25 @@ const prodExportFile = {
   fallback: appPaths.resolve.app('.quasar/ssr-fallback-production-export.js')
 }
 
-const flattenObject = (obj, prefix = 'process.env') => {
-  return Object.keys(obj)
-    .reduce((acc, k) => {
-      const pre = prefix.length ? prefix + '.' : ''
+const { dependencies: appDeps = {} } = appPkg
+const { dependencies: cliDeps = {} } = cliPkg
+const externalsList = [
+  'vue/server-renderer',
+  '@vue/server-renderer',
+  'vue/compiler-sfc',
+  '@vue/compiler-sfc',
+  '@quasar/ssr-helpers/create-renderer',
+  './render-template.js',
+  './quasar.server-manifest.json',
+  './quasar.client-manifest.json',
+  './server/server-entry.js',
+  'compression',
+  'express',
+  ...Object.keys(cliDeps),
+  ...Object.keys(appDeps)
+]
 
-      if (Object(obj[ k ]) === obj[ k ]) {
-        Object.assign(acc, flattenObject(obj[ k ], pre + k))
-      }
-      else {
-        acc[ pre + k ] = JSON.stringify(obj[ k ])
-      }
-
-      return acc
-    }, {})
-}
-
-module.exports = function (cfg, configName) {
-  const { dependencies: appDeps = {} } = require(appPaths.resolve.app('package.json'))
-  const { dependencies: cliDeps = {} } = require(appPaths.resolve.cli('package.json'))
-
+module.exports.createSSRWebserverChain = function createSSRWebserverChain (cfg, configName) {
   const chain = new WebpackChain()
   const resolveModules = [
     'node_modules',
@@ -53,18 +54,14 @@ module.exports = function (cfg, configName) {
 
   chain.resolve.alias.set('src-ssr', appPaths.ssrDir)
 
+  chain.entry('webserver')
+    .add(appPaths.resolve.app(`.quasar/ssr-${ cfg.ctx.dev ? 'dev' : 'prod' }-webserver.js`))
   if (cfg.ctx.dev) {
-    chain.entry('webserver')
-      .add(appPaths.resolve.app('.quasar/ssr-middlewares.js'))
-
     chain.output
-      .filename('compiled-middlewares.js')
+      .filename('compiled-dev-webserver.js')
       .path(appPaths.resolve.app('.quasar/ssr'))
   }
   else {
-    chain.entry('webserver')
-      .add(appPaths.resolve.app('.quasar/ssr-prod-webserver.js'))
-
     chain.output
       .filename('index.js')
       .path(cfg.build.distDir)
@@ -73,24 +70,7 @@ module.exports = function (cfg, configName) {
   chain.output
     .libraryTarget('commonjs2')
 
-  chain.output
-    .library({
-      type: 'commonjs2',
-      export: 'default'
-    })
-
-  chain.externals([
-    '@vue/server-renderer',
-    '@vue/compiler-sfc',
-    '@quasar/ssr-helpers/create-renderer',
-    './render-template.js',
-    './quasar.server-manifest.json',
-    './quasar.client-manifest.json',
-    'compression',
-    'express',
-    ...Object.keys(cliDeps),
-    ...Object.keys(appDeps)
-  ])
+  chain.externals([ ...externalsList ])
 
   chain.node
     .merge({
@@ -114,9 +94,11 @@ module.exports = function (cfg, configName) {
 
   chain.plugin('define')
     .use(webpack.DefinePlugin, [
-      // flatten the object keys
-      // example: some: { object } becomes 'process.env.some.object'
-      { ...flattenObject(cfg.build.env), ...cfg.__rootDefines }
+      getBuildSystemDefine({
+        buildEnv: cfg.build.env,
+        buildRawDefine: cfg.build.rawDefine,
+        fileEnv: cfg.__fileEnv
+      })
     ])
 
   // we include it already in cfg.build.env

@@ -1,13 +1,13 @@
 {
   "name": "@quasar/cli",
-  "version": "2.0.1",
+  "version": "2.2.1",
   "description": "Quasar Framework - the Global CLI",
   "type": "module",
   "bin": {
     "quasar": "./bin/quasar.js"
   },
   "scripts": {
-    "lint": "eslint --ext .js ./ --fix"
+    "lint": "eslint --ext .js ./ --fix --report-unused-disable-directives"
   },
   "files": [
     "assets",
@@ -42,11 +42,12 @@
     "url": "https://donate.quasar.dev"
   },
   "engines": {
-    "node": ">= 14.15.0",
+    "node": ">= 16",
     "npm": ">= 5.6.0",
     "yarn": ">= 1.6.0"
   },
   "dependencies": {
+    "@quasar/ssl-certificate": "^1.0.0",
     "ci-info": "^3.8.0",
     "compression": "^1.7.4",
     "connect-history-api-fallback": "^2.0.0",

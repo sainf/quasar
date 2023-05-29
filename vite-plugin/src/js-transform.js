@@ -15,7 +15,7 @@ export function mapQuasarImports (code, importMap = {}) {
       .split(',')
       .map(identifier => {
         const data = identifier.split(' as ')
-        const importName = data[0].trim()
+        const importName = data[ 0 ].trim()
 
         // might be an empty entry like below
         // (notice useQuasar is followed by a comma)
@@ -24,11 +24,11 @@ export function mapQuasarImports (code, importMap = {}) {
           return ''
         }
 
-        const importAs = data[1] !== void 0
-          ? data[1].trim()
+        const importAs = data[ 1 ] !== void 0
+          ? data[ 1 ].trim()
           : importName
 
-        importMap[importName] = importAs
+        importMap[ importName ] = importAs
         return `import ${ importAs } from '${ importTransformation(importName) }';`
       })
       .join('')
@@ -43,25 +43,25 @@ export function mapQuasarImports (code, importMap = {}) {
  *    (removing original is required so that the end file will have
  *     only one import from Quasar statement)
  */
-export function removeQuasarImports (code, importMap, importList, reverseMap) {
+export function removeQuasarImports (code, importMap, importSet, reverseMap) {
   return code.replace(
     importQuasarRegex,
     (_, match) => {
       match.split(',').forEach(identifier => {
         const data = identifier.split(' as ')
-        const importName = data[0].trim()
+        const importName = data[ 0 ].trim()
 
         // might be an empty entry like below
         // (notice useQuasar is followed by a comma)
         // import { QTable, useQuasar, } from 'quasar'
         if (importName !== '') {
-          const importAs = data[1] !== void 0
-            ? data[1].trim()
+          const importAs = data[ 1 ] !== void 0
+            ? data[ 1 ].trim()
             : importName
 
-          importList.push(importName + (importAs !== importName ? ` as ${ importAs }` : ''))
-          importMap[importName] = importAs
-          reverseMap[importName.replace(/-/g, '_')] = importAs
+          importSet.add(importName + (importAs !== importName ? ` as ${ importAs }` : ''))
+          importMap[ importName ] = importAs
+          reverseMap[ importName.replace(/-/g, '_') ] = importAs
         }
       })
 

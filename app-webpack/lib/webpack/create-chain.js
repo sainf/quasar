@@ -1,17 +1,18 @@
-const path = require('path')
+const path = require('node:path')
 const webpack = require('webpack')
 const { merge } = require('webpack-merge')
 const WebpackChain = require('webpack-chain')
 const { VueLoaderPlugin } = require('vue-loader')
 
-const WebpackProgressPlugin = require('./plugin.progress')
-const BootDefaultExport = require('./plugin.boot-default-export')
-const parseBuildEnv = require('../helpers/parse-build-env')
-const getPackagePath = require('../helpers/get-package-path')
+const { WebpackProgressPlugin } = require('./plugin.progress.js')
+const { BootDefaultExportPlugin } = require('./plugin.boot-default-export.js')
+const { getBuildSystemDefine } = require('../utils/env.js')
+const { getPackagePath } = require('../utils/get-package-path.js')
 
-const appPaths = require('../app-paths')
-const injectStyleRules = require('./inject.style-rules')
-const { webpackNames } = require('./symbols')
+const appPaths = require('../app-paths.js')
+const { injectStyleRules } = require('./inject.style-rules.js')
+const { webpackNames } = require('./symbols.js')
+const { hasTypescript } = require('../utils/has-typescript.js')
 
 function getDependenciesRegex (list) {
   const deps = list.map(dep => { // eslint-disable-line array-callback-return
@@ -27,7 +28,7 @@ function getDependenciesRegex (list) {
   return new RegExp(deps.join('|'))
 }
 
-function getRootDefines (rootDefines, configName) {
+function getRawDefine (rootDefines, configName) {
   if (configName === webpackNames.ssr.serverSide) {
     return { ...rootDefines, __QUASAR_SSR_SERVER__: true }
   }
@@ -46,7 +47,7 @@ const extrasPath = (() => {
     : false
 })()
 
-module.exports = function (cfg, configName) {
+module.exports.createChain = function createChain (cfg, configName) {
   const chain = new WebpackChain()
 
   const useFastHash = cfg.ctx.dev || [ 'electron', 'cordova', 'capacitor', 'bex' ].includes(cfg.ctx.modeName)
@@ -77,7 +78,7 @@ module.exports = function (cfg, configName) {
 
   chain.resolve.extensions
     .merge(
-      cfg.supportTS !== false
+      hasTypescript === true
         ? [ '.mjs', '.ts', '.js', '.vue', '.json', '.wasm' ]
         : [ '.mjs', '.js', '.vue', '.json', '.wasm' ]
     )
@@ -179,7 +180,7 @@ module.exports = function (cfg, configName) {
       })
   }
 
-  if (cfg.supportTS !== false) {
+  if (hasTypescript === true) {
     chain.module
       .rule('typescript')
       .test(/\.ts$/)
@@ -187,7 +188,7 @@ module.exports = function (cfg, configName) {
       .loader('ts-loader')
       .options({
         // custom config is merged if present, but vue setup and type checking disable are always applied
-        ...(cfg.supportTS.tsLoaderConfig || {}),
+        ...cfg.build.tsLoaderOptions,
         appendTsSuffixTo: [ /\.vue$/ ],
         // Type checking is handled by fork-ts-checker-webpack-plugin
         transpileOnly: true
@@ -199,12 +200,12 @@ module.exports = function (cfg, configName) {
       // https://github.com/TypeStrong/fork-ts-checker-webpack-plugin#options
       .use(ForkTsCheckerWebpackPlugin, [
         // custom config is merged if present, but vue option is always enabled
-        merge({}, cfg.supportTS.tsCheckerConfig || {}, {
+        merge({}, cfg.build.tsCheckerOptions, {
           typescript: {
             extensions: {
               vue: {
                 enabled: true,
-                compiler: '@vue/compiler-sfc'
+                compiler: 'vue/compiler-sfc'
               }
             }
           }
@@ -272,7 +273,11 @@ module.exports = function (cfg, configName) {
 
   chain.plugin('define')
     .use(webpack.DefinePlugin, [
-      parseBuildEnv(cfg.build.env, getRootDefines(cfg.__rootDefines, configName))
+      getBuildSystemDefine({
+        buildEnv: cfg.build.env,
+        buildRawDefine: getRawDefine(cfg.build.rawDefine, configName),
+        fileEnv: cfg.__fileEnv
+      })
     ])
 
   chain.optimization
@@ -280,7 +285,7 @@ module.exports = function (cfg, configName) {
 
   if (cfg.ctx.dev && configName !== webpackNames.ssr.serverSide && cfg.ctx.mode.pwa && cfg.pwa.workboxPluginMode === 'InjectManifest') {
     // need to place it here before the status plugin
-    const CustomSwWarningPlugin = require('./pwa/plugin.custom-sw-warning')
+    const { CustomSwWarningPlugin } = require('./pwa/plugin.custom-sw-warning.js')
     chain.plugin('custom-sw-warning')
       .use(CustomSwWarningPlugin)
   }
@@ -289,7 +294,7 @@ module.exports = function (cfg, configName) {
     .use(WebpackProgressPlugin, [ { name: configName, cfg } ])
 
   chain.plugin('boot-default-export')
-    .use(BootDefaultExport)
+    .use(BootDefaultExportPlugin)
 
   chain.performance
     .hints(false)
