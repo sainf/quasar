@@ -93,7 +93,7 @@ const entry = computed(() => {
       margin: 0
       padding: 16px
       font-size: 14px
-      font-family: Consolas, Monaco, 'Andale Mono', 'Ubuntu Mono', monospace
+      font-family: Consolas, Monaco, 'Andale Mono', 'Ubuntu Mono', monospace !important
       line-height: 21px
       tab-size: 2
       text-align: left
@@ -114,6 +114,9 @@ const entry = computed(() => {
         height: 21px
         background: rgba(#fff, .2)
         pointer-events: none
+
+      code
+        display: inline-block
 
   &__links
     //

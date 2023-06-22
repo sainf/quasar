@@ -1,6 +1,6 @@
 import { h, ref } from 'vue'
 import { QBadge, QBtn, Notify } from 'quasar'
-import { copyToClipboard } from 'assets/page-utils'
+import { copyToClipboard } from 'assets/page-utils.js'
 import { mdiMinusBox, mdiPlusBox } from '@quasar/extras/mdi-v6'
 
 function copyPropName (propName) {
@@ -482,25 +482,12 @@ describe.injection = (_, injection) => {
 }
 
 describe.quasarConfOptions = (openState, conf) => {
-  const child = []
   const entry = [
-    getNameDiv(conf, conf.propName, 0, false, 'quasar.config file > framework > config > ')
+    getNameDiv(conf, conf.propName, 0, false, 'quasar.config file > framework > config > '),
+    getDiv(12, 'Type', getStringType(conf.type || 'Object')),
+    conf.desc ? getDiv(12, 'Description', conf.desc) : null,
+    getPropDetails(openState, 'quasarConfOptions', conf, 0)
   ]
-
-  for (const def in conf.definition) {
-    child.push(
-      getProp(openState, 'quasarConfOptions', conf.definition[ def ], def, 0)
-    )
-  }
-
-  entry.push(
-    getDiv(
-      12,
-      'Definition',
-      void 0,
-      h('div', { class: 'doc-api-entry__subitem' }, child)
-    )
-  )
 
   return [
     h('div', { class: 'doc-api-entry row' }, entry)

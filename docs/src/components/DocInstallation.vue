@@ -1,7 +1,7 @@
 <template>
-  <q-card id="installation" class="doc-installation q-my-xl" flat bordered>
+  <q-card :id="id" class="doc-installation q-my-xl" flat bordered>
     <div class="header-toolbar row items-center">
-      <doc-card-title title="Installation" />
+      <doc-card-title :title="props.title" />
     </div>
 
     <q-tabs class="header-tabs" v-model="currentTab" align="left" active-color="brand-primary" indicator-color="brand-primary" dense :breakpoint="0" shrink>
@@ -34,16 +34,23 @@ import { ref, computed } from 'vue'
 import DocCode from './DocCode.vue'
 import DocCardTitle from './DocCardTitle.vue'
 
+import { slugify } from 'src/assets/page-utils.js'
+
 const props = defineProps({
   components: [ Array, String ],
   directives: [ Array, String ],
   plugins: [ Array, String ],
-  config: String
+  config: String,
+  title: {
+    type: String,
+    default: 'Installation'
+  }
 })
 
 const tabList = [ 'Quasar CLI', 'Vite plugin / Vue CLI', 'UMD' ]
-
 const currentTab = ref('Quasar CLI')
+
+const id = computed(() => slugify(props.title))
 
 function nameAsString (name, indent, quotes = true) {
   const wrapper = quotes
@@ -57,7 +64,7 @@ function nameAsString (name, indent, quotes = true) {
 
 const quasarConf = computed(() => {
   return props.config !== void 0
-    ? `${props.config}: { /* look at QuasarConfOptions from the API card */ }`
+    ? `${props.config}: /* look at QuasarConfOptions from the API card */`
     : null
 })
 
@@ -114,7 +121,8 @@ app.use(Quasar, {
 })
 
 const ExternalCli = computed(() => {
-  const types = [], imports = []
+  const types = []
+  const imports = ['Quasar']
 
   ;[ 'components', 'directives', 'plugins' ].forEach(type => {
     if (props[ type ] !== void 0) {
@@ -134,7 +142,6 @@ const ExternalCli = computed(() => {
   return `// main.js
 
 import {
-  Quasar,
   ${imports.join(',\n  ')}
 } from 'quasar'
 

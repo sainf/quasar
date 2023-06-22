@@ -13,10 +13,11 @@ export const sponsors = {
     { src: 'Kalisio.svg', name: 'Kalisio', href: 'https://kalisio.com/' },
     { src: 'COMCOMService.svg', name: 'Com Com Services', href: 'https://comcomservices.com/' },
     { src: 'DigitalOcean.svg', name: 'DigitalOcean', href: 'https://digitalocean.com/' },
-    { src: 'ProjectFinance.svg', name: 'Project Finance', href: 'https://www.project-finance.io/' },
+    { src: 'ProjectFinance.svg', name: 'Project Finance', href: 'https://www.projectfinance.io/' },
     { src: 'iBL.svg', name: 'IB Langenthal AG', href: 'https://ib-langenthal.ch/' },
     { src: 'JuggleSt.svg', name: 'Juggle Street', href: 'https://jugglestreet.com.au/' },
     { src: 'Nodesol.svg', name: 'Nodesol', href: 'https://www.nodesol.com/' },
-    { src: 'AcornFinance.svg', name: 'Acorn Finance', href: 'https://www.acornfinance.com' }
+    { src: 'AcornFinance.svg', name: 'Acorn Finance', href: 'https://www.acornfinance.com' },
+    { src: 'Certible.svg', name: 'Certible - International Certification Body', href: 'https://www.certible.com/' }
   ]
 }
