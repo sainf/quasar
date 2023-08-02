@@ -102,15 +102,6 @@ interface QuasarStaticBuildConfiguration {
    */
   htmlFilename?: string;
   /**
-   * When using SSR+PWA, this is the name of the
-   * PWA index html file.
-   *
-   * Do NOT use index.html as name as it will mess SSR up!
-   *
-   * @default 'offline.html'
-   */
-  ssrPwaHtmlFilename?: string;
-  /**
    * Folder where Quasar CLI should generate the distributables.
    * Relative path to project root directory.
    *
@@ -132,14 +123,14 @@ interface QuasarStaticBuildConfiguration {
    *
    * @example { SOMETHING: 'someValue' }
    */
-  env?: { [index: string]: string | undefined | null };
+  env?: { [index: string]: string | boolean | undefined | null };
   /**
    * Defines constants that get replaced in your app.
    * Unlike `env`, you will need to use JSON.stringify() on the values yourself except for booleans.
    *
    * @example { SOMETHING: JSON.stringify('someValue') } -> console.log(SOMETHING) // console.log('someValue')
    */
-  rawDefine?: { [index: string]: string };
+  rawDefine?: { [index: string]: string | boolean | undefined | null };
   /**
    * Folder where Quasar CLI should look for .env* files.
    * Can be an absolute path or a relative path to project root directory.

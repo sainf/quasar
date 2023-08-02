@@ -1,8 +1,8 @@
 
-import mdPageList from 'src/pages/listing'
+import mdPageList from 'src/pages/listing.js'
 
 import layoutGallery from 'assets/layout-gallery.js'
-import vueGalleryPageList from 'src/layouts/gallery/listing'
+import vueGalleryPageList from 'src/layouts/gallery/listing.js'
 
 import DocLayout from 'src/layouts/doc-layout/DocLayout.vue'
 
@@ -16,7 +16,7 @@ const routes = [
   // legacy redirecting
   { path: '/quasar-cli/supporting-ie', redirect: '/quasar-cli-webpack/browser-compatibility' },
   { path: '/quasar-cli/modern-build', redirect: '/quasar-cli-webpack/browser-compatibility' },
-  { path: '/quasar-cli/quasar-conf-js', redirect: '/quasar-cli-webpack/quasar-config-js' },
+  { path: '/quasar-cli/quasar-conf-js', redirect: '/quasar-cli-webpack/quasar-config-file' },
   { path: '/contribution-guide', redirect: '/how-to-contribute/contribution-guide' },
 
   { path: '/quasar-cli-webpack/quasar-config-js', redirect: '/quasar-cli-webpack/quasar-config-file' },

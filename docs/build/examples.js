@@ -1,23 +1,23 @@
-const { join } = require('path')
-const { sync: fgSync } = require('fast-glob')
+import { join } from 'node:path'
+import fg from 'fast-glob'
 
 const moduleIdRE = /^examples:/
 const resolvedIdPrefix = '\0examples:'
 
-const targetFolder = join(__dirname, '../src/examples')
+const targetFolder = new URL('../src/examples', import.meta.url).pathname
 
 function devLoad (id) {
   if (id.startsWith(resolvedIdPrefix) === true) {
-    const folder = id.substring(id.indexOf(':') + 1)
-    return `export const code = import.meta.globEager('./src/examples/${folder}/*.vue')` +
-      `\nexport const source = import.meta.globEager('./src/examples/${folder}/*.vue', { as: 'raw' })`
+    const query = `'/src/examples/${ id.substring(id.indexOf(':') + 1) }/*.vue'`
+    return `export const code = import.meta.glob(${ query }, { eager: true })` +
+      `\nexport const source = import.meta.glob(${ query }, { as: 'raw', eager: true })`
   }
 }
 
 function prodLoad (id) {
   if (id.startsWith(resolvedIdPrefix) === true) {
     const exampleId = id.substring(id.indexOf(':') + 1)
-    const files = fgSync(join(targetFolder, exampleId, '/*.vue'))
+    const files = fg.sync(join(targetFolder, exampleId, '/*.vue'))
 
     const localFolder = join(targetFolder, exampleId) + '/'
     const localFolderLen = localFolder.length
@@ -38,14 +38,16 @@ function prodLoad (id) {
   }
 }
 
-module.exports = isProd => ({
-  name: 'docs-examples',
+export default function (isProd) {
+  return {
+    name: 'docs-examples',
 
-  resolveId (id) {
-    if (moduleIdRE.test(id) === true) {
-      return '\0' + id
-    }
-  },
+    resolveId (id) {
+      if (moduleIdRE.test(id) === true) {
+        return '\0' + id
+      }
+    },
 
-  load: isProd === true ? prodLoad : devLoad
-})
+    load: isProd === true ? prodLoad : devLoad
+  }
+}

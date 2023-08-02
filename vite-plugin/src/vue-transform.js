@@ -1,7 +1,14 @@
-import autoImportData from 'quasar/dist/transforms/auto-import.json'
+
+import { join } from 'node:path'
+import { readFileSync } from 'node:fs'
 import importTransformation from 'quasar/dist/transforms/import-transformation.js'
 
 import { mapQuasarImports, removeQuasarImports } from './js-transform.js'
+import { quasarPath } from './quasar-path.js'
+
+const autoImportData = JSON.parse(
+  readFileSync(join(quasarPath, 'dist/transforms/auto-import.json'), 'utf-8')
+)
 
 const compRegex = {
   kebab: new RegExp(`_resolveComponent\\("${ autoImportData.regex.kebabComponents }"\\)`, 'g'),
@@ -56,10 +63,6 @@ export function vueTransform (content, autoImportComponentCase, useTreeshaking) 
       return ''
     })
 
-  if (importSet.size === 0) {
-    return code
-  }
-
   if (compList.length !== 0) {
     const list = compList.sort(lengthSortFn).join('|')
     code = code
@@ -72,6 +75,10 @@ export function vueTransform (content, autoImportComponentCase, useTreeshaking) 
     code = code
       .replace(new RegExp(`const _directive_(${ list }) = `, 'g'), '')
       .replace(new RegExp(`_directive_(${ list })`, 'g'), (_, match) => reverseMap[ match ])
+  }
+
+  if (importSet.size === 0) {
+    return code
   }
 
   const importList = [ ...importSet ]

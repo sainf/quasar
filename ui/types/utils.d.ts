@@ -1,4 +1,4 @@
-import { QUploader } from "quasar";
+import { QUploader, LiteralUnion } from "quasar";
 import {
   ComponentOptionsMixin,
   ComponentPropsOptions,
@@ -18,8 +18,10 @@ export * from "./utils/event";
 export * from "./utils/format";
 export * from "./utils/scroll";
 export * from "./utils/is";
+export * from "./utils/patterns";
 export * from "./utils/run-sequential-promises";
 
+import { BrandColor } from "./api/color";
 import { VueStyleObjectProp } from "./api/vue-prop-types";
 
 interface ExportFileOpts {
@@ -95,10 +97,13 @@ interface MorphOptions {
 
 export function morph(options: MorphOptions): (abort?: boolean) => boolean;
 
-export function getCssVar(varName: string, element?: Element): string | null;
+export function getCssVar(
+  varName: LiteralUnion<BrandColor>,
+  element?: Element
+): string | null;
 
 export function setCssVar(
-  varName: string,
+  varName: LiteralUnion<BrandColor>,
   value: string,
   element?: Element
 ): void;

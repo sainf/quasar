@@ -1,4 +1,3 @@
-
 const parseArgs = require('minimist')
 
 const argv = parseArgs(process.argv.slice(2), {
@@ -81,6 +80,8 @@ async function inspect () {
   await extensionsRunner.registerExtensions(ctx)
 
   const quasarConfFile = new QuasarConfigFile(ctx)
+
+  await quasarConfFile.init()
 
   const { webpackConf } = await quasarConfFile.read()
 

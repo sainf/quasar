@@ -53,7 +53,7 @@ const objectTypes = {
   },
 
   String: {
-    props: [ 'tsInjectionPoint', 'desc', 'required', 'reactive', 'sync', 'syncable', 'link', 'values', 'default', 'examples', 'category', 'addedIn', 'transformAssetUrls', 'internal' ],
+    props: [ 'tsInjectionPoint', 'tsType', 'desc', 'required', 'reactive', 'sync', 'syncable', 'link', 'values', 'default', 'examples', 'category', 'addedIn', 'transformAssetUrls', 'internal' ],
     required: [ 'desc' ],
     isBoolean: [ 'tsInjectionPoint', 'required', 'reactive', 'sync', 'syncable', 'transformAssetUrls', 'internal' ],
     isArray: [ 'examples', 'values' ]
@@ -176,7 +176,7 @@ function isClassStyleType (type) {
   return hits === 3
 }
 
-const serializableTypes = [ 'Boolean', 'Number', 'String', 'Array', 'Object' ]
+const serializableTypes = [ 'Any', 'Boolean', 'Number', 'String', 'Array', 'Object' ]
 function isSerializable (value) {
   const types = Array.isArray(value.type) ? value.type : [ value.type ]
 

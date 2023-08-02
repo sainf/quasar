@@ -13,7 +13,7 @@ const { doneExternalWork } = require('./webpack/plugin.progress.js')
 const { webpackNames } = require('./webpack/symbols.js')
 
 const appPaths = require('./app-paths.js')
-const { log, warn, fatal, info, dot } = require('./utils/logger.js')
+const { log, warn, info, dot } = require('./utils/logger.js')
 
 const { getPackage } = require('./utils/get-package.js')
 const { renderToString } = getPackage('vue/server-renderer')
@@ -161,8 +161,8 @@ module.exports.DevServer = class DevServer {
           appUrl = cfg.build.APP_URL
           openedBrowser = true
 
-          if (cfg.__devServer.open) {
-            openBrowser({ url: appUrl, opts: cfg.__devServer.openOptions })
+          if (cfg.metaConf.devServer.open) {
+            openBrowser({ url: appUrl, opts: cfg.metaConf.devServer.openOptions })
           }
         }
       }

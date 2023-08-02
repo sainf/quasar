@@ -1,13 +1,17 @@
 
-const { readFileSync } = require('node:fs')
+import { readFileSync } from 'node:fs'
 
-const { appPkg } = require('../../app-pkg.js')
-const { getPackage } = require('../../utils/get-package.js')
-const { progress } = require('../../utils/logger.js')
+import { appPkg } from '../../app-pkg.js'
+import { getPackage } from '../../utils/get-package.js'
+import { progress } from '../../utils/logger.js'
 
-const workboxBuild = getPackage('workbox-build')
+const workboxBuild = await getPackage('workbox-build')
+const workboxMethodMap = {
+  GenerateSW: 'generateSW',
+  InjectManifest: 'injectManifest'
+}
 
-module.exports.createHeadTags = function createHeadTags (quasarConf) {
+export function createHeadTags (quasarConf) {
   const { publicPath } = quasarConf.build
   const { pwaManifest } = quasarConf.htmlVariables
   const { useCredentialsForManifestTag, injectPwaMetaTags, manifestFilename } = quasarConf.pwa
@@ -23,22 +27,22 @@ module.exports.createHeadTags = function createHeadTags (quasarConf) {
         : '')
       + '<meta name="apple-mobile-web-app-capable" content="yes">'
       + '<meta name="apple-mobile-web-app-status-bar-style" content="default">'
+      + (pwaManifest.name !== void 0 ? `<meta name="apple-mobile-web-app-title" content="${ pwaManifest.name }">` : '')
       + `<meta name="msapplication-TileImage" content="${ publicPath }icons/ms-icon-144x144.png">`
       + '<meta name="msapplication-TileColor" content="#000000">'
-      + (pwaManifest.name !== void 0 ? `<meta name="apple-mobile-web-app-title" content="${ pwaManifest.name }">` : '')
       + `<link rel="apple-touch-icon" href="${ publicPath }icons/apple-icon-120x120.png">`
       + `<link rel="apple-touch-icon" sizes="152x152" href="${ publicPath }icons/apple-icon-152x152.png">`
       + `<link rel="apple-touch-icon" sizes="167x167" href="${ publicPath }icons/apple-icon-167x167.png">`
       + `<link rel="apple-touch-icon" sizes="180x180" href="${ publicPath }icons/apple-icon-180x180.png">`
   }
   else if (typeof injectPwaMetaTags === 'function') {
-    headTags += injectPwaMetaTags()
+    headTags += injectPwaMetaTags({ publicPath, pwaManifest })
   }
 
   return headTags
 }
 
-module.exports.injectPwaManifest = function injectPwaManifest (quasarConf, ifNotAlreadyGenerated) {
+export function injectPwaManifest (quasarConf, ifNotAlreadyGenerated) {
   if (ifNotAlreadyGenerated === true && quasarConf.htmlVariables.pwaManifest !== void 0) {
     return
   }
@@ -61,8 +65,11 @@ module.exports.injectPwaManifest = function injectPwaManifest (quasarConf, ifNot
   quasarConf.htmlVariables.pwaManifest = pwaManifest
 }
 
-module.exports.buildPwaServiceWorker = async function buildPwaServiceWorker (workboxMode, workboxConfig) {
+export async function buildPwaServiceWorker (workboxMode, workboxConfig) {
   const done = progress('Compiling of the ___ with Workbox in progress...', 'Service Worker')
-  await workboxBuild[ workboxMode ](workboxConfig)
+
+  const buildMethod = workboxMethodMap[ workboxMode ]
+  await workboxBuild[ buildMethod ](workboxConfig)
+
   done('The ___ compiled with success')
 }

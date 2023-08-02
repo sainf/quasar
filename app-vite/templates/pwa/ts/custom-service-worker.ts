@@ -1,7 +1,7 @@
 /*
  * This file (which will be your service worker)
  * is picked up by the build system ONLY if
- * quasar.config file > pwa > workboxMode is set to "injectManifest"
+ * quasar.config file > pwa > workboxMode is set to "InjectManifest"
  */
 
 declare const self: ServiceWorkerGlobalScope & typeof globalThis;
@@ -28,7 +28,7 @@ if (process.env.MODE !== 'ssr' || process.env.PROD) {
   registerRoute(
     new NavigationRoute(
       createHandlerBoundToURL(process.env.PWA_FALLBACK_HTML),
-      { denylist: [/sw\.js$/, /workbox-(.)*\.js$/] }
+      { denylist: [new RegExp(process.env.PWA_SERVICE_WORKER_REGEX), /workbox-(.)*\\.js$/] }
     )
   );
 }

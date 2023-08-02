@@ -36,7 +36,7 @@ module.exports = {
 
   // add your custom rules here
   rules: {
-    'brace-style': [ 2, 'stroustrup', { 'allowSingleLine': true } ],
+    'brace-style': [ 2, 'stroustrup', { allowSingleLine: true } ],
     'prefer-const': 2,
     'prefer-promise-reject-errors': 'off',
     'multiline-ternary': 'off',
@@ -51,6 +51,7 @@ module.exports = {
     'no-console': process.env.NODE_ENV === 'production' ? 'error' : 'off',
     'no-debugger': process.env.NODE_ENV === 'production' ? 2 : 0,
     'template-curly-spacing': 'off',
+    'no-multiple-empty-lines': 'off',
 
     'import/export': 'off',
     'import/first': 'off',

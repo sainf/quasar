@@ -1,12 +1,12 @@
 
-const { writeFileSync } = require('node:fs')
-const { join } = require('node:path')
+import { writeFileSync } from 'node:fs'
+import { join } from 'node:path'
 
-const { AppBuilder } = require('../../app-builder.js')
-const { quasarPwaConfig } = require('./pwa-config.js')
-const { injectPwaManifest, buildPwaServiceWorker } = require('./utils.js')
+import { AppBuilder } from '../../app-builder.js'
+import { quasarPwaConfig } from './pwa-config.js'
+import { injectPwaManifest, buildPwaServiceWorker } from './utils.js'
 
-module.exports.QuasarModeBuilder = class QuasarModeBuilder extends AppBuilder {
+export class QuasarModeBuilder extends AppBuilder {
   async build () {
     injectPwaManifest(this.quasarConf)
 
@@ -25,9 +25,9 @@ module.exports.QuasarModeBuilder = class QuasarModeBuilder extends AppBuilder {
     )
 
     // also update ssr-builder.js when changing here
-    if (this.quasarConf.pwa.workboxMode === 'injectManifest') {
+    if (this.quasarConf.pwa.workboxMode === 'InjectManifest') {
       const esbuildConfig = await quasarPwaConfig.customSw(this.quasarConf)
-      await this.buildWithEsbuild('injectManifest Custom SW', esbuildConfig)
+      await this.buildWithEsbuild('InjectManifest Custom SW', esbuildConfig)
     }
 
     // also update ssr-builder.js when changing here

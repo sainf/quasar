@@ -1,4 +1,3 @@
-
 if (process.env.NODE_ENV === void 0) {
   process.env.NODE_ENV = 'development'
 }
@@ -214,11 +213,13 @@ async function goLive () {
     }
   })
 
+  await quasarConfFile.init()
+
   const { quasarConf } = await quasarConfFile.read()
 
   regenerateTypesFeatureFlags(quasarConf)
 
-  if (quasarConf.__vueDevtools !== false) {
+  if (quasarConf.metaConf.vueDevtools !== false) {
     await startVueDevtools()
   }
 

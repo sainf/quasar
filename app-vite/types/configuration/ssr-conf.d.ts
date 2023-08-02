@@ -15,20 +15,34 @@ export interface QuasarSsrConfiguration {
    *
    * Do NOT use index.html as name as it will mess SSR up!
    *
-   * @default offline.html
+   * @default 'offline.html'
    */
-  ssrPwaHtmlFilename?: string;
+  pwaOfflineHtmlFilename?: string;
+
+  /**
+   * Extend/configure the Workbox GenerateSW options
+   * Specify Workbox options which will be applied on top of
+   *  `pwa > extendGenerateSWOptions()`.
+   * More info: https://developer.chrome.com/docs/workbox/the-ways-of-workbox/
+   */
+  pwaExtendGenerateSWOptions?: (config: object) => void;
+
+  /**
+   * Extend/configure the Workbox InjectManifest options
+   * Specify Workbox options which will be applied on top of
+   *  `pwa > extendInjectManifestOptions()`.
+   * More info: https://developer.chrome.com/docs/workbox/the-ways-of-workbox/
+   */
+  pwaExtendInjectManifestOptions?: (config: object) => void;
 
   /**
    * Manually serialize the store state and provide it yourself
    * as window.__INITIAL_STATE__ to the client-side (through a <script> tag)
-   * (Requires @quasar/app-vite v1.0.0-beta.14+)
    */
   manualStoreSerialization?: boolean;
 
   /**
    * Manually inject the store state into ssrContext.state
-   * (Requires @quasar/app-vite v1.0.0-beta.14+)
    */
   manualStoreSsrContextInjection?: boolean;
 

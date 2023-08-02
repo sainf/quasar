@@ -1,12 +1,15 @@
 
-const mdPlugin = require('./build/md')
-const examplesPlugin = require('./build/examples')
-const manualChunks = require('./build/chunks')
+import mdPlugin from './build/md/index.js'
+import examplesPlugin from './build/examples.js'
+import manualChunks from './build/chunks.js'
 
-module.exports = ctx => ({
+export default ctx => ({
   eslint: {
     warnings: true,
-    errors: true
+    errors: true,
+    exclude: [
+      /(node_modules|ui[\\/])/
+    ]
   },
 
   boot: [
@@ -26,7 +29,11 @@ module.exports = ctx => ({
 
     env: {
       DOCS_BRANCH: 'dev',
-      SEARCH_INDEX: 'quasar-v2'
+      SEARCH_INDEX: 'quasar-v2',
+      ...(ctx.dev
+        ? { FS_QUASAR_FOLDER: new URL('../ui', import.meta.url).pathname.replace('\\', '/') }
+        : {}
+      )
     },
 
     viteVuePluginOptions: {
@@ -102,6 +109,7 @@ module.exports = ctx => ({
   },
 
   pwa: {
+    workboxMode: 'GenerateSW',
     injectPwaMetaTags: false,
     swFilename: 'service-worker.js',
 

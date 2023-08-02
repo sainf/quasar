@@ -4,23 +4,45 @@ import * as WebpackChain from "webpack-chain";
 export interface QuasarSsrConfiguration {
   /**
    * If a PWA should take over or just a SPA.
-   * When used in object form, you can specify Workbox options
-   *  which will be applied on top of `pwa > workboxOptions`.
-   *
    * @default false
    */
-  pwa?: boolean | object;
+  pwa?: boolean;
+
+  /**
+   * When using SSR+PWA, this is the name of the
+   * PWA index html file that the client-side fallbacks to.
+   * For production only.
+   *
+   * Do NOT use index.html as name as it will mess SSR up!
+   *
+   * @default 'offline.html'
+   */
+  pwaOfflineHtmlFilename?: string;
+
+  /**
+   * Extend/configure the Workbox GenerateSW options
+   * Specify Workbox options which will be applied on top of
+   *  `pwa > extendGenerateSWOptions()`.
+   * More info: https://developer.chrome.com/docs/workbox/the-ways-of-workbox/
+   */
+  pwaExtendGenerateSWOptions?: (config: object) => void;
+
+  /**
+   * Extend/configure the Workbox InjectManifest options
+   * Specify Workbox options which will be applied on top of
+   *  `pwa > extendInjectManifestOptions()`.
+   * More info: https://developer.chrome.com/docs/workbox/the-ways-of-workbox/
+   */
+  pwaExtendInjectManifestOptions?: (config: object) => void;
 
   /**
    * Manually serialize the store state and provide it yourself
    * as window.__INITIAL_STATE__ to the client-side (through a <script> tag)
-   * (Requires @quasar/app-webpack v3.5+)
    */
   manualStoreSerialization?: boolean;
 
   /**
    * Manually inject the store state into ssrContext.state
-   * (Requires @quasar/app-webpack v3.5+)
    */
   manualStoreSsrContextInjection?: boolean;
 
@@ -42,13 +64,6 @@ export interface QuasarSsrConfiguration {
    * (gets superseded if process.env.PORT is specified at runtime)
    */
   prodPort?: number;
-
-  /**
-   * Tell browser when a file from the server should expire from cache
-   * (the default value, in ms)
-   * Has effect only when server.static() is used
-   */
-  maxAge?: number;
 
   /**
    * List of middleware files in src-ssr/middlewares
