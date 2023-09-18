@@ -1,7 +1,7 @@
 const { warn, fatal } = require('./logger.js')
+const { getExternalNetworkInterface } = require('./net.js')
 
-module.exports.getExternalIP = async function () {
-  const { getExternalNetworkInterface } = require('./net.js')
+module.exports.getExternalIP = async function getExternalIP () {
   const interfaces = await getExternalNetworkInterface()
 
   if (interfaces.length === 0) {
@@ -14,7 +14,8 @@ module.exports.getExternalIP = async function () {
     return address
   }
 
-  const answer = await require('inquirer').prompt([ {
+  const { default: inquirer } = await import('inquirer')
+  const answer = await inquirer.prompt([ {
     type: 'list',
     name: 'address',
     message: 'What external IP should Quasar use?',

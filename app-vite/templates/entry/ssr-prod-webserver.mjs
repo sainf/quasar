@@ -6,15 +6,16 @@
 
 import { join, basename } from 'node:path'
 import { readFileSync } from 'node:fs'
+import { fileURLToPath } from 'node:url'
 import { renderToString } from 'vue/server-renderer'
-<% if (store && ssr.manualStoreSerialization !== true) { %>
+<% if (metaConf.hasStore && ssr.manualStoreSerialization !== true) { %>
 import serialize from 'serialize-javascript'
 <% } %>
 
-import renderTemplate from './render-template.cjs'
+import renderTemplate from './render-template.js'
 import serverEntry from './server/server-entry.<%= metaConf.ssrServerEntryPointExtension %>'
 
-import { create, listen, renderPreloadTag, serveStaticContent } from '../src-ssr/server'
+import { create, listen, renderPreloadTag, serveStaticContent } from 'app/src-ssr/server'
 import injectMiddlewares from './ssr-middlewares'
 
 const port = process.env.PORT || <%= ssr.prodPort %>
@@ -25,7 +26,7 @@ const resolveUrlPath = publicPath === '/'
   ? url => url || '/'
   : url => url ? (publicPath + url).replace(doubleSlashRE, '/') : publicPath
 
-const rootFolder = new URL('.', import.meta.url).pathname
+const rootFolder = fileURLToPath(new URL('.', import.meta.url))
 const publicFolder = join(rootFolder, 'client')
 
 const clientManifest = JSON.parse(
@@ -38,7 +39,7 @@ function resolvePublicFolder () {
   return join(publicFolder, ...arguments)
 }
 
-function renderModulesPreload (modules) {
+function renderModulesPreload (modules, opts) {
   let links = ''
   const seen = new Set()
 
@@ -59,25 +60,25 @@ function renderModulesPreload (modules) {
       if (clientManifest[filename] !== void 0) {
         for (const depFile of clientManifest[filename]) {
           if (seen.has(depFile) === false) {
-            links += renderPreloadTag(depFile)
+            links += renderPreloadTag(depFile, opts)
             seen.add(depFile)
           }
         }
       }
 
-      links += renderPreloadTag(file)
+      links += renderPreloadTag(file, opts)
     })
   })
 
   return links
 }
 
-<% if (store && ssr.manualStoreSerialization !== true) { %>
+<% if (metaConf.hasStore && ssr.manualStoreSerialization !== true) { %>
 const autoRemove = 'document.currentScript.remove()'
 
 function renderStoreState (ssrContext) {
   const nonce = ssrContext.nonce !== void 0
-    ? ' nonce="' + ssrContext.nonce + '" '
+    ? ' nonce="' + ssrContext.nonce + '"'
     : ''
 
   const state = serialize(ssrContext.state, { isJSON: true })
@@ -105,7 +106,7 @@ async function render (ssrContext) {
 
     ssrContext._meta.runtimePageContent = runtimePageContent
 
-    <% if (store && ssr.manualStoreSerialization !== true) { %>
+    <% if (metaConf.hasStore && ssr.manualStoreSerialization !== true) { %>
       if (ssrContext.state !== void 0) {
         ssrContext._meta.headTags = renderStoreState(ssrContext) + ssrContext._meta.headTags
       }
@@ -114,7 +115,7 @@ async function render (ssrContext) {
     // @vitejs/plugin-vue injects code into a component's setup() that registers
     // itself on ctx.modules. After the render, ctx.modules would contain all the
     // components that have been instantiated during this render call.
-    ssrContext._meta.endingHeadTags += renderModulesPreload(ssrContext.modules)
+    ssrContext._meta.endingHeadTags += renderModulesPreload(ssrContext.modules, { ssrContext })
 
     return renderTemplate(ssrContext)
   }

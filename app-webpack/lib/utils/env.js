@@ -3,23 +3,55 @@ const { join, isAbsolute } = require('node:path')
 const { parse: dotEnvParse } = require('dotenv')
 const { expand: dotEnvExpand } = require('dotenv-expand')
 
-const appPaths = require('../app-paths.js')
-let cachedFileEnv = null
+const { encodeForDiff } = require('./encode-for-diff.js')
+
+const readFileEnvCacheKey = 'readFileEnv'
 
 /**
  * Get the raw env definitions from the host
  * project env files.
  */
-module.exports.readFileEnv = function readFileEnv ({
-  quasarMode,
-  buildType,
-  envFolder = appPaths.appDir,
-  envFiles = []
-}) {
-  if (cachedFileEnv !== null) {
-    return cachedFileEnv
+module.exports.readFileEnv = function readFileEnv ({ ctx, quasarConf }) {
+  const { cacheProxy } = ctx
+
+  const opts = {
+    envFolder: quasarConf.build.envFolder,
+    envFiles: quasarConf.build.envFiles
   }
 
+  const configHash = encodeForDiff(opts)
+  const cache = cacheProxy.getRuntime(readFileEnvCacheKey, () => ({}))
+
+  if (cache.configHash !== configHash) {
+    const result = getFileEnvResult(ctx.appPaths, {
+      ...opts,
+      quasarMode: ctx.modeName,
+      buildType: ctx.dev ? 'dev' : 'prod'
+    })
+
+    cacheProxy.setRuntime(readFileEnvCacheKey, {
+      configHash,
+      result: {
+        ...result,
+        envFromCache: true
+      }
+    })
+
+    return result
+  }
+
+  return cache.result
+}
+
+function getFileEnvResult (
+  appPaths,
+  {
+    quasarMode,
+    buildType,
+    envFolder = appPaths.appDir,
+    envFiles = []
+  }
+) {
   const fileList = [
     // .env
     // loaded in all cases
@@ -85,12 +117,6 @@ module.exports.readFileEnv = function readFileEnv ({
 
   const { parsed: fileEnv } = dotEnvExpand({ parsed: env })
 
-  cachedFileEnv = {
-    fileEnv,
-    usedEnvFiles,
-    envFromCache: true
-  }
-
   return {
     fileEnv,
     usedEnvFiles,
@@ -100,7 +126,7 @@ module.exports.readFileEnv = function readFileEnv ({
 
 /**
  * Get the final env definitions to supply to
- * the build system (Vite or Esbuild).
+ * the build system (Webpack or Esbuild).
  */
 module.exports.getBuildSystemDefine = function getBuildSystemDefine ({
   fileEnv = {},

@@ -96,6 +96,12 @@ function getTypeVal (def) {
     return 'QNotifyCreateOptions | string'
   }
 
+  // Special check to avoid huge changes
+  // Fixes https://github.com/quasarframework/quasar/issues/16204
+  if (Array.isArray(def.type) && def.tsType === 'NamedColor') {
+    return def.type.map(type => `${ def.tsType }${ type === 'Array' ? '[]' : '' }`).join(' | ')
+  }
+
   return Array.isArray(def.type)
     ? def.tsType || def.type.map(type => convertTypeVal(type, def)).join(' | ')
     : convertTypeVal(def.type, def)
@@ -395,6 +401,8 @@ function getIndexDts (apis) {
 
       write(directives, comments)
       writeLine(directives, `v${ typeName }: ${ typeValue }`)
+
+      writeLine(quasarTypeContents, `export const ${ typeName }: ${ typeValue }`)
 
       // Nothing else to do for directives
       return

@@ -10,7 +10,7 @@ const argv = parseArgs(process.argv.slice(2), {
 const extId = argv._[ 0 ]
 const cmd = argv._[ 1 ]
 
-if (!extId && argv.help) {
+if (!extId || argv.help) {
   console.log(`
   Description
     Run app extension provided commands
@@ -44,11 +44,20 @@ function getArgv (argv) {
   }
 }
 
-async function run () {
-  const { Extension } = require('../app-extension/Extension.js')
-  const extension = new Extension(extId)
+const { getCtx } = require('../utils/get-ctx.js')
+const { appExt } = getCtx()
 
-  const hooks = await extension.run({})
+const ext = appExt.getInstance(extId)
+
+if (ext === void 0) {
+  warn()
+  warn(`"${ extId }" app extension is not installed`)
+  warn()
+  process.exit(1)
+}
+
+async function run () {
+  const hooks = await ext.run()
 
   const list = () => {
     if (Object.keys(hooks.commands).length === 0) {

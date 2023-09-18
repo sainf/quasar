@@ -3,20 +3,15 @@ import compileTemplate from 'lodash/template.js'
 import { minify } from 'html-minifier'
 
 const absoluteUrlRE = /^(https?:\/\/|\/)/i
-const entryScript = '<script type="module" src="/.quasar/client-entry.js"></script>'
+const ssrInterpolationsRE = /{{([\s\S]+?)}}/g
+
+const htmlStartTagRE = /(<html[^>]*)(>)/i
+const headStartTagRE = /(<head[^>]*)(>)/i
+const headEndRE = /(<\/head>)/i
+const bodyStartTagRE = /(<body[^>]*)(>)/i
 
 export const entryPointMarkup = '<!-- quasar:entry-point -->'
 export const attachMarkup = '<div id="q-app"></div>'
-
-const minifyOptions = {
-  removeComments: true,
-  collapseWhitespace: true,
-  removeAttributeQuotes: true,
-  collapseBooleanAttributes: true,
-  removeScriptTypeAttributes: true
-  // more options:
-  // https://github.com/kangax/html-minifier#options-quick-reference
-}
 
 function injectPublicPath (html, publicPath) {
   return html.replace(
@@ -27,10 +22,10 @@ function injectPublicPath (html, publicPath) {
   )
 }
 
-function injectRuntimeInterpolation (html) {
+function injectSsrRuntimeInterpolation (html) {
   return html
     .replace(
-      /(<html[^>]*)(>)/i,
+      htmlStartTagRE,
       (found, start, end) => {
         let matches
 
@@ -44,21 +39,21 @@ function injectRuntimeInterpolation (html) {
           start = start.replace(matches[ 0 ], '')
         }
 
-        return `${ start } {{ _meta.htmlAttrs }}${ end }`
+        return `${ start } {{ ssrContext._meta.htmlAttrs }}${ end }`
       }
     )
     .replace(
-      /(<head[^>]*)(>)/i,
-      (_, start, end) => `${ start }${ end }{{ _meta.headTags }}`
+      headStartTagRE,
+      (_, start, end) => `${ start }${ end }{{ ssrContext._meta.headTags }}`
     )
     .replace(
-      /(<\/head>)/i,
-      (_, tag) => `{{ _meta.endingHeadTags || '' }}${ tag }`
+      headEndRE,
+      (_, tag) => `{{ ssrContext._meta.endingHeadTags || '' }}${ tag }`
     )
     .replace(
-      /(<body[^>]*)(>)/i,
+      bodyStartTagRE,
       (found, start, end) => {
-        let classes = '{{ _meta.bodyClasses }}'
+        let classes = '{{ ssrContext._meta.bodyClasses }}'
 
         const matches = found.match(/\sclass\s*=\s*['"]([^'"]*)['"]/i)
 
@@ -69,31 +64,47 @@ function injectRuntimeInterpolation (html) {
           start = start.replace(matches[ 0 ], '')
         }
 
-        return `${ start } class="${ classes.trim() }" {{ _meta.bodyAttrs }}${ end }{{ _meta.bodyTags }}`
+        return `${ start } class="${ classes.trim() }" {{ ssrContext._meta.bodyAttrs }}${ end }{{ ssrContext._meta.bodyTags }}`
       }
     )
 }
 
+function injectVueDevtools (html, { host, port }, nonce = '') {
+  const scripts = (
+    `<script${ nonce }>window.__VUE_DEVTOOLS_HOST__='${ host }';window.__VUE_DEVTOOLS_PORT__='${ port }';</script>`
+    + `\n<script src="http://${ host }:${ port }"></script>`
+  )
+
+  return html.replace(
+    headEndRE,
+    (_, tag) => `${ scripts }${ tag }`
+  )
+}
+
 export function transformHtml (template, quasarConf) {
-  const { publicPath } = quasarConf.build
   const compiled = compileTemplate(template)
 
   let html = compiled(quasarConf.htmlVariables)
 
+  // should be dev only
+  if (quasarConf.metaConf.vueDevtools !== false) {
+    html = injectVueDevtools(html, quasarConf.metaConf.vueDevtools)
+  }
+
   html = html.replace(
     entryPointMarkup,
     (quasarConf.ctx.mode.ssr === true ? entryPointMarkup : attachMarkup)
-      + entryScript
+      + quasarConf.metaConf.entryScriptTag
   )
 
   // publicPath will be handled by Vite middleware
   // if src/href are not relative, which is what we need
-  if (publicPath) {
+  if (quasarConf.build.publicPath) {
     html = injectPublicPath(html, '/')
   }
 
   if (quasarConf.ctx.mode.ssr !== true && quasarConf.build.minify !== false) {
-    html = minify(html, minifyOptions)
+    html = minify(html, quasarConf.build.htmlMinifyOptions)
   }
 
   return html
@@ -110,7 +121,7 @@ export function transformProdSsrPwaOfflineHtml (html, quasarConf) {
   )
 
   if (quasarConf.build.minify !== false) {
-    html = minify(html, minifyOptions)
+    html = minify(html, quasarConf.build.htmlMinifyOptions)
   }
 
   return html
@@ -134,14 +145,18 @@ export function getDevSsrTemplateFn (template, quasarConf) {
   // publicPath will be handled by Vite middleware
   // if src/href are not relative, which is what we need
   html = injectPublicPath(html, '/')
-  html = injectRuntimeInterpolation(html)
+  html = injectSsrRuntimeInterpolation(html)
+
+  if (quasarConf.metaConf.vueDevtools !== false) {
+    html = injectVueDevtools(html, quasarConf.metaConf.vueDevtools, '{{ ssrContext.nonce ? \' nonce="\' + ssrContext.nonce + \'"\' : \'\' }}')
+  }
 
   html = html.replace(
     entryPointMarkup,
-    `${ entryPointMarkup }${ entryScript }`
+    `${ entryPointMarkup }${ quasarConf.metaConf.entryScriptTag }`
   )
 
-  return compileTemplate(html, { interpolate: /{{([\s\S]+?)}}/g })
+  return compileTemplate(html, { interpolate: ssrInterpolationsRE, variable: 'ssrContext' })
 }
 
 /**
@@ -156,19 +171,19 @@ export function getDevSsrTemplateFn (template, quasarConf) {
  * const html = fn(ssrContext)
  */
 export function getProdSsrTemplateFn (viteHtmlContent, quasarConf) {
-  let html = injectRuntimeInterpolation(viteHtmlContent)
+  let html = injectSsrRuntimeInterpolation(viteHtmlContent)
 
   html = html.replace(
     entryPointMarkup,
-    '<div id="q-app">{{ _meta.runtimePageContent }}</div>'
+    '<div id="q-app">{{ ssrContext._meta.runtimePageContent }}</div>'
   )
 
   if (quasarConf.build.minify !== false) {
     html = minify(html, {
-      ...minifyOptions,
-      ignoreCustomFragments: [ /{{([\s\S]+?)}}/ ]
+      ...quasarConf.build.htmlMinifyOptions,
+      ignoreCustomFragments: [ ssrInterpolationsRE ]
     })
   }
 
-  return compileTemplate(html, { interpolate: /{{([\s\S]+?)}}/g })
+  return compileTemplate(html, { interpolate: ssrInterpolationsRE, variable: 'ssrContext' })
 }

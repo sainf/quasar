@@ -5,9 +5,6 @@ const fs = require('node:fs')
 const fse = require('fs-extra')
 
 const { log, warn } = require('../utils/logger.js')
-const appPaths = require('../app-paths.js')
-const storeProvider = require('../utils/store-provider.js')
-const { hasTypescript } = require('../utils/has-typescript.js')
 
 const argv = parseArgs(process.argv.slice(2), {
   alias: {
@@ -15,13 +12,10 @@ const argv = parseArgs(process.argv.slice(2), {
     f: 'format'
   },
   boolean: [ 'h' ],
-  string: [ 'f' ],
-  default: {
-    f: hasTypescript ? 'ts-composition' : 'default'
-  }
+  string: [ 'f' ]
 })
 
-function showHelp () {
+function showHelp (returnCode) {
   console.log(`
   Description
     Quickly scaffold files.
@@ -62,17 +56,17 @@ function showHelp () {
                              * ts-class - [DEPRECATED] TS class style syntax
                              * ts - Plain TS template (for boot, store, and ssrmiddleware files)
   `)
-  process.exit(0)
+  process.exit(returnCode)
 }
 
 function showError (message, param) {
   console.log()
   warn(`${ message }: ${ param }`)
-  showHelp()
+  showHelp(1)
 }
 
 if (argv.help) {
-  showHelp()
+  showHelp(0)
 }
 
 console.log()
@@ -80,8 +74,18 @@ console.log()
 if (argv._.length < 2) {
   console.log()
   warn(`Wrong number of parameters (${ argv._.length }).`)
-  showHelp()
+  showHelp(1)
   process.exit(1)
+}
+
+const { getCtx } = require('../utils/get-ctx.js')
+const { appPaths, cacheProxy } = getCtx()
+
+const storeProvider = cacheProxy.getModule('storeProvider')
+const hasTypescript = cacheProxy.getModule('hasTypescript')
+
+if (!argv.format) {
+  argv.format = argv.f = hasTypescript ? 'ts-composition' : 'default'
 }
 
 /** @type {string[]} */
@@ -153,7 +157,7 @@ function createFile (asset, file) {
   )
 }
 
-const resolveWithExtension = (path) =>
+const resolveWithExtension = path =>
   path + (fs.existsSync(appPaths.resolve.app(path + '.ts')) ? '.ts' : '.js')
 
 const pathList = {
@@ -198,37 +202,41 @@ const mapping = {
 
 const asset = mapping[ type ]
 
-if (asset.install) {
-  const folder = appPaths.resolve.app(asset.folder)
+async function run () {
+  if (asset.install) {
+    const folder = appPaths.resolve.app(asset.folder)
 
-  if (!storeProvider.isInstalled) {
-    storeProvider.install()
-  }
+    if (!storeProvider.isInstalled) {
+      await storeProvider.install()
+    }
 
-  if (!fs.existsSync(folder)) {
-    fse.ensureDir(folder)
-    fse.copy(
-      appPaths.resolve.cli(`templates/store/${ storeProvider.name }/${ format }`),
-      folder,
-      err => {
-        if (err) {
-          console.warn(err)
-          warn(`Could not generate ${ asset.folder }.`, 'FAIL')
-          return
+    if (!fs.existsSync(folder)) {
+      fse.ensureDir(folder)
+      fse.copy(
+        appPaths.resolve.cli(`templates/store/${ storeProvider.name }/${ format }`),
+        folder,
+        err => {
+          if (err) {
+            console.warn(err)
+            warn(`Could not generate ${ asset.folder }.`, 'FAIL')
+            return
+          }
+
+          log(`Generated ${ asset.folder }`)
+          log()
         }
-
-        log(`Generated ${ asset.folder }`)
-        log()
-      }
-    )
+      )
+    }
   }
+
+  names.forEach(name => {
+    const hasExtension = !asset.ext || (asset.ext && name.endsWith(asset.ext))
+    const ext = hasExtension ? '' : asset.ext
+
+    const file = appPaths.resolve.app(path.join(asset.folder, name + ext))
+
+    createFile(asset, file)
+  })
 }
 
-names.forEach(name => {
-  const hasExtension = !asset.ext || (asset.ext && name.endsWith(asset.ext))
-  const ext = hasExtension ? '' : asset.ext
-
-  const file = appPaths.resolve.app(path.join(asset.folder, name + ext))
-
-  createFile(asset, file)
-})
+run()

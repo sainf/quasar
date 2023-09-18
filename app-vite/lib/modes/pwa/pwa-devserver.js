@@ -20,25 +20,35 @@ export class QuasarModeDevserver extends AppDevserver {
 
     // also update ssr-devserver.js when changing here
     this.registerDiff('pwaManifest', quasarConf => [
+      quasarConf.pwa.manifestFilename,
+      quasarConf.pwa.extendManifestJson
+    ])
+
+    // also update ssr-devserver.js when changing here
+    this.registerDiff('vitePWA', (quasarConf, diffMap) => [
       quasarConf.pwa.injectPwaMetaTags,
       quasarConf.pwa.manifestFilename,
       quasarConf.pwa.extendManifestJson,
-      quasarConf.pwa.useCredentialsForManifestTag
+      quasarConf.pwa.useCredentialsForManifestTag,
+      quasarConf.pwa.swFilename,
+
+      // extends 'vite' diff
+      ...diffMap.vite(quasarConf)
     ])
 
     // also update ssr-devserver.js when changing here
     this.registerDiff('pwaServiceWorker', quasarConf => [
       quasarConf.pwa.workboxMode,
-      quasarConf.pwa.precacheFromPublicFolder,
       quasarConf.pwa.swFilename,
-      quasarConf.pwa[
-        quasarConf.pwa.workboxMode === 'GenerateSW'
-          ? 'extendGenerateSWOptions'
-          : 'extendInjectManifestOptions'
-      ],
-      quasarConf.pwa.workboxMode === 'InjectManifest'
-        ? [ quasarConf.build.env, quasarConf.build.rawDefine ]
-        : ''
+      quasarConf.build,
+      quasarConf.pwa.workboxMode === 'GenerateSW'
+        ? quasarConf.pwa.extendGenerateSWOptions
+        : [
+            quasarConf.pwa.extendInjectManifestOptions,
+            quasarConf.pwa.swFilename,
+            quasarConf.pwa.extendPWACustomSWConf,
+            quasarConf.sourceFiles.pwaServiceWorker
+          ]
     ])
 
     // also update ssr-devserver.js when changing here
@@ -61,7 +71,7 @@ export class QuasarModeDevserver extends AppDevserver {
     }
 
     // also update ssr-devserver.js when changing here
-    if (diff([ 'vite', 'pwaFilenames' ], quasarConf) === true) {
+    if (diff('vitePWA', quasarConf) === true) {
       return queue(() => this.#runVite(quasarConf, diff('viteUrl', quasarConf)))
     }
   }
@@ -126,12 +136,12 @@ export class QuasarModeDevserver extends AppDevserver {
     if (quasarConf.pwa.workboxMode === 'InjectManifest') {
       const esbuildConfig = await quasarPwaConfig.customSw(quasarConf)
       await this.watchWithEsbuild('InjectManifest Custom SW', esbuildConfig, () => {
-        queue(() => buildPwaServiceWorker(quasarConf.pwa.workboxMode, workboxConfig))
+        queue(() => buildPwaServiceWorker(quasarConf, workboxConfig))
       }).then(esbuildCtx => {
         this.#pwaServiceWorkerWatcher = { close: esbuildCtx.dispose }
       })
     }
 
-    await buildPwaServiceWorker(quasarConf.pwa.workboxMode, workboxConfig)
+    await buildPwaServiceWorker(quasarConf, workboxConfig)
   }
 }

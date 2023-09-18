@@ -1,5 +1,4 @@
-import { Configuration as WebpackConfiguration } from "webpack";
-import * as WebpackChain from "webpack-chain";
+import { BuildOptions as EsbuildConfiguration } from "esbuild";
 
 export interface QuasarSsrConfiguration {
   /**
@@ -38,11 +37,13 @@ export interface QuasarSsrConfiguration {
   /**
    * Manually serialize the store state and provide it yourself
    * as window.__INITIAL_STATE__ to the client-side (through a <script> tag)
+   * @default false
    */
   manualStoreSerialization?: boolean;
 
   /**
    * Manually inject the store state into ssrContext.state
+   * @default false
    */
   manualStoreSsrContextInjection?: boolean;
 
@@ -50,18 +51,21 @@ export interface QuasarSsrConfiguration {
    * Manually handle the store hydration instead of letting Quasar CLI do it.
    * For Pinia: store.state.value = window.__INITIAL_STATE__
    * For Vuex: store.replaceState(window.__INITIAL_STATE__)
+   * @default false
    */
   manualStoreHydration?: boolean;
 
   /**
    * Manually call $q.onSSRHydrated() instead of letting Quasar CLI do it.
    * This announces that client-side code should takeover.
+   * @default false
    */
   manualPostHydrationTrigger?: boolean;
 
   /**
    * The default port (3000) that the production server should use
    * (gets superseded if process.env.PORT is specified at runtime)
+   * @default 3000
    */
   prodPort?: number;
 
@@ -77,14 +81,8 @@ export interface QuasarSsrConfiguration {
   extendPackageJson?: (pkg: { [index in string]: any }) => void;
 
   /**
-   * Webpack config object for the Webserver
-   * which includes the SSR middleware
+   * Extend the Esbuild config that is used for the SSR webserver
+   * (which includes the SSR middlewares)
    */
-  extendWebpackWebserver?: (config: WebpackConfiguration) => void;
-
-  /**
-   * Equivalent to `extendWebpackWebserver()` but uses `webpack-chain` instead.
-   * Handles the Webserver webpack config ONLY which includes the SSR middleware
-   */
-  chainWebpackWebserver?: (chain: WebpackChain) => void;
+  extendSSRWebserverConf?: (config: EsbuildConfiguration) => void;
 }

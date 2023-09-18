@@ -126,6 +126,13 @@ For a full list of our `wonderful` people who make Quasar happen, visit the [Bac
 * When QDrawer is set into overlay mode, **it will force it to go into fixed position**, regardless if QLayout's "view" prop is configured with  "l/r" or "L/R". Also, **if on iOS platform and QLayout is containerized**, the fixed position will also be forced upon QDrawer due to platform limitations that cannot be overcome.
 :::
 
+::: details Details container title
+For a full list of our `wonderful` people who make Quasar happen, visit the [Backers](https://github.com/quasarframework/quasar/blob/dev/backers.md) page.
+<br><br>
+* It is important that you specify all sections of a QLayout, even if you don't use them. For example, even if you don't use footer or right side drawer, still specify them within your QLayout's `view` prop.
+* When QDrawer is set into overlay mode, **it will force it to go into fixed position**, regardless if QLayout's "view" prop is configured with  "l/r" or "L/R". Also, **if on iOS platform and QLayout is containerized**, the fixed position will also be forced upon QDrawer due to platform limitations that cannot be overcome.
+:::
+
 ## Call to action button
 
 <q-btn icon-right="launch" label="Layout Builder" href="/layout-builder" target="_blank" />
@@ -139,7 +146,7 @@ For a full list of our `wonderful` people who make Quasar happen, visit the [Bac
 ## Inline example
 
 ```js
-module.exports = function (ctx) { // can be async too
+export default function (ctx) { // can be async too
   console.log(ctx)
 
   // Example output on console:
@@ -165,6 +172,16 @@ module.exports = function (ctx) { // can be async too
 
 ```bash
 /home/your_user/bin:/home/your_user/.local/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/usr/games:/usr/local/games:/home/your_user/Android/Sdk/tools:/home/your_user/Android/Sdk/platform-tools
+```
+
+``` diff
+// diff
+{
+  min: 0
+- super: false
++ super: true
+  max: 100
+}
 ```
 
 ## Tree

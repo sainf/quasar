@@ -99,6 +99,7 @@ export interface QuasarPwaConfiguration {
 
   /**
    * Does the PWA manifest tag requires crossorigin auth?
+   * @default false
    */
   useCredentialsForManifestTag?: boolean;
 
@@ -109,7 +110,7 @@ export interface QuasarPwaConfiguration {
   injectPwaMetaTags?: boolean | ((injectParam: InjectPwaMetaTagsParams) => string);
 
   /**
-   * Extend the esbuild config that is used for the custom service worker
+   * Extend the Esbuild config that is used for the custom service worker
    * (if using it through workboxMode: 'InjectManifest')
    */
   extendPWACustomSWConf?: (config: EsbuildConfiguration) => void;

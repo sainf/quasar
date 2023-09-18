@@ -1,12 +1,14 @@
-const { cliPkg } = require('../app-pkg.js')
+const { readFileSync } = require('node:fs')
+const { join } = require('node:path')
 
-console.log()
 console.log(
-  require('node:fs').readFileSync(
-    require('node:path').join(__dirname, '../../assets/logo.art'),
+  readFileSync(
+    join(__dirname, '../../assets/logo.art'),
     'utf8'
   )
 )
+
+const { cliPkg } = require('../utils/cli-runtime.js')
 
 if (process.env.QUASAR_CLI_VERSION) {
   console.log('  Running @quasar/cli v' + process.env.QUASAR_CLI_VERSION)
@@ -27,17 +29,16 @@ console.log(`
   Commands
     dev, d        Start a dev server for your App
     build, b      Build your app for production
-    clean, c      Clean all build artifacts
+    clean, c      Clean dev/build cache, /dist folder & entry points
     new, n        Quickly scaffold page/layout/component/... vue file
     mode, m       Add/remove Quasar Modes for your App
-    inspect       Inspect generated Webpack config
+    inspect       Inspect Webpack/Esbuild configs used under the hood
+                    - keeps into account your quasar.config file
+                      and your installed App Extensions
     ext, e        Manage Quasar App Extensions
     run, r        Run specific command provided by an installed
                     Quasar App Extension
     describe      Describe a Quasar API (component)
-    test, t       Run @quasar/testing App Extension command
-                    - requires @quasar/testing App Extension to be installed
-                    - this is an alias command for convenience purposes
     info, i       Display info about your machine and your App
     help, h       Displays this message
 

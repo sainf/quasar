@@ -1,9 +1,7 @@
 const fs = require('node:fs')
 const path = require('node:path')
-const open = require('open')
-const { execSync } = require('child_process')
+const { execSync } = require('node:child_process')
 
-const appPaths = require('../app-paths.js')
 const { warn, fatal } = require('./logger.js')
 
 function findXcodeWorkspace (folder) {
@@ -18,7 +16,7 @@ function findXcodeWorkspace (folder) {
   }
 }
 
-function runMacOS (mode, target) {
+function runMacOS ({ mode, target, appPaths, open }) {
   if (target === 'ios') {
     const folder = mode === 'cordova'
       ? appPaths.resolve.cordova('platforms/ios')
@@ -61,7 +59,7 @@ function getLinuxPath (bin) {
   }
 }
 
-function runLinux (mode, bin, target) {
+function runLinux ({ mode, bin, target, appPaths, open }) {
   if (target === 'android') {
     const studioPath = getLinuxPath(bin)
     if (studioPath) {
@@ -114,7 +112,7 @@ function getWindowsPath (bin) {
   }
 }
 
-function runWindows (mode, bin, target) {
+function runWindows ({ mode, bin, target, appPaths, open }) {
   if (target === 'android') {
     const studioPath = getWindowsPath(bin)
     if (studioPath) {
@@ -144,7 +142,7 @@ function runWindows (mode, bin, target) {
   process.exit(1)
 }
 
-module.exports.openIDE = function openIDE (mode, bin, target, dev) {
+module.exports.openIDE = async function openIDE ({ mode, bin, target, dev, appPaths }) {
   console.log()
   console.log(' ⚠️  ')
   console.log(` ⚠️  Opening ${ target === 'ios' ? 'XCode' : 'Android Studio' } IDE...`)
@@ -160,20 +158,22 @@ module.exports.openIDE = function openIDE (mode, bin, target, dev) {
 
   if (target === 'android') {
     console.log(' ⚠️  ')
-    console.log(' ⚠️  DO NOT upgrade Gradle or any other deps as Android Studio will suggest.')
+    console.log(' ⚠️  DO NOT upgrade Gradle or any other deps if Android Studio will suggest.')
     console.log(' ⚠️  If you encounter any IDE errors then click on File > Invalidate caches and restart.')
   }
 
   console.log(' ⚠️  ')
   console.log()
 
+  const { default: open } = await import('open')
+
   switch (process.platform) {
     case 'darwin':
-      return runMacOS(mode, target)
+      return runMacOS({ mode, target, appPaths, open })
     case 'linux':
-      return runLinux(mode, bin, target)
+      return runLinux({ mode, bin, target, appPaths, open })
     case 'win32':
-      return runWindows(mode, bin, target)
+      return runWindows({ mode, bin, target, appPaths, open })
     default:
       fatal('Unsupported host OS for opening the IDE')
   }

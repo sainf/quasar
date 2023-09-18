@@ -1,5 +1,6 @@
 import fs from 'node:fs'
 import { join, resolve } from 'node:path'
+import { fileURLToPath } from 'node:url'
 import fg from 'fast-glob'
 import md from 'markdown-ast'
 
@@ -11,7 +12,7 @@ const apiRE = /<doc-api .*file="([^"]+)".*\n/
 const installationRE = /<doc-installation /
 const hiddenPageRE = /[\\/]__[a-zA-Z0-9_-]+\.md$/
 
-const thisFolder = new URL('.', import.meta.url).pathname
+const thisFolder = fileURLToPath(new URL('.', import.meta.url))
 
 const mdPagesDir = join(thisFolder, '../src/pages')
 const mdPagesLen = mdPagesDir.length + 1
@@ -295,6 +296,13 @@ const run = () => {
 
   const fileName = resolve(thisFolder, '../dist/indices.json')
   const content = JSON.stringify(entries, null, 2)
+
+  try {
+    // create the folder if it doesn't exists yet
+    fs.mkdirSync(resolve(thisFolder, '../dist'))
+  }
+  catch (_) {}
+
   fs.writeFileSync(fileName, content, () => {})
 
   const end = new Date().getTime()

@@ -2,15 +2,11 @@
 import { join } from 'node:path'
 import { merge } from 'webpack-merge'
 
-import appPaths from '../../app-paths.js'
-import { appPkg } from '../../app-pkg.js'
 import { log, warn, progress } from '../../utils/logger.js'
 import { AppBuilder } from '../../app-builder.js'
 import { quasarElectronConfig } from './electron-config.js'
-import { nodePackager } from '../../utils/node-packager.js'
 import { getPackageJson } from '../../utils/get-package-json.js'
 import { getFixedDeps } from '../../utils/get-fixed-deps.js'
-import { getBundler } from './bundler.js'
 
 export class QuasarModeBuilder extends AppBuilder {
   async build () {
@@ -46,10 +42,11 @@ export class QuasarModeBuilder extends AppBuilder {
   }
 
   async #writePackageJson () {
+    const { appPkg } = this.ctx.pkg
     const pkg = merge({}, appPkg)
 
     if (pkg.dependencies) {
-      pkg.dependencies = getFixedDeps(pkg.dependencies)
+      pkg.dependencies = getFixedDeps(pkg.dependencies, this.ctx.appPaths.appDir)
       delete pkg.dependencies[ '@quasar/extras' ]
     }
 
@@ -74,14 +71,16 @@ export class QuasarModeBuilder extends AppBuilder {
       '.npmrc',
       'package-lock.json',
       '.yarnrc',
-      'yarn.lock'
+      'yarn.lock',
+      'pnpm-lock.yaml',
+      'bun.lockb'
     ].map(filename => ({
       from: filename,
       to: './UnPackaged'
     }))
 
     patterns.push({
-      from: appPaths.resolve.electron('icons'),
+      from: this.ctx.appPaths.resolve.electron('icons'),
       to: './UnPackaged/icons'
     })
 
@@ -89,6 +88,9 @@ export class QuasarModeBuilder extends AppBuilder {
   }
 
   async #packageFiles () {
+    const { appPaths, cacheProxy } = this.ctx
+
+    const nodePackager = await cacheProxy.getModule('nodePackager')
     nodePackager.install({
       cwd: join(this.quasarConf.build.distDir, 'UnPackaged'),
       params: this.quasarConf.electron.unPackagedInstallParams,
@@ -115,7 +117,10 @@ export class QuasarModeBuilder extends AppBuilder {
 
     const bundlerName = this.quasarConf.electron.bundler
     const bundlerConfig = this.quasarConf.electron[ bundlerName ]
-    const bundler = await getBundler(bundlerName)
+
+    const { getBundler } = await cacheProxy.getModule('electron')
+    const bundlerResult = await getBundler(bundlerName)
+    const bundler = bundlerResult.default || bundlerResult
     const pkgName = `electron-${ bundlerName }`
 
     return new Promise((resolve, reject) => {
@@ -124,7 +129,7 @@ export class QuasarModeBuilder extends AppBuilder {
       const bundlePromise = bundlerName === 'packager'
         ? bundler({
           ...bundlerConfig,
-          electronVersion: getPackageJson('electron').version
+          electronVersion: getPackageJson('electron', appPaths.appDir).version
         })
         : bundler.build(bundlerConfig)
 

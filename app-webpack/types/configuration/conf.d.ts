@@ -1,4 +1,5 @@
 import { QuasarAnimations, QuasarFonts, QuasarIconSets } from "quasar";
+import { QuasarEslintConfiguration } from "./eslint";
 import { Configuration as WebpackDevServerConfiguration } from "webpack-dev-server";
 import { Options as OpenOptions } from "open";
 import { QuasarBootConfiguration } from "./boot";
@@ -10,18 +11,13 @@ import { QuasarFrameworkConfiguration } from "./framework-conf";
 import { QuasarPwaConfiguration } from "./pwa-conf";
 import { QuasarSsrConfiguration } from "./ssr-conf";
 import { QuasarMobileConfiguration } from "./mobile-conf";
+import { QuasarBexConfiguration } from "./bex";
+
+type DevServerOptions = Omit<WebpackDevServerConfiguration, "open"> & {
+  open?: Omit<OpenOptions, "wait"> | boolean;
+};
 
 type QuasarAnimationsConfiguration = "all" | QuasarAnimations[];
-
-interface QuasarDevServerConfiguration
-  extends Omit<WebpackDevServerConfiguration, "open"> {
-  open?: Omit<OpenOptions, "wait"> | boolean;
-
-  /**
-   * Automatically open remote Vue Devtools when running in development mode.
-   */
-  vueDevtools?: boolean;
-}
 
 /**
  * Use this property to change the default names of some files of your website/app if you have to.
@@ -34,12 +30,13 @@ interface QuasarDevServerConfiguration
  *  router: 'src/router/index',
  *  store: 'src/stores/index', // for Pinia
  *  // store: 'src/store/index' // for Vuex
- *  indexHtmlTemplate: 'src/index.template.html',
+ *  indexHtmlTemplate: 'index.html',
  *  pwaRegisterServiceWorker: 'src-pwa/register-service-worker',
  *  pwaServiceWorker: 'src-pwa/custom-service-worker',
  *  pwaManifestFile: 'src-pwa/manifest.json',
  *  electronMain: 'src-electron/electron-main',
  *  electronPreload: 'src-electron/electron-preload'
+ *  bexManifestFile: 'src-bex/manifest.json
  * }
  * ```
  */
@@ -53,9 +50,13 @@ interface QuasarSourceFilesConfiguration {
   pwaManifestFile?: string;
   electronMain?: string;
   electronPreload?: string;
+  bexManifestFile?: string;
 }
 
 interface BaseQuasarConfiguration {
+  /** Options with which Quasar CLI will use ESLint */
+  eslint?: QuasarEslintConfiguration;
+
   /** Boot files to load. Order is important. */
   boot?: QuasarBootConfiguration;
   /**
@@ -84,8 +85,8 @@ interface BaseQuasarConfiguration {
   framework?: QuasarFrameworkConfiguration;
   /**
    * What [CSS animations](/options/animations) to import.
-   * Example: [ 'bounceInLeft', 'bounceOutRight' ]
-   * */
+   * @example: [ 'bounceInLeft', 'bounceOutRight' ]
+   */
   animations?: QuasarAnimationsConfiguration | 'all';
   /**
    * Webpack dev server [options](https://webpack.js.org/configuration/dev-server/).
@@ -94,7 +95,7 @@ interface BaseQuasarConfiguration {
    * Note: if you're proxying the development server (i.e. using a cloud IDE),
    * set the `public` setting to your public application URL.
    */
-  devServer?: QuasarDevServerConfiguration;
+  devServer?: DevServerOptions;
   /** Build configuration options. */
   build?: QuasarBuildConfiguration;
   /** Change the default name of parts of your app. */
@@ -120,4 +121,7 @@ export type QuasarConf = BaseQuasarConfiguration & QuasarMobileConfiguration & {
 } & {
   /** Electron specific [config](/quasar-cli/developing-electron-apps/configuring-electron). */
   electron?: QuasarElectronConfiguration;
+} & {
+  /** Bex specific [config](/quasar-cli/developing-bex/configuring-bex). */
+  bex?: QuasarBexConfiguration;
 };

@@ -1,28 +1,69 @@
-const fs = require('node:fs')
+const { existsSync, readFileSync } = require('node:fs')
+const { relative, sep } = require('node:path')
 
 const { warn } = require('./logger.js')
-const appPaths = require('../app-paths.js')
+const { entryPointMarkup, attachMarkup } = require('../utils/html-template.js')
 
-module.exports.appFilesValidations = function appFilesValidations (cfg) {
-  let error = false
+function getRelativePath (appPaths, file) {
+  return sep + relative(appPaths.appDir, file)
+}
 
-  const file = appPaths.resolve.app(cfg.sourceFiles.indexHtmlTemplate)
-  const content = fs.readFileSync(file, 'utf-8')
+module.exports.appFilesValidations = function appFilesValidations (appPaths, sourceFiles) {
+  let relativePath
+  const file = appPaths.resolve.app(
+    sourceFiles.indexHtmlTemplate
+  )
 
-  if (content.indexOf('<base href') > -1) {
-    warn(`Please remove the <base> tag from /src/index.template.html
-   This is taken care of by Quasar automatically.
-  `)
-    error = true
+  if (existsSync(file) === false) {
+    relativePath = getRelativePath(appPaths, file)
+    const oldIndexHtmlFile = appPaths.resolve.src('index.template.html')
+    const configuredBanner = sourceFiles.indexHtmlTemplate !== 'index.html'
+      ? ' (configured through quasar.config file > sourceFiles > indexHtmlTemplate)'
+      : ''
+
+    if (existsSync(oldIndexHtmlFile)) {
+      warn(`The file ${ relativePath }${ configuredBanner } is missing but found the deprecated /src/index.template.html one instead.
+
+  Please do the following to fix this:
+  1. Move /src/index.template.html to ${ relativePath }
+  2. Then replace the following content in it:
+
+    <!-- DO NOT touch the following DIV -->
+    <div id="q-app"></div>
+
+    with:
+
+    ${ entryPointMarkup }\n`)
+    }
+    else {
+      warn(`The file ${ relativePath }${ configuredBanner } is missing. Please add it back.\n`)
+    }
+
+    return false
   }
 
-  if (!/<div id=['"]q-app/.test(content)) {
-    warn(`Please add back <div id="q-app"></div> to
-    /src/index.template.html inside of <body>\n`)
-    error = true
+  let valid = true
+  const content = readFileSync(file, 'utf-8')
+
+  if (content.indexOf(attachMarkup) !== -1) {
+    if (relativePath === void 0) {
+      relativePath = getRelativePath(appPaths, file)
+    }
+
+    warn(`Please remove ${ attachMarkup } from
+       ${ relativePath } inside of <body>\n`)
+    valid = false
   }
 
-  if (error === true) {
-    process.exit(1)
+  if (content.indexOf(entryPointMarkup) === -1) {
+    if (relativePath === void 0) {
+      relativePath = getRelativePath(appPaths, file)
+    }
+
+    warn(`Please add ${ entryPointMarkup } to
+       ${ relativePath } inside of <body>\n`)
+    valid = false
   }
+
+  return valid
 }

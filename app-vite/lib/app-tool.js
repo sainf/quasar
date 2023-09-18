@@ -1,20 +1,26 @@
+import { join } from 'node:path'
+import fse from 'fs-extra'
 
 import { build as viteBuild } from 'vite'
 import { build as esBuild, context as esContextBuild } from 'esbuild'
 
-import { cleanArtifacts } from './artifacts.js'
 import { progress } from './utils/logger.js'
+
+const cordovaWWW = join('src-cordova', 'www')
+const capacitorWWW = join('src-capacitor', 'www')
 
 export class AppTool {
   argv
+  ctx
 
-  constructor (argv) {
+  constructor ({ argv, ctx }) {
     this.argv = argv
+    this.ctx = ctx
   }
 
   async buildWithVite (threadName, viteConfig) {
     // ensure clean build
-    cleanArtifacts(viteConfig.build.outDir)
+    this.cleanArtifacts(viteConfig.build.outDir)
 
     const done = progress(
       'Compiling of ___ with Vite in progress...',
@@ -22,7 +28,7 @@ export class AppTool {
     )
 
     await viteBuild(viteConfig)
-    done('___ compiled with success')
+    done('___ compiled with success by Vite')
   }
 
   async watchWithEsbuild (threadName, esbuildConfig, onRebuildSuccess) {
@@ -50,7 +56,7 @@ export class AppTool {
             return
           }
 
-          done('___ compiled with success')
+          done('___ compiled with success by Esbuild')
 
           if (isFirst === true) {
             isFirst = false
@@ -81,7 +87,25 @@ export class AppTool {
 
     const esbuildResult = await esBuild(esbuildConfig)
 
-    done('___ compiled with success')
+    done('___ compiled with success by Esbuild')
     return esbuildResult
+  }
+
+  cleanArtifacts (dir) {
+    if (dir.endsWith(cordovaWWW)) {
+      fse.emptyDirSync(dir)
+    }
+    else if (dir.endsWith(capacitorWWW)) {
+      const { appPaths } = this.ctx
+
+      fse.emptyDirSync(dir)
+      fse.copySync(
+        appPaths.resolve.cli('templates/capacitor/www'),
+        appPaths.resolve.capacitor('www')
+      )
+    }
+    else {
+      fse.removeSync(dir)
+    }
   }
 }

@@ -1,7 +1,8 @@
 import { join } from 'node:path'
+import { fileURLToPath } from 'node:url'
 import { mergeConfig } from 'vite'
 
-const rootFolder = new URL('.', import.meta.url).pathname
+const rootFolder = fileURLToPath(new URL('.', import.meta.url))
 const resolve = _path => join(rootFolder, _path)
 
 export default ctx => ({
@@ -46,6 +47,10 @@ export default ctx => ({
     //   }
     // },
 
+    // needed otherwise we need to compile Quasar UI
+    // on each source file change:
+    devTreeshaking: true,
+
     plugins: [
       'AddressbarColor',
       'AppFullscreen',
@@ -67,10 +72,6 @@ export default ctx => ({
 
   build: {
     vueRouterMode: 'history',
-
-    // needed otherwise we need to compile Quasar UI
-    // on each source file change:
-    devQuasarTreeshaking: true,
 
     alias: {
       'quasar/dist/quasar.sass': resolve('../src/css/index.sass'),

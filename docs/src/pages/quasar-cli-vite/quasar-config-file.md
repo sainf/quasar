@@ -553,6 +553,21 @@ interface QuasarStaticBuildConfiguration {
   minify?: boolean | 'terser' | 'esbuild';
 
   /**
+   * (requires @quasar/app-vite v1.5.2+)
+   *
+   * Minification options for html-minifier. [Full list](https://github.com/kangax/html-minifier)
+   * @default
+   *  {
+   *    removeComments: true,
+   *    collapseWhitespace: true,
+   *    removeAttributeQuotes: true,
+   *    collapseBooleanAttributes: true,
+   *    removeScriptTypeAttributes: true
+   *  }
+   */
+  htmlMinifyOptions?: HtmlMinifierOptions;
+
+  /**
    * If `true`, a separate sourcemap file will be created. If 'inline', the
    * sourcemap will be appended to the resulting output file as data URI.
    * 'hidden' works like `true` except that the corresponding sourcemap
@@ -560,15 +575,6 @@ interface QuasarStaticBuildConfiguration {
    * @default false
    */
   sourcemap?: boolean | 'inline' | 'hidden';
-
-  /**
-   * (requires @quasar/app-vite v1.1.1+)
-   *
-   * Treeshake Quasar's UI on dev too?
-   * Recommended to leave this as false for performance reasons.
-   * @default false
-   */
-  devQuasarTreeshaking?: boolean;
 
   /**
    * Prepare external services before `$ quasar dev` command runs

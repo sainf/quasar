@@ -2,9 +2,6 @@
 
 require('../lib/node-version-check.js')
 
-const { log, warn } = require('../lib/utils/logger.js')
-const { cliPkg } = require('../lib/app-pkg.js')
-
 const commands = [
   'dev',
   'build',
@@ -16,7 +13,6 @@ const commands = [
   'mode',
   'info',
   'new',
-  'test',
   'help'
 ]
 
@@ -33,7 +29,6 @@ if (cmd) {
       m: 'mode',
       i: 'info',
       n: 'new',
-      t: 'test',
       h: 'help'
     }
     cmd = mapToCmd[ cmd ]
@@ -44,12 +39,17 @@ if (cmd) {
   }
   else {
     if (cmd === '-v' || cmd === '--version') {
+      const { cliPkg } = require('../lib/utils/cli-runtime.js')
+
       console.log(
         `${ cliPkg.name } ${ cliPkg.version }`
         + (process.env.QUASAR_CLI_VERSION ? ` (@quasar/cli ${ process.env.QUASAR_CLI_VERSION })` : '')
       )
+
       process.exit(0)
     }
+
+    const { log, warn } = require('../lib/utils/logger.js')
 
     if (cmd === '-h' || cmd === '--help') {
       cmd = 'help'
