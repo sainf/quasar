@@ -13,8 +13,7 @@ Quasar makes use of the Web [Page Visibility API](https://developer.mozilla.org/
 
 ## Usage
 
-```js
-// outside of a Vue file
+```js Outside of a Vue file
 import { AppVisibility } from 'quasar'
 AppVisibility.appVisible // Boolean
 
@@ -30,7 +29,7 @@ setup () {
 
 ## Watching for status change
 
-```vue
+```html
 <template>...</template>
 
 <script>

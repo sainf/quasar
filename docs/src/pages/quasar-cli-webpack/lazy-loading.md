@@ -82,7 +82,7 @@ import('./categories.json')
 One advantage of using dynamic imports as opposed to regular imports is that the import path can be determined at runtime:
 
 ```js
-import('pages/' + pageName + '/' + 'id')
+import('pages/' + pageName + '/' + id)
 ```
 
 ## Caveat with vendor imports
@@ -100,8 +100,7 @@ import('my-package')
 
 However, should you want to make Quasar CLI put `my-package` in its own chunk you'll have to edit the `/quasar.config` file:
 
-````js
-// quasar.config file
+````js /quasar.config file
 return {
   vendor: {
     remove: [ 'my-package' ]

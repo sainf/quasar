@@ -24,7 +24,7 @@ However, **you can also supply a component for the Dialog Plugin to render** (se
 With the QDialog plugin, you can programmatically build three types of dialogs with the following form content:
  1. A prompt dialog - asking the user to fill in some sort of data in an input field.
  2. A set of options for the user to select from using either radio buttons or toggles (singular selection only) or check boxes (for multiple selections).
- 3. A simple confirmation dialog, where the user can cancel or give her "ok" for a particular action or input.
+ 3. A simple confirmation dialog, where the user can cancel or give their "ok" for a particular action or input.
 
 In order to create #1, the prompting input form, you have the `prompt` property within the `opts` object.
 
@@ -36,8 +36,7 @@ In order to create #2, the options selection form, you have the `options` proper
 
 ## Built-in component
 
-```js
-// outside of a Vue file
+```js Outside of a Vue file
 import { Dialog } from 'quasar'
 (Object) Dialog.create({ ... })
 
@@ -353,13 +352,13 @@ Quasar handles the back button for you by default so it can hide any opened Dial
 
 However, should you wish to disable this behavior, edit your `/quasar.config` file:
 
-```js
-// quasar.config file;
-// for Cordova (only!):
+```tabs
+<<| js For Capacitor |>>
+// quasar.config file
 return {
   framework: {
     config: {
-      cordova: {
+      capacitor: {
         // Quasar handles app exit on mobile phone back button.
         backButtonExit: true/false/'*'/['/login', '/home', '/my-page'],
 
@@ -370,13 +369,12 @@ return {
     }
   }
 }
-
-// quasar.config file;
-// for Capacitor (only!)
+<<| js For Cordova |>>
+// quasar.config file
 return {
   framework: {
     config: {
-      capacitor: {
+      cordova: {
         // Quasar handles app exit on mobile phone back button.
         backButtonExit: true/false/'*'/['/login', '/home', '/my-page'],
 

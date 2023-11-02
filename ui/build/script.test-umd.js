@@ -1,6 +1,5 @@
 const fs = require('fs')
 const { resolve } = require('path')
-const open = require('open')
 const rimraf = require('rimraf').sync
 
 const src = resolve(__dirname, '../dist')
@@ -14,6 +13,11 @@ if (!fs.existsSync(src)) {
 rimraf(dest)
 fs.symlinkSync(src, dest, 'dir')
 
-open(
-  resolve(__dirname, '../dev-umd/index.umd.html')
-)
+import('open').then(({ default: open }) => {
+  open(
+    resolve(__dirname, '../dev-umd/index.umd.html'),
+    {
+      app: { name: 'google chrome' }
+    }
+  )
+})
