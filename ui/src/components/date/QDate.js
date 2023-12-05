@@ -728,10 +728,22 @@ export default createComponent({
     })
 
     function setToday () {
-      const date = today.value
-      const month = daysMap.value[ getMonthHash(date) ]
+      const { year, month, day } = today.value
 
-      if (month === void 0 || month.includes(date.day) === false) {
+      const date = {
+        // contains more props than needed (hour, minute, second, millisecond)
+        // but those aren't used in the processing of this "date" variable
+        ...viewModel.value,
+
+        // overwriting with today's date
+        year,
+        month,
+        day
+      }
+
+      const monthMap = daysMap.value[ getMonthHash(date) ]
+
+      if (monthMap === void 0 || monthMap.includes(date.day) === false) {
         addToModel(date)
       }
 
@@ -898,17 +910,17 @@ export default createComponent({
 
     function updateViewModel (year, month, time) {
       if (minNav.value !== null && year <= minNav.value.year) {
-        year = minNav.value.year
-        if (month < minNav.value.month) {
+        if (month < minNav.value.month || year < minNav.value.year) {
           month = minNav.value.month
         }
+        year = minNav.value.year
       }
 
       if (maxNav.value !== null && year >= maxNav.value.year) {
-        year = maxNav.value.year
-        if (month > maxNav.value.month) {
+        if (month > maxNav.value.month || year > maxNav.value.year) {
           month = maxNav.value.month
         }
+        year = maxNav.value.year
       }
 
       if (time !== void 0) {
