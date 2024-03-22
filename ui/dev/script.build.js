@@ -1,7 +1,10 @@
-const path = require('path')
-const moduleAlias = require('module-alias')
+const { resolve } = require('node:path')
+const fse = require('fs-extra')
 
-moduleAlias.addAlias('quasar', path.join(__dirname, '..'))
+if (!fse.existsSync(resolve(__dirname, '../dist'))) {
+  console.error('\nERROR: please run "pnpm build" in the /ui folder first\n')
+  process.exit(0)
+}
 
 // Ensure cwd is set to ui/dev
 process.chdir(__dirname)

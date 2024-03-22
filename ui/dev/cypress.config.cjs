@@ -4,13 +4,7 @@ const { defineConfig } = require('cypress')
 const viteVuePlugin = require('@vitejs/plugin-vue')
 const { quasar, transformAssetUrls } = require('@quasar/vite-plugin')
 
-const moduleAlias = require('module-alias')
 const { join } = require('path')
-
-const uiFolder = join(__dirname, '..')
-
-// Quasar dependency should point to the current UI project, which we build right before running tests
-moduleAlias.addAlias('quasar', uiFolder)
 
 module.exports = defineConfig({
   projectId: '5zr217',
@@ -19,16 +13,15 @@ module.exports = defineConfig({
   videosFolder: '../test/cypress/videos',
   videoCompression: false,
   video: false,
+  ...(process.env.CYPRESS_JUNIT_RESULTS_FILENAME !== undefined ? {
+    reporter: 'junit',
+    reporterOptions: {
+      mochaFile: process.env.CYPRESS_JUNIT_RESULTS_FILENAME
+    }
+  } : {}),
   e2e: {
     setupNodeEvents (on, config) {
       registerCodeCoverageTasks(on, config)
-
-      if (process.env.CYPRESS_JSON_RESULTS_FILENAME !== undefined) {
-        require('cypress-json-results')({
-          on,
-          filename: process.env.CYPRESS_JSON_RESULTS_FILENAME
-        })
-      }
     },
     baseUrl: 'http://localhost:9000/',
     supportFile: '../test/cypress/support/e2e.js',
@@ -37,13 +30,6 @@ module.exports = defineConfig({
   component: {
     setupNodeEvents (on, config) {
       registerCodeCoverageTasks(on, config)
-
-      if (process.env.CYPRESS_JSON_RESULTS_FILENAME !== undefined) {
-        require('cypress-json-results')({
-          on,
-          filename: process.env.CYPRESS_JSON_RESULTS_FILENAME
-        })
-      }
     },
     supportFile: '../test/cypress/support/component.js',
     specPattern: [ '../src/components/**/*.cy.{js,jsx,ts,tsx}', '../src/composables/**/*.cy.{js,jsx,ts,tsx}' ],
@@ -52,9 +38,16 @@ module.exports = defineConfig({
       framework: 'vue',
       bundler: 'vite',
       viteConfig: {
+        resolve: {
+          alias: {
+            quasar: join(__dirname, '../')
+          }
+        },
         plugins: [
           viteVuePlugin({ template: { transformAssetUrls } }),
-          quasar()
+          quasar({
+            devTreeshaking: true
+          })
         ]
       }
     }

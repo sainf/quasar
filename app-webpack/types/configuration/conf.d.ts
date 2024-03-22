@@ -35,7 +35,7 @@ type QuasarAnimationsConfiguration = "all" | QuasarAnimations[];
  *  pwaServiceWorker: 'src-pwa/custom-service-worker',
  *  pwaManifestFile: 'src-pwa/manifest.json',
  *  electronMain: 'src-electron/electron-main',
- *  bexManifestFile: 'src-bex/manifest.json
+ *  bexManifestFile: 'src-bex/manifest.json'
  * }
  * ```
  */
@@ -75,7 +75,7 @@ interface BaseQuasarConfiguration {
     remove: string[];
   };
   /** Add variables that you can use in index.template.html. */
-  htmlVariables?: { [index: string]: string };
+  htmlVariables?: Record<string, any>;
   /**
    * What Quasar language pack to use, what Quasar icon
    * set to use for Quasar components.
