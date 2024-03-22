@@ -1,5 +1,5 @@
-const fs = require('fs')
-const path = require('path')
+const path = require('node:path')
+const fse = require('fs-extra')
 const prettier = require('prettier')
 
 const { logError, writeFile, clone } = require('./build.utils')
@@ -199,27 +199,29 @@ function getInjectionDefinition (propertyName, typeDef, typeName) {
  * @returns {Promise<void>[]}
  */
 function copyPredefinedTypes (dir, parentDir) {
-  return fs.readdirSync(dir)
+  return fse.readdirSync(dir)
     .filter(file => path.basename(file).startsWith('.') !== true)
     .flatMap(async file => {
       const fullPath = path.resolve(dir, file)
-      const stats = fs.lstatSync(fullPath)
+      const stats = fse.lstatSync(fullPath)
       if (stats.isFile()) {
         return writeFile(
           resolvePath(parentDir ? parentDir + file : file),
-          fs.readFileSync(fullPath)
+          fse.readFileSync(fullPath)
         )
       }
       else if (stats.isDirectory()) {
         const p = resolvePath(parentDir ? parentDir + file : file)
-        if (!fs.existsSync(p)) {
-          fs.mkdirSync(p)
-        }
+        fse.ensureDirSync(p)
         return copyPredefinedTypes(fullPath, parentDir ? parentDir + file : file + '/')
       }
     })
 }
 
+// Add types that should not be imported from ./api, but rather defined globally or generated in the final index.d.ts
+const extraInterfaceExclusions = [
+  'IntersectionObserverEntry'
+]
 function addToExtraInterfaces (def) {
   if (def !== void 0 && def !== null && def.tsType !== void 0) {
     // When a type name is found and it has autoDefineTsType and a definition,
@@ -234,7 +236,7 @@ function addToExtraInterfaces (def) {
         extraInterfaces[ def.tsType ] = getPropDefinitions({ definitions: def.definition })
       }
     }
-    else if (!extraInterfaces.hasOwnProperty(def.tsType)) {
+    else if (!extraInterfaces.hasOwnProperty(def.tsType) && !extraInterfaceExclusions.includes(def.tsType)) {
       extraInterfaces[ def.tsType ] = void 0
     }
   }
@@ -247,16 +249,12 @@ function writeInterface (contents, typeName, props) {
   writeLine(contents)
 }
 
-function addQuasarLangCodes (contents) {
-  // We are able to read this file only because
-  //  it's been generated before type generation take place
-  const langJson = require('../lang/index.json')
-
+function addQuasarLangCodes (contents, quasarLangIndex) {
   // Assure we are doing a module augmentation instead of a module overwrite
   writeLine(contents, 'import \'./lang\'')
   writeLine(contents, 'declare module \'./lang\' {')
   writeLine(contents, 'export interface QuasarLanguageCodesHolder {', 2)
-  langJson.forEach(({ isoName }) => writeLine(contents, `'${ isoName }': true`, 3))
+  quasarLangIndex.forEach(({ isoName }) => writeLine(contents, `'${ isoName }': true`, 3))
   writeLine(contents, '}', 2)
   writeLine(contents, '}')
 }
@@ -274,7 +272,7 @@ function transformObject (definition, handler) {
   return result
 }
 
-function getIndexDts (apis) {
+function getIndexDts (apis, quasarLangIndex) {
   const contents = []
   const quasarTypeContents = []
   const components = []
@@ -283,7 +281,7 @@ function getIndexDts (apis) {
   /** @type { { [componentName: string]: { props: string; slots: string; } } } */
   const componentToSubTypeMap = {}
 
-  addQuasarLangCodes(quasarTypeContents)
+  addQuasarLangCodes(quasarTypeContents, quasarLangIndex)
 
   // TODO: (Qv3) remove this reference to q/app and
   // rely on the shim provided by the starter kit with
@@ -702,16 +700,16 @@ function ensureTypeScriptValidity () {
   throw error
 }
 
-module.exports.generate = async function (data) {
-  const apis = data.plugins
-    .concat(data.directives)
-    .concat(data.components)
+module.exports.generate = async function ({ api, quasarLangIndex }) {
+  const apiList = api.plugins
+    .concat(api.directives)
+    .concat(api.components)
 
   try {
     await Promise.all(copyPredefinedTypes(typeRoot))
 
-    const { header, body } = getIndexDts(apis)
-    const formattedBody = prettier.format(body, { parser: 'typescript' })
+    const { header, body } = getIndexDts(apiList, quasarLangIndex)
+    const formattedBody = await prettier.format(body, { parser: 'typescript' })
 
     // The header contains stuff that breaks TS checking.
     // So, write only the body at first to check the validity

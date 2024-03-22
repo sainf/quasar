@@ -6,12 +6,6 @@ const rootFolder = fileURLToPath(new URL('.', import.meta.url))
 const resolve = _path => join(rootFolder, _path)
 
 export default ctx => ({
-  eslint: {
-    fix: true,
-    warnings: true,
-    errors: true
-  },
-
   boot: [
     ctx.mode.ssr ? { path: 'ssr-client', server: false } : ''
   ],
@@ -79,6 +73,19 @@ export default ctx => ({
       'quasar/lang': resolve('../lang'),
       'quasar/src': resolve('../src')
     },
+
+    vitePlugins: [
+      [
+        'vite-plugin-checker',
+        {
+          root: resolve('../'),
+          eslint: {
+            lintCommand: 'eslint --report-unused-disable-directives "./**/*.{js,mjs,cjs,vue}"'
+          }
+        },
+        { server: false }
+      ]
+    ],
 
     extendViteConf (viteConf, { isServer }) {
       viteConf.server = mergeConfig(viteConf.server, {

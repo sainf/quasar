@@ -1,13 +1,13 @@
+const path = require('node:path')
 const glob = require('fast-glob')
-const path = require('path')
 const { merge } = require('webpack-merge')
-const fs = require('fs')
+const fse = require('fs-extra')
 
 const root = path.resolve(__dirname, '..')
 const resolvePath = file => path.resolve(root, file)
 const dest = path.join(root, 'dist/api')
 const extendApi = require(resolvePath('src/api.extends.json'))
-const { logError, writeFile, kebabCase } = require('./build.utils')
+const { logError, writeFile, kebabCase, filterTestFiles } = require('./build.utils')
 const ast = require('./ast')
 
 const slotRegex = /\(slots\[['`](\S+)['`]\]|\(slots\.([A-Za-z]+)|hSlot\(this, '(\S+)'|hUniqueSlot\(this, '(\S+)'|hMergeSlot\(this, '(\S+)'|hMergeSlotSafely\(this, '(\S+)'/g
@@ -16,7 +16,7 @@ function getMixedInAPI (api, mainFile) {
   api.mixins.forEach(mixin => {
     const mixinFile = resolvePath('src/' + mixin + '.json')
 
-    if (!fs.existsSync(mixinFile)) {
+    if (!fse.existsSync(mixinFile)) {
       logError(`build.api.js: ${ path.relative(root, mainFile) } -> no such mixin ${ mixin }`)
       process.exit(1)
     }
@@ -37,8 +37,15 @@ function getMixedInAPI (api, mainFile) {
 }
 
 const topSections = {
+  // also update /ui/test/generators/generator.plugin.js
   plugin: [ 'meta', 'injection', 'quasarConfOptions', 'addedIn', 'props', 'methods', 'internal' ],
+
+  // also update:
+  //  * /ui/test/generators/generator.component.js
+  //  * /ui/test/generators/generator.composable.js
   component: [ 'meta', 'quasarConfOptions', 'addedIn', 'props', 'slots', 'events', 'methods', 'computedProps' ],
+
+  // also update /ui/test/generators/generator.directive.js
   directive: [ 'meta', 'quasarConfOptions', 'addedIn', 'value', 'arg', 'modifiers' ]
 }
 
@@ -379,7 +386,7 @@ function parseObject ({ banner, api, itemName, masterType, verifyCategory, verif
   }
 
   ;[ 'params', 'definition', 'scope', 'props' ].forEach(prop => {
-    if (!obj[ prop ]) { return }
+    if (!obj[ prop ]) return
 
     for (const item in obj[ prop ]) {
       parseObject({
@@ -527,7 +534,7 @@ function arrayHasError (name, key, property, expected, propApi) {
   }
 }
 
-function fillAPI (apiType, list) {
+function fillAPI (apiType, list, encodeFn) {
   return file => {
     const
       name = path.basename(file),
@@ -540,9 +547,9 @@ function fillAPI (apiType, list) {
 
       // QUploader has different definition
       if (name !== 'QUploader.json') {
-        const filePath = file.replace('.json', fs.existsSync(file.replace('.json', '.js')) ? '.js' : '.ts')
+        const filePath = file.replace('.json', fse.existsSync(file.replace('.json', '.js')) ? '.js' : '.ts')
 
-        const definition = fs.readFileSync(filePath, 'utf-8')
+        const definition = fse.readFileSync(filePath, 'utf-8')
 
         let slotMatch
         while ((slotMatch = slotRegex.exec(definition)) !== null) {
@@ -569,7 +576,7 @@ function fillAPI (apiType, list) {
               .replace(/\s+/g, '-')
               .toLowerCase()
 
-            if (/^on-/.test(key) === true) { return }
+            if (/^on-/.test(key) === true) return
           }
 
           if (api[ prop ] === void 0 || api[ prop ][ key ] === void 0) {
@@ -657,7 +664,7 @@ function fillAPI (apiType, list) {
     }
 
     // copy API file to dest
-    writeFile(filePath, JSON.stringify(api, null, 2))
+    writeFile(filePath, encodeFn(api))
 
     const shortName = name.substring(0, name.length - 5)
     list.push(shortName)
@@ -669,7 +676,7 @@ function fillAPI (apiType, list) {
   }
 }
 
-function writeTransformAssetUrls (components) {
+function writeTransformAssetUrls (components, encodeFn) {
   const transformAssetUrls = {
     base: null,
     includeAbsolute: false,
@@ -700,18 +707,22 @@ function writeTransformAssetUrls (components) {
 
   writeFile(
     path.join(root, 'dist/transforms/loader-asset-urls.json'),
-    JSON.stringify(transformAssetUrls, null, 2)
+    encodeFn(transformAssetUrls)
   )
 }
 
-function writeApiIndex (list) {
+function writeApiIndex (list, encodeFn) {
   writeFile(
     path.join(root, 'dist/transforms/api-list.json'),
-    JSON.stringify(list, null, 2)
+    encodeFn(list)
   )
 }
 
-module.exports.generate = function () {
+module.exports.generate = function ({ compact = false } = {}) {
+  const encodeFn = compact === true
+    ? JSON.stringify
+    : json => JSON.stringify(json, null, 2)
+
   return new Promise((resolve) => {
     const list = []
 
@@ -720,19 +731,19 @@ module.exports.generate = function () {
       'src/Brand.json',
       'src/Lang.json'
     ], { cwd: root, absolute: true })
-      .filter(file => !path.basename(file).startsWith('__'))
-      .map(fillAPI('plugin', list))
+      .filter(filterTestFiles)
+      .map(fillAPI('plugin', list, encodeFn))
 
-    const directives = glob.sync('src/directives/*.json', { cwd: root, absolute: true })
-      .filter(file => !path.basename(file).startsWith('__'))
-      .map(fillAPI('directive', list))
+    const directives = glob.sync('src/directives/**/*.json', { cwd: root, absolute: true })
+      .filter(filterTestFiles)
+      .map(fillAPI('directive', list, encodeFn))
 
     const components = glob.sync('src/components/**/Q*.json', { cwd: root, absolute: true })
-      .filter(file => !path.basename(file).startsWith('__'))
-      .map(fillAPI('component', list))
+      .filter(filterTestFiles)
+      .map(fillAPI('component', list, encodeFn))
 
-    writeTransformAssetUrls(components)
-    writeApiIndex(list)
+    writeTransformAssetUrls(components, encodeFn)
+    writeApiIndex(list, encodeFn)
 
     resolve({ components, directives, plugins })
   }).catch(err => {
