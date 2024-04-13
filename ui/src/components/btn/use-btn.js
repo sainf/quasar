@@ -13,7 +13,7 @@ export const btnPadding = {
   xl: 32
 }
 
-const defaultSizes = {
+export const defaultSizes = {
   xs: 8,
   sm: 10,
   md: 14,
@@ -25,14 +25,16 @@ const formTypes = [ 'button', 'submit', 'reset' ]
 const mediaTypeRE = /[^\s]\/[^\s]/
 
 export const btnDesignOptions = [ 'flat', 'outline', 'push', 'unelevated' ]
-export const getBtnDesign = (props, defaultValue) => {
+
+export function getBtnDesign (props, defaultValue) {
   if (props.flat === true) return 'flat'
   if (props.outline === true) return 'outline'
   if (props.push === true) return 'push'
   if (props.unelevated === true) return 'unelevated'
   return defaultValue
 }
-export const getBtnDesignAttr = props => {
+
+export function getBtnDesignAttr (props) {
   const design = getBtnDesign(props)
   return design !== void 0
     ? { [ design ]: true }

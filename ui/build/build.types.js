@@ -40,10 +40,10 @@ const fallbackComplexTypeMap = new Map([
 ])
 
 const dontNarrowValues = [
-  '(Boolean) true',
-  '(Boolean) false',
-  '(CSS selector)',
-  '(DOM Element)'
+  'true',
+  'false',
+  '# CSS selector',
+  '# DOM Element'
 ]
 
 function convertTypeVal (type, def) {
@@ -52,10 +52,8 @@ function convertTypeVal (type, def) {
   }
 
   if (def.values && type === 'String') {
-    const narrowedValues = def.values.filter(v =>
-      !dontNarrowValues.includes(v)
-      && typeof v === 'string'
-    ).map(v => `'${ v }'`)
+    const narrowedValues = def.values
+      .filter(v => !dontNarrowValues.includes(v))
 
     if (narrowedValues.length) {
       return narrowedValues.join(' | ')
@@ -555,11 +553,14 @@ function getIndexDts (apis, quasarLangIndex) {
       // Example: $q.dialog -> target: $q, property: dialog
       const [ target, property ] = content.injection.split('.')
 
-      if (!injections[ target ]) {
-        injections[ target ] = []
-      }
+      // should not be the following; they are declared separately in globals.d.ts
+      if ([ 'iconSet', 'lang' ].includes(property) === false) {
+        if (!injections[ target ]) {
+          injections[ target ] = []
+        }
 
-      injections[ target ].push(getInjectionDefinition(property, content, typeName))
+        injections[ target ].push(getInjectionDefinition(property, content, typeName))
+      }
     }
   })
 

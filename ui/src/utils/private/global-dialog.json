@@ -11,14 +11,14 @@
               "type": [ "String", "Array", "Object" ],
               "tsType": "VueClassProp",
               "desc": "CSS Class name to apply to the Dialog's QCard",
-              "examples": [ "my-class" ]
+              "examples": [ "'my-class'" ]
             },
 
             "style": {
               "type": [ "String", "Array", "Object" ],
               "tsType": "VueStyleProp",
               "desc": "CSS style to apply to the Dialog's QCard",
-              "examples": [ "border: 2px solid black" ]
+              "examples": [ "'border: 2px solid black'" ]
             }
           }
         }
@@ -48,7 +48,7 @@
                   }
                 },
                 "returns": null,
-                "examples": [ "() => console.log('OK!')", "(payload) => Notify.create({ type: 'positive', message: `Successfully saved '${payload.book.name}' book!` })" ]
+                "examples": [ "() => console.log('OK!')", "payload => Notify.create({ type: 'positive', message: `Successfully saved '${payload.book.name}' book!` })" ]
               }
             },
             "returns": {

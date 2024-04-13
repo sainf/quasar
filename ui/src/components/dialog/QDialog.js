@@ -235,6 +235,7 @@ export default createComponent({
           ? refocusTarget.closest('[tabindex]:not([tabindex^="-"])')
           : void 0
         ) || refocusTarget).focus()
+
         refocusTarget = null
       }
 
@@ -250,16 +251,26 @@ export default createComponent({
       addFocusFn(() => {
         let node = innerRef.value
 
-        if (node === null || node.contains(document.activeElement) === true) {
-          return
+        if (node === null) return
+
+        if (selector !== void 0) {
+          const target = node.querySelector(selector)
+          if (target !== null) {
+            target.focus({ preventScroll: true })
+            return
+          }
         }
 
-        node = (selector !== '' ? node.querySelector(selector) : null)
-          || node.querySelector('[autofocus][tabindex], [data-autofocus][tabindex]')
-          || node.querySelector('[autofocus] [tabindex], [data-autofocus] [tabindex]')
-          || node.querySelector('[autofocus], [data-autofocus]')
-          || node
-        node.focus({ preventScroll: true })
+        if (node.contains(document.activeElement) !== true) {
+          node = (
+            node.querySelector('[autofocus][tabindex], [data-autofocus][tabindex]')
+            || node.querySelector('[autofocus] [tabindex], [data-autofocus] [tabindex]')
+            || node.querySelector('[autofocus], [data-autofocus]')
+            || node
+          )
+
+          node.focus({ preventScroll: true })
+        }
       })
     }
 

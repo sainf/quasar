@@ -37,7 +37,7 @@ export default createComponent({
   props: {
     rows: {
       type: Array,
-      default: () => []
+      required: true
     },
     rowKey: {
       type: [ String, Function ],
@@ -435,21 +435,21 @@ export default createComponent({
       if (props.onRowClick !== void 0) {
         data.class[ 'cursor-pointer' ] = true
         data.onClick = evt => {
-          emit('RowClick', evt, row, pageIndex)
+          emit('rowClick', evt, row, pageIndex)
         }
       }
 
       if (props.onRowDblclick !== void 0) {
         data.class[ 'cursor-pointer' ] = true
         data.onDblclick = evt => {
-          emit('RowDblclick', evt, row, pageIndex)
+          emit('rowDblclick', evt, row, pageIndex)
         }
       }
 
       if (props.onRowContextmenu !== void 0) {
         data.class[ 'cursor-pointer' ] = true
         data.onContextmenu = evt => {
-          emit('RowContextmenu', evt, row, pageIndex)
+          emit('rowContextmenu', evt, row, pageIndex)
         }
       }
 
