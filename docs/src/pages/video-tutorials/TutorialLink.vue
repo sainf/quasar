@@ -6,36 +6,23 @@
     @click="openWebsite"
   >
     <q-card-section class="col tutorial-link__title">
-      <div class="text-subtitle2 text-weight-bold">{{ props.name }}</div>
-      <div class="q-mt-sm">{{ props.desc }}</div>
+      <div class="text-subtitle1 text-weight-bold">{{ props.t }}</div>
+      <div class="q-mt-xs">{{ props.d }}</div>
     </q-card-section>
 
-    <q-img alt="Tutorial logo" :src="props.imgUrl" class="bg-white" />
+    <q-separator />
 
-    <q-card-section>
-      <div>Created by: {{ props.author }}</div>
-      <div>
-        Language:
-        <span class="q-ml-xs text-weight-bold">{{ props.lang }}</span>
-      </div>
-    </q-card-section>
+    <q-img alt="Tutorial logo" :src="props.i" class="bg-white" />
   </q-card>
 </template>
 
 <script setup>
 import { openURL } from 'quasar'
 
-const props = defineProps({
-  name: String,
-  desc: String,
-  author: String,
-  lang: String,
-  link: String,
-  imgUrl: String
-})
+const props = defineProps([ 't', 'd', 'u', 'i' ])
 
 function openWebsite () {
-  openURL(props.link)
+  openURL(props.u)
 }
 </script>
 

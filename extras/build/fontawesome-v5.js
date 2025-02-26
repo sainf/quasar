@@ -5,7 +5,7 @@ const prefix = 'fa'
 
 // ------------
 
-const glob = require('glob')
+const { globSync } = require('tinyglobby')
 const { copySync } = require('fs-extra')
 const { writeFileSync } = require('fs')
 const { resolve, join } = require('path')
@@ -21,15 +21,13 @@ let iconNames = new Set()
 const svgExports = []
 const typeExports = []
 
-iconTypes.forEach(type => {
-  const svgFiles = glob.sync(svgFolder + `/${ type }/*.svg`)
+iconTypes.forEach((type) => {
+  const svgFiles = globSync(svgFolder + `/${ type }/*.svg`)
 
-  svgFiles.forEach(file => {
+  svgFiles.forEach((file) => {
     const name = defaultNameMapper(file, prefix + type.charAt(0))
 
-    if (iconNames.has(name)) {
-      return
-    }
+    if (iconNames.has(name)) return
 
     try {
       const { svgDef, typeDef } = extract(file, name)
@@ -56,7 +54,14 @@ iconNames.sort((a, b) => {
   return ('' + a).localeCompare(b)
 })
 
-writeExports(iconSetName, packageName, distFolder, svgExports, typeExports, skipped)
+writeExports(
+  iconSetName,
+  packageName,
+  distFolder,
+  svgExports,
+  typeExports,
+  skipped
+)
 
 // then update webfont files
 
@@ -69,7 +74,7 @@ const webfont = [
   'fa-solid-900.woff2'
 ]
 
-webfont.forEach(file => {
+webfont.forEach((file) => {
   copySync(
     resolve(__dirname, `../node_modules/${ packageName }/webfonts/${ file }`),
     resolve(__dirname, `../fontawesome-v5/${ file }`)

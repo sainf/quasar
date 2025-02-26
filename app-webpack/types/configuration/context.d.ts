@@ -10,16 +10,17 @@ import {
 } from "./electron-conf";
 import { QuasarCordovaTargets } from "./cordova-conf";
 
-type QuasarModes = "spa" | "ssr" | "pwa" | "cordova" | "capacitor" | "electron" | "bex";
+export type QuasarMode = "spa" | "ssr" | "pwa" | "cordova" | "capacitor" | "electron" | "bex";
 
+type QuasarBexTargets = "chrome" | "firefox";
 interface BaseQuasarContext {
   /** True if we are in development mode */
   dev: boolean;
   /** True if we are in production mode */
   prod: boolean;
   /** App mode */
-  mode: { [index in QuasarModes]?: true };
-  modeName: QuasarModes;
+  mode: { [index in QuasarMode]?: true };
+  modeName: QuasarMode;
   /** True if debugging is enabled */
   debug: boolean;
   /** True if opening remote Vue Devtools in development mode. */
@@ -144,6 +145,12 @@ interface SsrQuasarContext extends BaseQuasarContext {
 interface BexQuasarContext extends BaseQuasarContext {
   mode: { bex: true };
   modeName: "bex";
+  /**
+   * App target.
+   */
+  target: Partial<Record<QuasarBexTargets, true>>;
+  /** App target name. */
+  targetName: QuasarBexTargets;
 }
 
 export type QuasarContext =

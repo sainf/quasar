@@ -60,7 +60,7 @@ function getRedirectUrl (url, router) {
     return url
   }
 
-  try { return <%= build.publicPath === '/' ? 'router.resolve(url).href' : 'addPublicPath(router.resolve(url).href)' %> }
+  try { return router.resolve(url).href }
   catch (err) {}
 
   return url
@@ -71,11 +71,20 @@ const { components, directives, ...qUserOptions } = quasarUserOptions
 <%
   const bootEntries = boot.filter(asset => asset.server !== false)
   if (bootEntries.length !== 0) { %>
-const bootFiles = Promise.all([
+let bootFunctions = null
+let bootFiles = Promise.allSettled([
   <% bootEntries.forEach((asset, index) => { %>
   import(/* webpackMode: "eager" */ '<%= asset.path %>')<%= index < bootEntries.length - 1 ? ',' : '' %>
   <% }) %>
-]).then(bootFiles => bootFiles.map(entry => entry.default).filter(entry => typeof entry === 'function'))
+])
+.then(bootFiles => bootFiles.map(result => {
+  if (result.status === 'rejected') {
+    console.error('[Quasar] boot error:', result.reason)
+    return
+  }
+  return result.value.default
+}))
+.then(bootFiles => bootFiles.filter(entry => typeof entry === 'function'))
 <% } %>
 
 // This is where we perform data-prefetching to determine the
@@ -85,11 +94,14 @@ const bootFiles = Promise.all([
 export default ssrContext => {
   return new Promise(async (resolve, reject) => {
     <% if (bootEntries.length !== 0) { %>
-    const bootFunctions = await bootFiles
+    if (bootFunctions === null) {
+      bootFunctions = await bootFiles
+      bootFiles = null
+    }
     <% } %>
 
     const {
-      app, router<%= metaConf.hasStore ? ', store' + (metaConf.storePackage === 'vuex' ? ', storeKey' : '') : '' %>
+      app, router<%= metaConf.hasStore ? ', store' : '' %>
     } = await createQuasarApp(createApp, qUserOptions, ssrContext)
 
     <% if (bootEntries.length !== 0) { %>
@@ -117,13 +129,10 @@ export default ssrContext => {
       }
     }
 
-    if (hasRedirected === true) {
-      return
-    }
+    if (hasRedirected === true) return
     <% } %>
 
     app.use(router)
-    <% if (metaConf.hasStore && metaConf.storePackage === 'vuex') { %>app.use(store, storeKey)<% } %>
 
     const url = ssrContext.req.url<% if (build.publicPath !== '/') { %>.replace(publicPath, '/')<% } %>
     const { fullPath } = router.resolve(url)
@@ -183,7 +192,7 @@ export default ssrContext => {
         Promise.resolve()
       )
       .then(() => {
-        if (hasRedirected === true) { return }
+        if (hasRedirected === true) return
 
         <% if (metaConf.hasStore && ssr.manualStoreSsrContextInjection !== true) { %>ssrContext.state = unref(store.state)<% } %>
 

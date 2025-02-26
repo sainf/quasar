@@ -17,17 +17,14 @@ export class EntryFilesGenerator {
 
     if (ctx.mode.ssr) {
       templateFiles.push(
-        'server-entry.mjs',
-        'ssr-middlewares.mjs',
-        `ssr-${ ctx.dev ? 'dev' : 'prod' }-webserver.mjs`
+        'server-entry.js',
+        'ssr-middlewares.js',
+        `ssr-${ ctx.dev ? 'dev' : 'prod' }-webserver.js`
       )
     }
     else if (ctx.mode.bex) {
       regularFiles.push(
-        'bex-bridge.js',
-        'bex-entry-background.js',
-        'bex-entry-dom.js',
-        'bex-window-event-listener.js'
+        'bex-app.js'
       )
     }
 

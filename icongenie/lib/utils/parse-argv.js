@@ -20,9 +20,7 @@ function die (msg) {
 }
 
 function profile (value, argv) {
-  if (!value) {
-    return
-  }
+  if (!value) return
 
   const profilePath = resolve(process.cwd(), untildify(value))
 
@@ -61,9 +59,7 @@ function mode (value, argv) {
 }
 
 function include (value, argv) {
-  if (!value) {
-    return
-  }
+  if (!value) return
 
   if (value.includes('all')) {
     argv.include = modesList
@@ -175,9 +171,7 @@ function icon (value, argv) {
 }
 
 function background (value, argv) {
-  if (!value) {
-    return
-  }
+  if (!value) return
 
   argv.background = resolve(appDir, untildify(value))
 

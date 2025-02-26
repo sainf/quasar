@@ -48,9 +48,7 @@ export class AppTool {
         })
 
         build.onEnd(result => {
-          if (result.errors.length !== 0) {
-            return
-          }
+          if (result.errors.length !== 0) return
 
           done('___ compiled with success by Esbuild')
 

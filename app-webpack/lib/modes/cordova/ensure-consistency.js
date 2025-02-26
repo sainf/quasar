@@ -19,9 +19,7 @@ function ensureWWW ({ appPaths, forced }) {
 module.exports.ensureWWW = ensureWWW
 
 function ensureDeps ({ appPaths }) {
-  if (existsSync(appPaths.resolve.cordova('node_modules'))) {
-    return
-  }
+  if (existsSync(appPaths.resolve.cordova('node_modules'))) return
 
   log('Installing dependencies in /src-cordova')
   spawnSync(

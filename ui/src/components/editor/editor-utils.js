@@ -7,9 +7,9 @@ import QTooltip from '../tooltip/QTooltip.js'
 import QItem from '../item/QItem.js'
 import QItemSection from '../item/QItemSection.js'
 
-import { prevent, stop } from '../../utils/event.js'
-import { hSlot } from '../../utils/private/render.js'
-import { shouldIgnoreKey } from '../../utils/private/key-composition.js'
+import { prevent, stop } from '../../utils/event/event.js'
+import { hSlot } from '../../utils/private.render/render.js'
+import { shouldIgnoreKey } from '../../utils/private.keyboard/key-composition.js'
 
 function run (e, btn, eVm) {
   if (btn.handler) {
@@ -246,9 +246,7 @@ export function getLinkEditor (eVm) {
           link = evt.target.value
         },
         onKeydown: evt => {
-          if (shouldIgnoreKey(evt) === true) {
-            return
-          }
+          if (shouldIgnoreKey(evt) === true) return
 
           switch (evt.keyCode) {
             case 13: // ENTER key

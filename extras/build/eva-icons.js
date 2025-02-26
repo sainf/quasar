@@ -5,14 +5,20 @@ const prefix = 'eva'
 
 // ------------
 
-const glob = require('glob')
+const { globSync } = require('tinyglobby')
 const { copySync } = require('fs-extra')
 const { writeFileSync } = require('fs')
 const { resolve, join } = require('path')
 
 const skipped = []
 const distFolder = resolve(__dirname, '../eva-icons')
-const { defaultNameMapper, extract, writeExports, copyCssFile, getBanner } = require('./utils')
+const {
+  defaultNameMapper,
+  extract,
+  writeExports,
+  copyCssFile,
+  getBanner
+} = require('./utils')
 
 const svgFolder = resolve(__dirname, `../node_modules/${ packageName }/`)
 const iconTypes = [ 'fill', 'outline' ]
@@ -21,15 +27,13 @@ let iconNames = new Set()
 const svgExports = []
 const typeExports = []
 
-iconTypes.forEach(type => {
-  const svgFiles = glob.sync(svgFolder + `/${ type }/svg/*.svg`)
+iconTypes.forEach((type) => {
+  const svgFiles = globSync(svgFolder + `/${ type }/svg/*.svg`)
 
-  svgFiles.forEach(file => {
+  svgFiles.forEach((file) => {
     const name = defaultNameMapper(file, prefix)
 
-    if (iconNames.has(name)) {
-      return
-    }
+    if (iconNames.has(name)) return
 
     try {
       const { svgDef, typeDef } = extract(file, name)
@@ -56,16 +60,20 @@ iconNames.sort((a, b) => {
   return ('' + a).localeCompare(b)
 })
 
-writeExports(iconSetName, packageName, distFolder, svgExports, typeExports, skipped)
+writeExports(
+  iconSetName,
+  packageName,
+  distFolder,
+  svgExports,
+  typeExports,
+  skipped
+)
 
 // then update webfont files
 
-const webfont = [
-  'Eva-Icons.woff2',
-  'Eva-Icons.woff'
-]
+const webfont = [ 'Eva-Icons.woff2', 'Eva-Icons.woff' ]
 
-webfont.forEach(file => {
+webfont.forEach((file) => {
   copySync(
     resolve(__dirname, `../node_modules/${ packageName }/style/fonts/${ file }`),
     resolve(__dirname, `../eva-icons/${ file }`)
@@ -73,17 +81,20 @@ webfont.forEach(file => {
 })
 
 copyCssFile({
-  from: resolve(__dirname, `../node_modules/${ packageName }/style/eva-icons.css`),
+  from: resolve(
+    __dirname,
+    `../node_modules/${ packageName }/style/eva-icons.css`
+  ),
   to: resolve(__dirname, '../eva-icons/eva-icons.css'),
-  replaceFn: content => (
+  replaceFn: (content) =>
     getBanner('Eva Icons', packageName)
-      + (
-        content
-          .replace('@font-face {', '@font-face {\nfont-display: block;')
-          .replace('src: url("./fonts/Eva-Icons.eot");', '')
-          .replace(/src:[^;]+;/, 'src: url("./Eva-Icons.woff2") format("woff2"), url("./Eva-Icons.woff") format("woff");')
+    + content
+      .replace('@font-face {', '@font-face {\nfont-display: block;')
+      .replace('src: url("./fonts/Eva-Icons.eot");', '')
+      .replace(
+        /src:[^;]+;/,
+        'src: url("./Eva-Icons.woff2") format("woff2"), url("./Eva-Icons.woff") format("woff");'
       )
-  )
 })
 
 // write the JSON file

@@ -178,9 +178,9 @@ This is especially useful if you want to change the colors dynamically at initia
 
 ```js /src/boot/brand-colors.js - or any other name
 import { setCssVar } from 'quasar'
-import { boot } from 'quasar/wrappers'
+import { defineBoot } from '#q-app/wrappers'
 
-export default boot(() => {
+export default defineBoot(() => {
   setCssVar('primary', '#ff0000')
 })
 ```

@@ -3,203 +3,59 @@ title: Supporting TypeScript
 desc: (@quasar/app-vite) How to enable support for TypeScript in a Quasar app.
 related:
   - /quasar-cli-vite/quasar-config-file
+  - /quasar-cli-vite/linter
 ---
 
-The Typescript support is not added by default to your project (unless you selected TS when you created your project folder), but it can be easily integrated by following the guide on this page.
+If you didn't select TypeScript support when creating your project, you can still add it later. This guide will show you how to add TypeScript support to your existing JavaScript-based Quasar project.
 
 ::: tip
-The following steps are only required when you **have not** selected TypeScript support when creating a fresh Quasar project. If you selected the TS option on project creation, TypeScript support is already enabled.
+If you selected TypeScript support when creating your project, you can skip this guide.
 :::
 
 ## Installation of TypeScript Support
 
-Create `/tsconfig.json` file at the root of you project with this content:
-
-```json
-{
-  "extends": "@quasar/app-vite/tsconfig-preset",
-  "compilerOptions": {
-    "baseUrl": "."
-  },
-  "exclude": [
-    "./dist",
-    "./.quasar",
-    "./node_modules",
-    "./src-capacitor",
-    "./src-cordova",
-    "./quasar.config.*.temporary.compiled*"
-  ]
-}
-```
-
-Then install the `typescript` package:
+Install the `typescript` package:
 
 ```tabs
 <<| bash Yarn |>>
-$ yarn add --dev typescript
+$ yarn add --dev typescript@~5.5.3
 <<| bash NPM |>>
-$ npm install --save-dev typescript
+$ npm install --save-dev typescript@~5.5.3
 <<| bash PNPM |>>
-$ pnpm add -D typescript
+$ pnpm add -D typescript@~5.5.3
 <<| bash Bun |>>
-$ bun add --dev typescript
+$ bun add --dev typescript@~5.5.3
 ```
+
+Then, create `/tsconfig.json` file at the root of you project with this content:
+
+```json /tsconfig.json
+{
+  "extends": "./.quasar/tsconfig.json"
+}
+```
+
+Run `$ quasar prepare` in the root of your project folder.
 
 Now you can start using TypeScript into your project. Note that some IDEs might require a restart for the new setup to fully kick in.
 
 ::: tip
-Remember that you must change the extension of your JavaScript files to `.ts` to be allowed to write TypeScript code inside them. To write TS code into your components, instead, change the script opening tag like so `<script lang="ts">`.
+Remember that you must change the extension of your JavaScript files to `.ts` to be allowed to write TypeScript code inside them. To use TypeScript in Vue files, you must update the script tag to include the `lang="ts"` attribute, like `<script lang="ts">` or `<script setup lang="ts">`
 :::
 
 ::: warning
-If you fail to add the `tsconfig.json` file, the application will break at compile time!
+If you forget to add the `tsconfig.json` file, the application will break at compile time!
 :::
 
-### Linting setup
+## Linting setup
 
-::: tip
-TypeScript Linting is really slow due to type-checking overhead, we suggest you to disable it in `/quasar.config` file for dev builds.
-:::
+You might want to check the requirements for it [here](/quasar-cli-vite/linter).
 
-First add the needed dependencies:
+## TypeScript Declaration Files
 
-```tabs
-<<| bash Yarn |>>
-$ yarn add --dev eslint @typescript-eslint/parser @typescript-eslint/eslint-plugin
-# you might also want to install the `eslint-plugin-vue` package.
-<<| bash NPM |>>
-$ npm install --save-dev eslint @typescript-eslint/parser @typescript-eslint/eslint-plugin
-# you might also want to install the `eslint-plugin-vue` package.
-<<| bash PNPM |>>
-$ pnpm add -D eslint @typescript-eslint/parser @typescript-eslint/eslint-plugin
-# you might also want to install the `eslint-plugin-vue` package.
-<<| bash Bun |>>
-$ bun add --dev eslint @typescript-eslint/parser @typescript-eslint/eslint-plugin
-# you might also want to install the `eslint-plugin-vue` package.
-```
-
-Then update your ESLint configuration accordingly, like in the following example:
-
-```js /.eslintrc.cjs
-const { resolve } = require('node:path');
-
-module.exports = {
-  // https://eslint.org/docs/user-guide/configuring#configuration-cascading-and-hierarchy
-  // This option interrupts the configuration hierarchy at this file
-  // Remove this if you have an higher level ESLint config file (it usually happens into a monorepos)
-  root: true,
-
-  // https://eslint.vuejs.org/user-guide/#how-to-use-custom-parser
-  // Must use parserOptions instead of "parser" to allow vue-eslint-parser to keep working
-  // `parser: 'vue-eslint-parser'` is already included with any 'plugin:vue/**' config and should be omitted
-  parserOptions: {
-    // https://github.com/typescript-eslint/typescript-eslint/tree/master/packages/parser#configuration
-    // https://github.com/TypeStrong/fork-ts-checker-webpack-plugin#eslint
-    // Needed to make the parser take into account 'vue' files
-    extraFileExtensions: ['.vue'],
-    parser: '@typescript-eslint/parser',
-    project: resolve(__dirname, './tsconfig.json'),
-    tsconfigRootDir: __dirname,
-    ecmaVersion: 2021, // Allows for the parsing of modern ECMAScript features
-    sourceType: 'module', // Allows for the use of imports
-  },
-
-  // Rules order is important, please avoid shuffling them
-  extends: [
-    // Base ESLint recommended rules
-    'eslint:recommended',
-
-    // https://github.com/typescript-eslint/typescript-eslint/tree/master/packages/eslint-plugin#usage
-    // ESLint typescript rules
-    'plugin:@typescript-eslint/eslint-recommended',
-    'plugin:@typescript-eslint/recommended',
-    // consider disabling this class of rules if linting takes too long
-    'plugin:@typescript-eslint/recommended-requiring-type-checking',
-
-    // https://eslint.vuejs.org/rules/#priority-a-essential-error-prevention
-    // consider switching to `plugin:vue/strongly-recommended` or `plugin:vue/recommended` for stricter rules
-    'plugin:vue/essential',
-
-    // --- ONLY WHEN USING PRETTIER ---
-    // https://github.com/prettier/eslint-config-prettier#installation
-    // usage with Prettier, provided by 'eslint-config-prettier'.
-    'prettier',
-    'prettier/@typescript-eslint',
-    'prettier/vue',
-  ],
-
-  plugins: [
-    // required to apply rules which need type information
-    '@typescript-eslint',
-
-    // https://eslint.vuejs.org/user-guide/#why-doesn-t-it-work-on-vue-file
-    // required to lint *.vue files
-    'vue',
-  ],
-
-  // add your custom rules here
-  rules: {
-    // others rules...
-
-    // TypeScript
-    'quotes': ['warn', 'single'],
-    // this rule, if on, would require explicit return type on the `render` function
-    '@typescript-eslint/explicit-function-return-type': 'off',
-    // in plain CommonJS modules, you can't use `import foo = require('foo')` to pass this rule, so it has to be disabled
-    '@typescript-eslint/no-var-requires': 'off',
-  }
-}
-```
-
-If anything goes wrong, read the [typescript-eslint guide](https://github.com/typescript-eslint/typescript-eslint/blob/master/docs/getting-started/linting/README.md), on which this example is based.
-
-As a last step, update your `yarn lint` command to also lint `.ts` files.
-
-Finally, edit your `/quasar.config` file:
-
-```js /quasar.config file
-eslint: {
-  // fix: true,
-  // include: [],
-  // exclude: [],
-  // rawOptions: {},
-  warnings: true,
-  errors: true
-},
-```
-
-### TypeScript Declaration Files
-
-If you chose TypeScript support when scaffolding the project, these declaration files were automatically scaffolded for you. If TypeScript support wasn't enabled during project creation, create the following files.
-
-```ts /src/shims-vue.d.ts
-/* eslint-disable */
-
-/// <reference types="vite/client" />
-
-// Mocks all files ending in `.vue` showing them as plain Vue instances
-declare module '*.vue' {
-  import type { DefineComponent } from 'vue';
-  const component: DefineComponent<{}, {}, any>;
-  export default component;
-}
-```
-
-```ts /src/quasar.d.ts
-/* eslint-disable */
-
-// Forces TS to apply `@quasar/app-vite` augmentations of `quasar` package
-// Removing this would break `quasar/wrappers` imports as those typings are declared
-//  into `@quasar/app-vite`
-// As a side effect, since `@quasar/app-vite` reference `quasar` to augment it,
-//  this declaration also apply `quasar` own
-//  augmentations (eg. adds `$q` into Vue component context)
-/// <reference types="@quasar/app-vite" />
-```
+If you chose TypeScript support when scaffolding the project, the following declaration file was automatically scaffolded for you. If TypeScript support wasn't enabled during project creation, create it:
 
 ```ts /src/env.d.ts
-/* eslint-disable */
-
 declare namespace NodeJS {
   interface ProcessEnv {
     NODE_ENV: string;
@@ -210,79 +66,35 @@ declare namespace NodeJS {
 }
 ```
 
-See the following sections depending on the features and build modes you are using.
+See the following sections for the features and build modes you are using.
 
-#### Pinia
+### Pinia
 
-If you are using [Pinia](/quasar-cli-vite/state-management-with-pinia), add the section below to your project. Quasar CLI provides the `router` property, you may need to add more global properties if you have them.
+If you are using Pinia, Quasar CLI augments the `router` property inside `.quasar/pinia.d.ts` automatically. So, don't manually add the `router` property from the `PiniaCustomProperties` interface in the `src/stores/index.ts` file.
 
-```ts /src/stores/index.ts
-import { Router } from 'vue-router';
+```diff /src/stores/index.ts
+import { defineStore } from '#q-app/wrappers'
+import { createPinia } from 'pinia'
+- import { type Router } from 'vue-router';
 
 /*
  * When adding new properties to stores, you should also
  * extend the `PiniaCustomProperties` interface.
- * @see https://pinia.vuejs.org/core-concepts/plugins.html#typing-new-store-properties
+ * @see https://pinia.vuejs.org/core-concepts/plugins.html#Typing-new-store-properties
  */
 declare module 'pinia' {
   export interface PiniaCustomProperties {
-    readonly router: Router;
+-    readonly router: Router;
++    // add your custom properties here, if any
   }
 }
 ```
 
-#### Vuex
-
-If you are using [Vuex](/quasar-cli-vite/state-management-with-vuex), add the section below to your project. Quasar CLI provides the `router` property, you may need to add more global properties if you have them. Adjust the state interface to suit your application.
-
-```ts /src/store/index.ts
-import { InjectionKey } from 'vue'
-import { Router } from 'vue-router'
-import {
-  createStore,
-  Store as VuexStore,
-  useStore as vuexUseStore,
-} from 'vuex'
-
-export interface StateInterface {
-  // Define your own store structure, using submodules if needed
-  // example: ExampleStateInterface;
-  // Declared as unknown to avoid linting issue. Best to strongly type as per the line above.
-  example: unknown
-}
-
-// provide typings for `this.$store`
-declare module '@vue/runtime-core' {
-  interface ComponentCustomProperties {
-    $store: VuexStore<StateInterface>
-  }
-}
-
-// Provide typings for `this.$router` inside Vuex stores
-declare module "vuex" {
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  export interface Store<S> {
-    readonly $router: Router;
-  }
-}
-
-// provide typings for `useStore` helper
-export const storeKey: InjectionKey<VuexStore<StateInterface>> = Symbol('vuex-key')
-
-export function useStore() {
-  return vuexUseStore(storeKey)
-}
-
-// createStore<StateInterface>({ ... })
-```
-
-#### PWA mode
+### PWA mode
 
 If you are using [PWA mode](/quasar-cli-vite/developing-pwa/introduction), make the following modifications to your project, and create any files that do not exist:
 
 ```ts /src-pwa/pwa-env.d.ts
-/* eslint-disable */
-
 declare namespace NodeJS {
   interface ProcessEnv {
     SERVICE_WORKER_FILE: string;
@@ -308,33 +120,11 @@ declare const self: ServiceWorkerGlobalScope &
 }
 ```
 
-```js /src-pwa/.eslintrc.cjs
-const { resolve } = require('node:path');
-
-module.exports = {
-  parserOptions: {
-    project: resolve(__dirname, './tsconfig.json'),
-  },
-
-  overrides: [
-    {
-      files: ['custom-service-worker.ts'],
-
-      env: {
-        serviceworker: true,
-      },
-    },
-  ],
-};
-```
-
-#### Electron mode
+### Electron mode
 
 If you are using [Electron mode](/quasar-cli-vite/developing-electron-apps/introduction), add the section below to your project.
 
 ```ts /src-electron/electron-env.d.ts
-/* eslint-disable */
-
 declare namespace NodeJS {
   interface ProcessEnv {
     QUASAR_PUBLIC_FOLDER: string;
@@ -345,7 +135,7 @@ declare namespace NodeJS {
 }
 ```
 
-#### BEX mode
+### BEX mode
 
 If you are using [BEX mode](/quasar-cli-vite/developing-browser-extensions/introduction), add the section below to your project. You may need to adjust it to your needs depending on the events you are using. The key is the event name, the value is a tuple where the first element is the input and the second is the output type.
 
@@ -360,6 +150,117 @@ declare module '@quasar/app-vite' {
     'storage.set': [{ key: string; value: any }, any];
     'storage.remove': [{ key: string }, any];
     /* eslint-enable @typescript-eslint/no-explicit-any */
+  }
+}
+```
+
+You'll also need this in every content script file:
+
+```ts /src-bex/my-content-script.ts
+declare module '@quasar/app-vite' {
+  interface BexEventMap {
+    /* eslint-disable @typescript-eslint/no-explicit-any */
+    'some.event': [{ someProp: string }, void];
+    /* eslint-enable @typescript-eslint/no-explicit-any */
+  }
+}
+```
+
+## Configuring TypeScript
+
+### tsconfig.json
+
+Notice the `/tsconfig.json` file in your project folder. This file is used by the Quasar CLI to detect if you want TypeScript support or not. Its content should look like this:
+
+```json /tsconfig.json
+{
+  "extends": "./.quasar/tsconfig.json"
+}
+```
+
+For reviewing purposes, here is an example of the generated tsconfig (non strict) that your `/tsconfig.json` is extending:
+
+```json /.quasar/tsconfig.json
+{
+  "compilerOptions": {
+    "esModuleInterop": true,
+    "skipLibCheck": true,
+    "target": "esnext",
+    "allowJs": true,
+    "resolveJsonModule": true,
+    "moduleDetection": "force",
+    "isolatedModules": true,
+    "module": "preserve",
+    "noEmit": true,
+    "lib": [
+      "esnext",
+      "dom",
+      "dom.iterable"
+    ],
+    "paths": { ... }
+  },
+  "exclude": [ ... ]
+}
+```
+
+Properly running typechecking and linting requires the `.quasar/tsconfig.json` to be present. The file will be auto-generated when running `quasar dev` or `quasar build` commands. But, as a lightweight alternative, there is the CLI command `quasar prepare` that will generate the `.quasar/tsconfig.json` file and some types files. It is especially useful for CI/CD pipelines.
+
+```bash
+$ quasar prepare
+```
+
+You can add it as a `postinstall` script to make sure it's run after installing the dependencies. This would be helpful when someone is pulling the project for the first time.
+
+```json /package.json
+{
+  "scripts": {
+    "postinstall": "quasar prepare"
+  }
+}
+```
+
+Thanks to this setup, Capacitor dependencies are properly linked to the project's TypeScript configuration. That means you won't have to install dependencies twice, once in `/src-capacitor` and once in the root folder.
+
+Another benefit of this change is that folder aliases (`quasar.config file > build > alias`) are automatically recognized by TypeScript. So, you can remove `tsconfig.json > compilerOptions > paths`. If you are using a plugin like `vite-tsconfig-paths`, you can uninstall it and use `quasar.config file > build > alias` as the source of truth.
+
+If you are using ESLint, we recommend enabling `@typescript-eslint/consistent-type-imports` rules in your ESLint configuration. If you don't have linting set up, we recommend using `verbatimModuleSyntax` in your `tsconfig.json` file as an alternative (_unlike ESLint rules, it's not auto-fixable_). These changes will help you unify your imports regarding regular and type-only imports. Please read [typescript-eslint Blog - Consistent Type Imports and Exports: Why and How](https://typescript-eslint.io/blog/consistent-type-imports-and-exports-why-and-how) for more information about this and how to set it up. Here is an example:
+
+```js /eslint.config.js
+rules: {
+  // ...
+  '@typescript-eslint/consistent-type-imports': [
+    'error',
+    { prefer: 'type-imports' },
+  ],
+  // ...
+}
+```
+
+### quasar.config.ts
+
+You can use `quasar.config file > build > typescript` to control the TypeScript-related behavior. Add this section into your configuration:
+
+```diff /quasar.config.ts
+  build: {
++  typescript: {
++    strict: true, // (recommended) enables strict settings for TypeScript
++    vueShim: true, // required when using ESLint with type-checked rules, will generate a shim file for `*.vue` files
++    extendTsConfig (tsConfig) {
++      // You can use this hook to extend tsConfig dynamically
++      // For basic use cases, you can still update the usual tsconfig.json file to override some settings
++    },
++  }
+}
+```
+
+Should you want, you should be able to set the `strict` option to `true` without facing much trouble. But, if you face any issues, you can either update your code to satisfy the stricter rules or set the "problematic" options to `false` in your `tsconfig.json` file, at least until you can fix them.
+
+If you are using ESLint with type-check rules, enable the `vueShim` option to preserve the previous behavior with the shim file. If your project is working fine without that option, you don't need to enable it.
+
+```diff /quasar.config.ts
+build: {
+  typescript: {
++    vueShim: true // required when using ESLint with type-checked rules, will generate a shim file for `*.vue` files
   }
 }
 ```

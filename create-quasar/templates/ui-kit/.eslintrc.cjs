@@ -11,17 +11,12 @@ module.exports = {
 
       'packageDescription',
       'aeDescription',
-      'aeCodeFormat',
 
       'umdExportName',
       'componentName',
       'directiveName',
 
-      'license',
-      'repositoryType',
-      'repositoryURL',
-      'homepage',
-      'bugs'
+      'license'
     ]
   },
 

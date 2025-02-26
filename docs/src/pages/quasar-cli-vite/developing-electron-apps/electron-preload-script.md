@@ -3,19 +3,21 @@ title: Electron Preload Script
 desc: (@quasar/app-vite) How to handle Electron Node Integration with an Electron Preload script with Quasar CLI.
 ---
 
-For security reasons, the renderer thread (your UI code from `/src`) does not have access to the Node.js stuff. However, you can run Node.js code and bridge it to the renderer thread through an Electron Preload script located at `/src-electron/electron-preload.[js|ts]`. Use `contextBridge` (from the `electron` package) to expose the stuff that you need for your UI.
+For security reasons, the renderer thread (your UI code from `/src`) does not have access to the Node.js stuff. However, you can run Node.js code and bridge it to the renderer thread through an Electron Preload script located at `/src-electron/electron-preload.js`. Use `contextBridge` (from the `electron` package) to expose the stuff that you need for your UI.
 
 Since the preload script runs from Node.js, be careful what you do with it and what you expose to the renderer thread!
 
 ## How to use it
 In `/src-electron/` folder, there is a file named `electron-preload.js`. Fill it with your preload code.
 
-Make sure that your `/src-electron/electron-main.[js|ts]` has the following (near the "webPreferences" section):
+Make sure that your `/src-electron/electron-main.js` has the following (near the "webPreferences" section):
 
 ```js /src-electron/electron-main
 // Add this at the top:
 import path from 'path'
+import { fileURLToPath } from 'url'
 
+const currentDir = fileURLToPath(new URL('.', import.meta.url))
 // ...
 
 function createWindow () {
@@ -24,12 +26,15 @@ function createWindow () {
     // ...
     webPreferences: {
       // HERE IS THE MAGIC:
-      preload: path.resolve(__dirname, process.env.QUASAR_ELECTRON_PRELOAD)
+      preload: path.resolve(
+        currentDir,
+        path.join(process.env.QUASAR_ELECTRON_PRELOAD_FOLDER, 'electron-preload' + process.env.QUASAR_ELECTRON_PRELOAD_EXTENSION)
+      )
     }
   })
 ```
 
-Example of `/src-electron/electron-preload.[js|ts]` content:
+Example of `/src-electron/electron-preload.js` content:
 
 ```js
 // example which injects window.myAPI.doAThing() into the renderer
@@ -86,10 +91,9 @@ ipcMain.handle('myAPI:load-prefs', () => {
 ## Custom path to the preload script
 Should you wish to change the location of the preload script (and/or even the main thread file) then edit the `/quasar.config` file:
 
-```js
+```js /quasar.config file
 // should you wish to change default files
 sourceFiles: {
-  electronMain: 'src-electron/electron-main.js',
-  electronPreload: 'src-electron/electron-preload.js'
+  electronMain: 'src-electron/electron-main.js'
 }
 ```

@@ -22,12 +22,12 @@ Adding PWA mode to a Quasar project means a new folder will be created: `/src-pw
 
 You can freely edit these files. Notice a few things:
 
-1. `register-service-worker.[js|ts]` is automatically imported into your app (like any other /src file). It registers the service worker (created by Workbox or your custom one, depending on workbox plugin mode -- quasar.config file > pwa > workboxPluginMode) and you can listen for Service Worker's events. You can use ES6 code.
-2. `custom-service-worker.[js|ts]` will be your service worker file ONLY if workbox plugin mode is set to "injectManifest" (quasar.config file > pwa > workboxMode: 'injectManifest'). Otherwise, Quasar and Workbox will create a service-worker file for you.
+1. `register-service-worker.js` is automatically imported into your app (like any other /src file). It registers the service worker (created by Workbox or your custom one, depending on workbox plugin mode -- quasar.config file > pwa > workboxPluginMode) and you can listen for Service Worker's events. You can use ES6 code.
+2. `custom-service-worker.js` will be your service worker file ONLY if workbox plugin mode is set to "injectManifest" (quasar.config file > pwa > workboxMode: 'injectManifest'). Otherwise, Quasar and Workbox will create a service-worker file for you.
 3. It makes sense to run [Lighthouse](https://developers.google.com/web/tools/lighthouse/) tests on production builds only.
 
 ::: tip
-Read more on `register-service-worker.[js|ts]` and how to interact with the Service Worker on [Handling Service Worker](/quasar-cli-vite/developing-pwa/handling-service-worker) documentation page.
+Read more on `register-service-worker.js` and how to interact with the Service Worker on [Handling Service Worker](/quasar-cli-vite/developing-pwa/handling-service-worker) documentation page.
 :::
 
 ## quasar.config file
@@ -35,15 +35,54 @@ This is the place where you can configure Workbox behavior and also tweak your m
 
 ```js
 pwa: {
-  workboxMode: 'generateSW', // or 'injectManifest'
-  injectPwaMetaTags: true, // boolean | (() => string)
-  swFilename: 'sw.js', // should be .js (as it's the distribution file, not the input file)
-  manifestFilename: 'manifest.json',
-  useCredentialsForManifestTag: false,
-  extendGenerateSWOptions (cfg) {},
-  extendInjectManifestOptions (cfg) {},
-  extendManifestJson (json) {},
-  extendPWACustomSWConf (esbuildConf) {}
+  workboxMode?: "GenerateSW" | "InjectManifest";
+
+  /**
+   * Generated service worker filename to use (needs to end with .js)
+   * @default sw.js
+   */
+  swFilename?: string;
+
+  /**
+   * PWA manifest filename to use on your browser
+   * @default manifest.json
+   */
+  manifestFilename?: string;
+
+  /**
+   * Should you need some dynamic changes to the /src-pwa/manifest.json,
+   * use this method to do it.
+   */
+  extendManifestJson?: (json: PwaManifestOptions) => void;
+
+  /**
+   * Does the PWA manifest tag requires crossorigin auth?
+   * @default false
+   */
+  useCredentialsForManifestTag?: boolean;
+
+  /**
+   * Auto inject the PWA meta tags?
+   * If using the function form, return HTML tags as one single string.
+   * @default true
+   */
+  injectPwaMetaTags?: boolean | ((injectParam: InjectPwaMetaTagsParams) => string);
+
+  /**
+   * Extend the Esbuild config that is used for the custom service worker
+   * (if using it through workboxMode: 'InjectManifest')
+   */
+  extendPWACustomSWConf?: (config: EsbuildConfiguration) => void;
+
+  /**
+   * Extend/configure the Workbox GenerateSW options
+   */
+  extendGenerateSWOptions?: (config: GenerateSWOptions) => void;
+
+  /**
+   * Extend/configure the Workbox InjectManifest options
+   */
+  extendInjectManifestOptions?: (config: InjectManifestOptions) => void;
 }
 
 sourceFiles: {
@@ -56,17 +95,18 @@ sourceFiles: {
 Should you want to tamper with the Vite config for UI in /src:
 
 ```js /quasar.config file
-module.exports = function (ctx) {
+export default defineConfig((ctx) => {
   return {
     build: {
       extendViteConf (viteConf) {
         if (ctx.mode.pwa) {
-          // do something with ViteConf
+          // do something with viteConf
+          // or return an object to deeply merge with current viteConf
         }
       }
     }
   }
-}
+})
 ```
 
 More information: [Workbox](https://developers.google.com/web/tools/workbox).
@@ -89,7 +129,7 @@ Then, edit your `/index.html` file. The following are the actual meta tags that 
   <% if (ctx.mode.pwa) { %>
     <meta name="theme-color" content="<%= pwaManifest.theme_color %>">
     <link rel="mask-icon" href="icons/safari-pinned-tab.svg" color="<%= pwaManifest.theme_color %>">
-    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="default">
     <meta name="msapplication-TileImage" content="icons/ms-icon-144x144.png">
     <meta name="msapplication-TileColor" content="#000000">
@@ -109,8 +149,8 @@ Alternatively, you can assign a function to injectPwaMetaTags like below:
 
 ```js /quasar.config file
 pwa: {
-  injectPwaMetaTags () {
-    return `<meta name="apple-mobile-web-app-capable" content="yes">`
+  injectPwaMetaTags ({ pwaManifest, publicPath }) {
+    return `<meta name="mobile-web-app-capable" content="yes">`
       + `<meta name="apple-mobile-web-app-status-bar-style" content="default">`
   }
 }
@@ -168,11 +208,11 @@ When NOT to use InjectManifest:
 * You want the easiest path to adding a service worker to your site.
 
 ::: tip TIPS
-* If you want to use this mode, you will have to write the service worker (`/src-pwa/custom-service-worker.[js|ts]`) file by yourself.
+* If you want to use this mode, you will have to write the service worker (`/src-pwa/custom-service-worker.js`) file by yourself.
 * Please check the available workboxOptions for this mode on [Workbox website](https://developers.google.com/web/tools/workbox/reference-docs/latest/module-workbox-build#.injectManifest).
 :::
 
-The following snippet is the default code for a custom service worker (`/src-pwa/custom-service-worker.[js|ts]`) which mimics the behavior of `generateSW` mode:
+The following snippet is the default code for a custom service worker (`/src-pwa/custom-service-worker.js`) which mimics the behavior of `generateSW` mode:
 
 ```js
 /*
@@ -182,24 +222,28 @@ The following snippet is the default code for a custom service worker (`/src-pwa
  */
 
 import { clientsClaim } from 'workbox-core'
-import { precacheAndRoute, cleanupOutdatedCaches, createHandlerBoundToURL } from 'workbox-precaching'
+import {
+  precacheAndRoute,
+  cleanupOutdatedCaches,
+  createHandlerBoundToURL,
+} from 'workbox-precaching'
 import { registerRoute, NavigationRoute } from 'workbox-routing'
 
-self.skipWaiting()
-clientsClaim()
+self.skipWaiting();
+clientsClaim();
 
 // Use with precache injection
 precacheAndRoute(self.__WB_MANIFEST)
 
 cleanupOutdatedCaches()
 
-// Non-SSR fallback to index.html
-// Production SSR fallback to offline.html (except for dev)
+// Non-SSR fallbacks to index.html
+// Production SSR fallbacks to offline.html (except for dev)
 if (process.env.MODE !== 'ssr' || process.env.PROD) {
   registerRoute(
     new NavigationRoute(
       createHandlerBoundToURL(process.env.PWA_FALLBACK_HTML),
-      { denylist: [/sw\.js$/, /workbox-(.)*\.js$/] }
+      { denylist: [new RegExp(process.env.PWA_SERVICE_WORKER_REGEX), /workbox-(.)*\.js$/] }
     )
   )
 }
@@ -213,7 +257,7 @@ Should you need to change it dynamically at build time, you can do so by editing
 ```js /quasar.config file
 pwa: {
   extendManifestJson (json) {
-    // tamper with the json
+    // tamper with the json inline
   }
 }
 ```
@@ -248,7 +292,7 @@ pwa: {
 }
 ```
 
-## Filename hashes quirk <q-badge label="@quasar/app-vite v1.1+" />
+## Filename hashes quirk
 
 Due to how Rollup builds the assets (through Vite), when you change any of your script source files (.js) this will also change the hash part of (almost) ALL .js files (ex: `454d87bd` in `assets/index.454d87bd.js`). The revision number of all assets will get changed in your service worker file and this means that when PWA updates it will re-download ALL your assets again. What a waste of bandwidth and such a longer time to get the PWA updated!
 

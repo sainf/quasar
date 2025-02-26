@@ -282,7 +282,7 @@ value => value.includes('Hello') || 'Field must contain word Hello'
 
 You can reset the validation by calling `resetValidation()` method on the QInput.
 
-There are **helpers** for QInput `rules` prop: [full list](https://github.com/quasarframework/quasar/blob/dev/ui/src/utils/patterns.js). You can use these for convenience (examples: "date", "time", "hexColor", "rgbOrRgbaColor", "anyColor") or write the string specifying your custom needs.
+There are **helpers** for QInput `rules` prop: [full list](https://github.com/quasarframework/quasar/blob/dev/ui/src/utils/patterns/patterns.js). You can use these for convenience (examples: "date", "time", "hexColor", "rgbOrRgbaColor", "anyColor") or write the string specifying your custom needs.
 
 <DocExample title="Basic" file="ValidationRequired" />
 
@@ -308,7 +308,7 @@ Consider coupling async rules with `debounce` prop to avoid calling the async ru
 You can also use external validation and only pass `error` and `error-message` (enable `bottom-slots` to display this error message).
 
 ::: tip
-Depending on your needs, you might connect [Vuelidate](https://vuelidate.netlify.com/) (our recommended approach) or some other validation library to QInput.
+Depending on your needs, you might connect [Vuelidate](https://vuelidate-next.netlify.app/) (our recommended approach) or some other validation library to QInput.
 :::
 
 <DocExample title="External" file="ValidationExternal" />

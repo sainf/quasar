@@ -1,6 +1,6 @@
 import { join } from 'node:path'
 import { fileURLToPath } from 'node:url'
-import fg from 'fast-glob'
+import { globSync } from 'tinyglobby'
 
 const moduleIdRE = /^examples:/
 const resolvedIdPrefix = '\0examples:'
@@ -18,12 +18,9 @@ function devLoad (id) {
 function prodLoad (id) {
   if (id.startsWith(resolvedIdPrefix) === true) {
     const exampleId = id.substring(id.indexOf(':') + 1)
-    const files = fg.sync(join(targetFolder, exampleId, '/*.vue'))
+    const files = globSync('*.vue', { cwd: join(targetFolder, exampleId) })
 
-    const localFolder = join(targetFolder, exampleId) + '/'
-    const localFolderLen = localFolder.length
-
-    const importList = files.map(entry => entry.substring(localFolderLen, entry.length - 4))
+    const importList = files.map(entry => entry.substring(0, entry.length - 4))
     const importStatements = importList
       .map(entry => (
         `import ${entry} from 'app/src/examples/${exampleId}/${entry}.vue'` +

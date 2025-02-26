@@ -11,20 +11,20 @@ The `ssrContext` Object is the SSR context with which all the app's Vue componen
 The `ssrContext` Object is available only on SSR builds, on the server-side compilation (when `process∙env∙SERVER === true`).
 :::
 
-Among other places, it is supplied as parameter to [boot files](/quasar-cli-webpack/boot-files), to the [Vuex store](/quasar-cli-webpack/state-management-pinia-vuex) and [Vue Router](/quasar-cli-webpack/routing) initialization functions, and to the [preFetch](/quasar-cli-webpack/prefetch-feature) method:
+Among other places, it is supplied as parameter to [boot files](/quasar-cli-webpack/boot-files), to the [Pinia instance](/quasar-cli-webpack/state-management-with-pinia) and [Vue Router](/quasar-cli-webpack/routing) initialization functions, and to the [preFetch](/quasar-cli-webpack/prefetch-feature) method:
 
 ```js
 // a boot file
-export default ({ ..., ssrContext }) => { /* ... */ }
+export default defineBoot(({ ..., ssrContext }) => { /* ... */ })
 
-// src/router/index.[js|ts]
-export default ({ ..., ssrContext }) { /* ... */ }
+// src/router/index.js
+export default defineRouter(({ ..., ssrContext }) { /* ... */ })
 
-// src/store/index.[js|ts]
-export default ({ ..., ssrContext }) { /* ... */ }
+// src/store/index.js
+export default defineStore(({ ..., ssrContext }) { /* ... */ })
 
 // with preFetch:
-preFetch ({ ..., ssrContext }) { /* ... */ }
+preFetch: definePreFetch(({ ..., ssrContext }) { /* ... */ })
 ```
 
 You can also access the ssrContext in your Vue components. Below are two examples, one with Composition API and one with Options API:
@@ -57,7 +57,6 @@ ssrContext: {
   req,        // Express.js object
   res,        // Express.js object
   $q,         // The Quasar's $q Object
-  state,      // The Vuex state (ONLY if using the Vuex store)
 
   nonce,      // (optional to set it yourself)
               // The global "nonce" attribute to use

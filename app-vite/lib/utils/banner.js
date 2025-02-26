@@ -138,6 +138,10 @@ function getIPList () {
   return cache.ipList
 }
 
+function capitalize (str) {
+  return str.charAt(0).toUpperCase() + str.slice(1)
+}
+
 export function printDevRunningBanner (quasarConf) {
   const { ctx } = quasarConf
 
@@ -166,13 +170,14 @@ export function printDevRunningBanner (quasarConf) {
   }
 
   if (ctx.mode.bex === true) {
+    const folder = ctx.targetName === 'chrome'
+      ? quasarConf.build.distDir
+      : join(quasarConf.build.distDir, 'manifest.json')
+
     banner.push(
       line,
-      ` ${ greenBanner } Load the dev extension from:`,
-      `   · Chrome(ium): ${ green(quasarConf.build.distDir) }`,
-      `   · Firefox:     ${ green(join(quasarConf.build.distDir, 'manifest.json')) }`,
-      line,
-      ` ${ greenBanner } You will need to manually refresh the browser page to see changes after recompilations.`
+      ` ${ greenBanner } Load the dev extension in ${ capitalize(ctx.targetName) } from:`,
+      `   ${ green(folder) }`
     )
   }
 

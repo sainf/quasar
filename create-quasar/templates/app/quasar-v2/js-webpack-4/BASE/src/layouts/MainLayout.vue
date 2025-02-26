@@ -49,10 +49,6 @@
 import { ref } from 'vue'
 import EssentialLink from 'components/EssentialLink.vue'
 
-defineOptions({
-  name: 'MainLayout'
-})
-
 const linksList = [
   {
     title: 'Docs',

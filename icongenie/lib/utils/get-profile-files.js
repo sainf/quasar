@@ -1,12 +1,12 @@
 
 import { basename } from 'node:path'
-import glob from 'fast-glob'
+import { globSync } from 'tinyglobby'
 import { lstatSync } from 'node:fs'
 
 import { warn } from '../utils/logger.js'
 
 function parseFolder (folder) {
-  const profileFiles = glob.sync(`icongenie-*.json`, {
+  const profileFiles = globSync(`icongenie-*.json`, {
     cwd: folder,
     deep: 1,
     absolute: true

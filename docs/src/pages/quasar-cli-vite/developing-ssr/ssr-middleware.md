@@ -22,11 +22,19 @@ You will need at least one SSR middleware file which handles the rendering of th
 A SSR middleware file is a simple JavaScript file which exports a function. Quasar will then call the exported function when it prepares the Nodejs server (Expressjs) app and additionally pass an Object as param (which will be detailed in the next section).
 
 ```js
-// import something here
+import { defineSsrMiddleware } from '#q-app/wrappers'
 
-export default ({ app, port, resolve, publicPath, folders, render, serve }) => {
+export default defineSsrMiddleware(({
+  app,
+  port,
+  resolve,
+  publicPath,
+  folders,
+  render,
+  serve
+}) => {
   // something to do with the server "app"
-}
+})
 ```
 
 The SSR middleware files can also be async:
@@ -34,22 +42,13 @@ The SSR middleware files can also be async:
 ```js
 // import something here
 
-export default async ({ app, port, resolve, publicPath, folders, render, serve }) => {
+export default defineSsrMiddleware(async ({ app, port, resolve, publicPath, folders, render, serve }) => {
   // something to do with the server "app"
-  await something()
-}
-```
-
-You can wrap the returned function with `ssrMiddleware` helper to get a better IDE autocomplete experience (through Typescript):
-
-```js
-import { ssrMiddleware } from 'quasar/wrappers'
-
-export default ssrMiddleware(async ({ app, port, resolve, publicPath, folders, render, serve }) => {
-  // something to do
   await something()
 })
 ```
+
+Notice the `defineSsrMiddleware` import. It is essentially a no-op function, but it helps with the IDE autocomplete.
 
 Notice we are using the [ES6 destructuring assignment](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Operators/Destructuring_assignment). Only assign what you actually need/use.
 
@@ -58,7 +57,7 @@ Notice we are using the [ES6 destructuring assignment](https://developer.mozilla
 We are referring here to the Object received as parameter by the default exported function of the SSR middleware file.
 
 ```js
-export default ({ app, port, resolve, publicPath, folders, render, serve }) => {
+export default defineSsrMiddleware(({ app, port, resolve, publicPath, folders, render, serve }) => {
 ```
 
 Detailing the Object:
@@ -131,13 +130,11 @@ serve.static():
   * `opts.maxAge` is used by default, taking into account the quasar.config file > ssr > maxAge configuration; this sets how long the respective file(s) can live in browser's cache
 
   ```js
-  serve.static('my-file.json')
+  serve.static({ urlPath: '/my-file.json', pathToServe: '.', opts = {} })
 
   // is equivalent to:
 
-  express.static(resolve.public('my-file.json'), {
-    maxAge: ... // quasar.config file > ssr > maxAge
-  })
+  express.static(resolve.public('my-file.json'), {})
   ```
 
 serve.error():
@@ -173,11 +170,11 @@ You can also return a Promise:
 ```js
 // import something here
 
-export default ({ app, port, resolve, publicPath, folders, render, serve }) => {
+export default defineSsrMiddleware(({ app, port, resolve, publicPath, folders, render, serve }) => {
   return new Promise((resolve, reject) => {
     // something to do with the server "app"
   })
-}
+})
 ```
 
 You can now add content to that file depending on the intended use of your SSR middleware file.
@@ -291,7 +288,10 @@ export default ({ app, resolve, render, serve }) => {
           // Render Error Page on production or
           // create a route (/src/routes) for an error page and redirect to it
           res.status(500).send('500 | Internal Server Error')
-          // console.error(err.stack)
+
+          if (process.env.DEBUGGING) {
+            console.error(err.stack)
+          }
         }
       })
   })
@@ -315,10 +315,10 @@ You can use any connect API compatible middleware.
 The order in which the SSR middlewares are applied matters. So it might be wise to set the following one as the first (in quasar.config file > ssr > middlewares) so that it will be able to intercept all client requests.
 
 ```js
-export default ({ app, resolve }) => {
+export default defineSsrMiddleware(({ app, resolve }) => {
   app.all(resolve.urlPath('*'), (req, _, next) => {
     console.log('someone requested:', req.url)
     next()
   })
-}
+})
 ```

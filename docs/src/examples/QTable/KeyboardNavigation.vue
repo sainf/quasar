@@ -127,17 +127,13 @@ export default {
           navigationActive.value !== true ||
           [ 33, 34, 35, 36, 38, 40 ].indexOf(evt.keyCode) === -1 ||
           tableRef.value === null
-        ) {
-          return
-        }
+        ) return
 
         evt.preventDefault()
 
         const { computedRowsNumber, computedRows } = tableRef.value
 
-        if (computedRows.length === 0) {
-          return
-        }
+        if (computedRows.length === 0) return
 
         const currentIndex = selected.value.length > 0 ? computedRows.indexOf(toRaw(selected.value[ 0 ])) : -1
         const currentPage = pagination.value.page

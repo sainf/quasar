@@ -1,5 +1,5 @@
 {
-  "mixins": [ "composables/private/use-field", "components/virtual-scroll/use-virtual-scroll", "composables/private/use-form" ],
+  "mixins": [ "composables/private.use-field/use-field", "components/virtual-scroll/use-virtual-scroll", "composables/use-form/private.use-form" ],
 
   "meta": {
     "docsUrl": "https://v2.quasar.dev/vue-components/select"
@@ -34,7 +34,7 @@
 
     "options": {
       "type": "Array",
-      "desc": "Available options that the user can select from. For best performance freeze the list of options.",
+      "desc": "Array of objects with available options that the user can select from. For best performance freeze the list of options. Canonical form of each object is with 'label' (String), 'value' (Any) and optional 'disable' (Boolean) props (can be customized with options-value/option-label/option-disable props).",
       "default": "[]",
       "examples": [
         "[ 'Tesla', 'iPhone' ]",
@@ -47,6 +47,7 @@
       "type": [ "Function", "String" ],
       "desc": "Property of option which holds the 'value'; If using a function then for best performance, reference it from your scope and do not define it inline",
       "default": "'value'",
+      "__runtimeDefault": true,
       "params": {
         "option": {
           "type": [ "String", "Object" ],
@@ -74,6 +75,7 @@
       "type": [ "Function", "String" ],
       "desc": "Property of option which holds the 'label'; If using a function then for best performance, reference it from your scope and do not define it inline",
       "default": "'label'",
+      "__runtimeDefault": true,
       "params": {
         "option": {
           "type": [ "String", "Object" ],
@@ -101,6 +103,7 @@
       "type": [ "Function", "String" ],
       "desc": "Property of option which tells it's disabled; The value of the property must be a Boolean; If using a function then for best performance, reference it from your scope and do not define it inline",
       "default": "'disable'",
+      "__runtimeDefault": true,
       "params": {
         "option": {
           "type": [ "String", "Object" ],
@@ -237,16 +240,22 @@
       "addedIn": "v2.15"
     },
 
+    "use-chips": {
+      "type": "Boolean",
+      "desc": "Use QChip to show what is currently selected",
+      "category": "selection"
+    },
+
     "use-input": {
       "type": "Boolean",
       "desc": "Use an input tag where users can type",
       "category": "content"
     },
 
-    "use-chips": {
-      "type": "Boolean",
-      "desc": "Use QChip to show what is currently selected",
-      "category": "selection"
+    "maxlength": {
+      "type": [ "String", "Number" ],
+      "desc": "Specify a max length for the inner input tag (if 'use-input' is enabled)",
+      "category": "content"
     },
 
     "fill-input": {
@@ -266,6 +275,13 @@
       "type": "Boolean",
       "desc": "Try to map labels of model from 'options' Array; has a small performance penalty; If you are using emit-value you will probably need to use map-options to display the label text in the select field rather than the value;  Refer to the 'Affecting model' section above",
       "category": "options"
+    },
+
+    "disable-tab-selection": {
+      "type": "Boolean",
+      "desc": "Prevents the tab key from confirming the currently hovered option",
+      "category": "options",
+      "addedIn": "v2.17"
     },
 
     "emit-value": {
@@ -304,7 +320,8 @@
     },
 
     "tabindex": {
-      "extends": "tabindex"
+      "extends": "tabindex",
+      "default": "0"
     },
 
     "autocomplete": {
@@ -318,6 +335,7 @@
       "extends": "transition",
       "desc": "Transition when showing the menu/dialog; One of Quasar's embedded transitions",
       "default": "'fade'",
+      "passthrough": "child",
       "category": "behavior"
     },
 
@@ -325,6 +343,7 @@
       "extends": "transition",
       "desc": "Transition when hiding the menu/dialog; One of Quasar's embedded transitions",
       "default": "'fade'",
+      "passthrough": "child",
       "category": "behavior"
     },
 
@@ -332,6 +351,7 @@
       "type": [ "String", "Number" ],
       "desc": "Transition duration when hiding the menu/dialog (in milliseconds, without unit)",
       "default": "300",
+      "passthrough": "child",
       "category": "behavior"
     },
 
@@ -345,6 +365,10 @@
 
     "name": {
       "desc": "Used to specify the name of the control; Useful if dealing with forms; If not specified, it takes the value of 'for' prop, if it exists"
+    },
+
+    "virtual-scroll-item-size": {
+      "__runtimeDefault": true
     }
   },
 
@@ -391,6 +415,10 @@
           "type": "Boolean",
           "desc": "Always true -- passed down as prop to QItem (when using QItem)"
         },
+        "html": {
+          "type": "Boolean",
+          "desc": "Is the content HTML?"
+        },
         "removeAtIndex": {
           "type": "Function",
           "desc": "Remove selected option located at specific index",
@@ -434,6 +462,14 @@
           "type": "Any",
           "desc": "Option -- its value is taken from 'options' prop"
         },
+        "html": {
+          "type": "Boolean",
+          "desc": "Is the content HTML?"
+        },
+        "label": {
+          "type": "String",
+          "desc": "Label of the option"
+        },
         "selected": {
           "type": "Boolean",
           "desc": "Is option selected?"
@@ -475,10 +511,6 @@
   },
 
   "events": {
-    "update:model-value": {
-      "extends": "update:model-value"
-    },
-
     "input-value": {
       "desc": "Emitted when the value in the text input changes",
       "params": {
@@ -642,16 +674,14 @@
           }
         }
       }
-    }
+    },
+
+    "keyup": { "internal": true },
+    "keydown": { "internal": true },
+    "keypress": { "internal": true }
   },
 
   "methods": {
-    "focus": {
-      "desc": "Focus component",
-      "params": null,
-      "returns": null
-    },
-
     "showPopup": {
       "desc": "Focus and open popup",
       "params": null,

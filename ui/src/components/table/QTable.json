@@ -1,5 +1,5 @@
 {
-  "mixins": [ "composables/private/use-fullscreen" ],
+  "mixins": [ "composables/private.use-fullscreen/use-fullscreen" ],
 
   "meta": {
     "docsUrl": "https://v2.quasar.dev/vue-components/table"
@@ -41,13 +41,15 @@
     },
 
     "virtual-scroll-target": {
-      "extends": "scroll-target"
+      "extends": "scroll-target",
+      "passthrough": "child"
     },
 
     "virtual-scroll-slice-size": {
-      "type": [ "Number", "String" ],
+      "type": [ "Number", "String", "null" ],
       "desc": "Minimum number of rows to render in the virtual list",
-      "default": "30",
+      "default": "10",
+      "passthrough": "child",
       "category": "virtual-scroll"
     },
 
@@ -55,6 +57,7 @@
       "type": [ "Number", "String" ],
       "desc": "Ratio of number of rows in visible zone to render before it",
       "default": "1",
+      "passthrough": "child",
       "category": "virtual-scroll"
     },
 
@@ -62,6 +65,7 @@
       "type": [ "Number", "String" ],
       "desc": "Ratio of number of rows in visible zone to render after it",
       "default": "1",
+      "passthrough": "child",
       "category": "virtual-scroll"
     },
 
@@ -69,6 +73,7 @@
       "type": [ "Number", "String" ],
       "desc": "Default size in pixels of a row; This value is used for rendering the initial table; Try to use a value close to the minimum size of a row; Default value: 48 (24 if dense)",
       "default": "# 48/24",
+      "passthrough": "child",
       "category": "virtual-scroll"
     },
 
@@ -76,6 +81,7 @@
       "type": [ "Number", "String" ],
       "desc": "Size in pixels of the sticky header (if using one); A correct value will improve scroll precision; Will be also used for non-virtual-scroll tables for fixing top alignment when using scrollTo method",
       "default": "0",
+      "passthrough": "child",
       "category": "virtual-scroll|behavior"
     },
 
@@ -83,13 +89,15 @@
       "type": [ "Number", "String" ],
       "desc": "Size in pixels of the sticky footer part (if using one); A correct value will improve scroll precision",
       "default": "0",
+      "passthrough": "child",
       "category": "virtual-scroll"
     },
 
     "table-colspan": {
       "type": [ "Number", "String" ],
       "desc": "The number of columns in the table (you need this if you use table-layout: fixed)",
-      "category": "virtual-scroll|content"
+      "category": "virtual-scroll|content",
+      "passthrough": "child"
     },
 
     "color": {
@@ -257,7 +265,7 @@
             "desc": "Comparison result of term 'a' with term 'b'. Less than 0 when 'a' should come first; greater than 0 if 'b' should come first; equal to 0 if their position must not be changed with respect to each other",
             "examples": [ "-1", "0", "1" ]
           },
-          "addedIn": "v2.13.0"
+          "addedIn": "v2.13"
         },
         "sortOrder": {
           "type": "String",
@@ -661,7 +669,6 @@
         "type": "Array",
         "desc": "Filtered rows"
       },
-      "default": "# see source code",
       "examples": [ "# see source code" ],
       "category": "filter"
     },
@@ -703,7 +710,7 @@
     "rows-per-page-options": {
       "type": "Array",
       "desc": "Options for user to pick (Numbers); Number 0 means 'Show all rows in one page'",
-      "default": "[ 3, 5, 7, 10, 15, 20, 25, 50, 0 ]",
+      "default": "[ 5, 7, 10, 15, 20, 25, 50, 0 ]",
       "examples": [ "[ 10, 20 ]" ],
       "category": "pagination"
     },
@@ -728,7 +735,6 @@
     "expanded": {
       "type": "Array",
       "desc": "Keeps the array with expanded rows keys",
-      "default": "[]",
       "syncable": true,
       "examples": [ "# v-model:expanded=\"expanded\"" ],
       "category": "expansion"
@@ -756,7 +762,6 @@
         "type": "Array",
         "desc": "Sorted rows"
       },
-      "default": "# see source code",
       "examples": [ "# see source code" ],
       "category": "sorting"
     }
@@ -1354,6 +1359,11 @@
               "type": "Number",
               "required": true,
               "desc": "How many rows per page? 0 means Infinite"
+            },
+            "rowsNumber": {
+              "type": "Number",
+              "required": false,
+              "desc": "For server-side fetching only. How many total database rows are there to be added to the table."
             }
           }
         },
@@ -1433,6 +1443,11 @@
               "type": "Number",
               "required": true,
               "desc": "How many rows per page? 0 means Infinite"
+            },
+            "rowsNumber": {
+              "type": "Number",
+              "required": false,
+              "desc": "For server-side fetching only. How many total database rows are there to be added to the table."
             }
           }
         },
@@ -1512,6 +1527,11 @@
               "type": "Number",
               "required": true,
               "desc": "How many rows per page? 0 means Infinite"
+            },
+            "rowsNumber": {
+              "type": "Number",
+              "required": false,
+              "desc": "For server-side fetching only. How many total database rows are there to be added to the table."
             }
           }
         },
@@ -1591,6 +1611,11 @@
               "type": "Number",
               "required": true,
               "desc": "How many rows per page? 0 means Infinite"
+            },
+            "rowsNumber": {
+              "type": "Number",
+              "required": false,
+              "desc": "For server-side fetching only. How many total database rows are there to be added to the table."
             }
           }
         },
@@ -1670,6 +1695,11 @@
               "type": "Number",
               "required": true,
               "desc": "How many rows per page? 0 means Infinite"
+            },
+            "rowsNumber": {
+              "type": "Number",
+              "required": false,
+              "desc": "For server-side fetching only. How many total database rows are there to be added to the table."
             }
           }
         },
@@ -1749,6 +1779,11 @@
               "type": "Number",
               "required": true,
               "desc": "How many rows per page? 0 means Infinite"
+            },
+            "rowsNumber": {
+              "type": "Number",
+              "required": false,
+              "desc": "For server-side fetching only. How many total database rows are there to be added to the table."
             }
           }
         },
@@ -1908,6 +1943,11 @@
                   "type": "Number",
                   "required": true,
                   "desc": "How many rows per page? 0 means Infinite"
+                },
+                "rowsNumber": {
+                  "type": "Number",
+                  "required": false,
+                  "desc": "For server-side fetching only. How many total database rows are there to be added to the table."
                 }
               }
             },
@@ -2182,6 +2222,11 @@
             "rowsPerPage": {
               "type": "Number",
               "desc": "How many rows per page? 0 means Infinite"
+            },
+            "rowsNumber": {
+              "type": "Number",
+              "required": false,
+              "desc": "For server-side fetching only. How many total database rows are there to be added to the table."
             }
           }
         },

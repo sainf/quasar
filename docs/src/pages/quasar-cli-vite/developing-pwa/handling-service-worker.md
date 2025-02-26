@@ -8,7 +8,7 @@ It's important to note that the Service Worker (which gets automatically generat
 
 ## Interacting with Service Worker
 
-Notice the [register-service-worker](https://github.com/yyx990803/register-service-worker) npm package, which comes out of the box along with Quasar CLI (so don't install it yourself).
+Add the [register-service-worker](https://github.com/yyx990803/register-service-worker) npm package in your package.json file as a dependency (if it's not already there).
 
 ```js /src-pwa/register-service-worker.js
 import { register } from 'register-service-worker'
@@ -70,7 +70,7 @@ When you set `devServer > https: true` in your quasar.config file, Quasar will i
 ```js /quasar.config file
 devServer: {
   https: {
-    // Use ABSOLUTE paths or path.join(__dirname, 'root/relative/path')
+    // Use ABSOLUTE paths or fileURLToPath(new URL('./root/relative/path', import.meta.url))
     // https://nodejs.org/api/https.html#https_https_createserver_options_requestlistener
     key: "/path/to/server.key",
     pfx: "/path/to/server.pfx",

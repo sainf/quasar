@@ -8,9 +8,11 @@ scope:
     l: src-pwa
     c:
     - l: register-service-worker.js
-      e: "(or .ts) App-code *managing* service worker"
+      e: "(or .ts) UI code *managing* service worker"
+    - l: manifest.json
+      e: Your PWA manifest file
     - l: custom-service-worker.js
-      e: "(or .ts) Optional custom service worker file (InjectManifest mode ONLY)"
+      e: "(or .ts) Optional custom service worker file (injectManifest mode ONLY)"
 ---
 
 ## Service Worker
@@ -20,12 +22,12 @@ Adding PWA mode to a Quasar project means a new folder will be created: `/src-pw
 
 You can freely edit these files. Notice a few things:
 
-1. `register-service-worker.[js|ts]` is automatically imported into your app (like any other /src file). It registers the service worker (created by Workbox or your custom one, depending on workbox plugin mode -- quasar.config file > pwa > workboxPluginMode) and you can listen for Service Worker's events. You can use ES6 code.
-2. `custom-service-worker.[js|ts]` will be your service worker file ONLY if workbox plugin mode is set to "InjectManifest" (quasar.config file > pwa > workboxPluginMode: 'InjectManifest'). Otherwise, Workbox will create a service-worker file for you.
+1. `register-service-worker.js` is automatically imported into your app (like any other /src file). It registers the service worker (created by Workbox or your custom one, depending on workbox plugin mode -- quasar.config file > pwa > workboxPluginMode) and you can listen for Service Worker's events. You can use ES6 code.
+2. `custom-service-worker.js` will be your service worker file ONLY if workbox plugin mode is set to "injectManifest" (quasar.config file > pwa > workboxMode: 'injectManifest'). Otherwise, Quasar and Workbox will create a service-worker file for you.
 3. It makes sense to run [Lighthouse](https://developers.google.com/web/tools/lighthouse/) tests on production builds only.
 
 ::: tip
-Read more on `register-service-worker.[js|ts]` and how to interact with the Service Worker on [Handling Service Worker](/quasar-cli-webpack/developing-pwa/handling-service-worker) documentation page.
+Read more on `register-service-worker.js` and how to interact with the Service Worker on [Handling Service Worker](/quasar-cli-webpack/developing-pwa/handling-service-worker) documentation page.
 :::
 
 ## quasar.config file
@@ -33,120 +35,155 @@ This is the place where you can configure Workbox behavior and also tweak your m
 
 ```js
 pwa: {
-  // workboxPluginMode: 'InjectManifest',
-  // workboxOptions: {},
-  manifest: {
-    // ...
-  },
+  workboxMode?: "GenerateSW" | "InjectManifest";
 
-  // Use this OR metaVariablesFn, but not both;
-  // variables used to inject specific PWA
-  // meta tags (below are default values);
-  metaVariables: {
-    appleMobileWebAppCapable: 'yes',
-    appleMobileWebAppStatusBarStyle: 'default',
-    appleTouchIcon120: 'icons/apple-icon-120x120.png',
-    appleTouchIcon180: 'icons/apple-icon-180x180.png',
-    appleTouchIcon152: 'icons/apple-icon-152x152.png',
-    appleTouchIcon167: 'icons/apple-icon-167x167.png',
-    appleSafariPinnedTab: 'icons/safari-pinned-tab.svg',
-    msapplicationTileImage: 'icons/ms-icon-144x144.png',
-    msapplicationTileColor: '#000000'
-  },
+  /**
+   * Generated service worker filename to use (needs to end with .js)
+   * @default sw.js
+   */
+  swFilename?: string;
 
-  // Optional, overrides metaVariables above;
-  // Use this OR metaVariables, but not both;
-  metaVariablesFn (manifest) {
-    // ...
-    return [
-      {
-        // this entry will generate:
-        // <meta name="theme-color" content="ff0">
+  /**
+   * PWA manifest filename to use on your browser
+   * @default manifest.json
+   */
+  manifestFilename?: string;
 
-        tagName: 'meta',
-        attributes: {
-          name: 'theme-color',
-          content: '#ff0'
-        }
-      },
+  /**
+   * Should you need some dynamic changes to the /src-pwa/manifest.json,
+   * use this method to do it.
+   */
+  extendManifestJson?: (json: PwaManifestOptions) => void;
 
-      {
-        // this entry will generate:
-        // <link rel="apple-touch-icon" sizes="180x180" href="icons/icon-180.png">
-        // references /public/icons/icon-180.png
+  /**
+   * Does the PWA manifest tag requires crossorigin auth?
+   * @default false
+   */
+  useCredentialsForManifestTag?: boolean;
 
-        tagName: 'link',
-        attributes: {
-          rel: 'apple-touch-icon',
-          sizes: '180x180',
-          href: 'icons/icon-180.png'
-        },
-        closeTag: false // this is optional;
-                        // specifies if tag also needs an explicit closing tag;
-                        // it's Boolean false by default
-      }
-    ]
-  },
+  /**
+   * Auto inject the PWA meta tags?
+   * If using the function form, return HTML tags as one single string.
+   * @default true
+   */
+  injectPwaMetaTags?: boolean | ((injectParam: InjectPwaMetaTagsParams) => string);
 
-  // optional; webpack config Object for
-  // the custom service worker ONLY (/src-pwa/custom-service-worker.[js|ts])
-  // if using workbox in InjectManifest mode
-  extendWebpackCustomSW (cfg) {
-    // directly change props of cfg;
-    // no need to return anything
-  },
+  /**
+   * Extend the Esbuild config that is used for the custom service worker
+   * (if using it through workboxMode: 'InjectManifest')
+   */
+  extendPWACustomSWConf?: (config: EsbuildConfiguration) => void;
 
-  // optional; EQUIVALENT to extendWebpackCustomSW() but uses webpack-chain;
-  // for the custom service worker ONLY (/src-pwa/custom-service-worker.[js|ts])
-  // if using workbox in InjectManifest mode
-  chainWebpackCustomSW (chain) {
-    // chain is a webpack-chain instance
-    // of the Webpack configuration
+  /**
+   * Extend/configure the Workbox GenerateSW options
+   */
+  extendGenerateSWOptions?: (config: GenerateSWOptions) => void;
 
-    // example:
-    // chain.plugin('eslint-webpack-plugin')
-    //   .use(ESLintPlugin, [{ extensions: [ 'js' ] }])
+  /**
+   * Extend/configure the Workbox InjectManifest options
+   */
+  extendInjectManifestOptions?: (config: InjectManifestOptions) => void;
+}
+
+sourceFiles: {
+  pwaRegisterServiceWorker: 'src-pwa/register-service-worker',
+  pwaServiceWorker: 'src-pwa/custom-service-worker',
+  pwaManifestFile: 'src-pwa/manifest.json',
+}
+```
+
+Should you want to tamper with the Webpack config for UI in /src you have two options:
+
+```js /quasar.config file
+build: {
+  extendWebpack(webpackCfg) { ... },
+  chainWebpack(webpackChain) { ... }
+}
+```
+
+More information: [Workbox](https://developers.google.com/web/tools/workbox).
+
+## Adding your own meta tags in index.html
+
+Quasar CLI adds (dynamically) some PWA oriented meta tags into your index.html. Should you wish to customize the tags, first disable this behavior in the `/quasar.config` file:
+
+```js /quasar.config file
+pwa: {
+  injectPwaMetaTags: false
+}
+```
+
+Then, edit your `/index.html` file. The following are the actual meta tags that Quasar CLI injects dynamically:
+
+```html
+<head>
+
+  <% if (ctx.mode.pwa) { %>
+    <meta name="theme-color" content="<%= pwaManifest.theme_color %>">
+    <link rel="mask-icon" href="icons/safari-pinned-tab.svg" color="<%= pwaManifest.theme_color %>">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="default">
+    <meta name="msapplication-TileImage" content="icons/ms-icon-144x144.png">
+    <meta name="msapplication-TileColor" content="#000000">
+    <meta name="apple-mobile-web-app-title" content="<%= pwaManifest.name %>">
+    <link rel="apple-touch-icon" href="icons/apple-icon-120x120.png">
+    <link rel="apple-touch-icon" sizes="152x152" href="icons/apple-icon-152x152.png">
+    <link rel="apple-touch-icon" sizes="167x167" href="icons/apple-icon-167x167.png">
+    <link rel="apple-touch-icon" sizes="180x180" href="icons/apple-icon-180x180.png">
+  <% } %>
+
+</head>
+```
+
+Notice that you have access to your PWA manifest through `pwaManifest` above.
+
+Alternatively, you can assign a function to injectPwaMetaTags like below:
+
+```js /quasar.config file
+pwa: {
+  injectPwaMetaTags ({ pwaManifest, publicPath }) {
+    return `<meta name="mobile-web-app-capable" content="yes">`
+      + `<meta name="apple-mobile-web-app-status-bar-style" content="default">`
   }
 }
 ```
 
-More information: [Workbox Webpack Plugin](https://developer.chrome.com/docs/workbox/modules/workbox-webpack-plugin/), [Workbox](https://developer.chrome.com/docs/workbox/).
-
-The `metaVariables` Object is used by Quasar itself only (has no meaning for Workbox) to inject specific value attributes to some PWA meta tags into the rendered HTML page. Example: `<meta name="apple-mobile-web-app-status-bar-style">` will have value attribute assigned to the content of `metaVariables.appleMobileWebAppStatusBarStyle`.
-
-You can use an alternative to metaVariables: `metaVariablesFn(manifest)` which can return an Array of Objects (see their form in the code above). Should you configure this function to not return an Array or to return an empty Array, then Quasar App CLI will understand not to add any tags -- so you can manually add your custom tags directly in /index.html or /src/index.template.html.
-
 ## Picking Workbox mode
 
-There are two Workbox operating modes: **GenerateSW** (default) and **InjectManifest**. The first one generates a service worker automatically, based on quasar.config file > pwa > workboxOptions (if any), while the second mode allows you to write your own service worker file.
+There are two Workbox operating modes: **generateSW** (default) and **injectManifest**.
 
 Setting the mode that you want to use is done through the `/quasar.config` file:
 
 ```js /quasar.config file
 pwa: {
-  // workboxPluginMode: 'InjectManifest',
-  // workboxOptions: { ... }
+  workboxMode: 'generateSW',
+  extendGenerateSWOptions (cfg) {
+    // configure workbox on generateSW
+  }
+}
+
+pwa: {
+  workboxMode: 'injectManifest',
+  extendInjectManifestOptions (cfg) {
+    // configure workbox on injectManifest
+  }
 }
 ```
 
-::: danger
-Make sure that your `workboxOptions` match the Workbox mode that you have picked, otherwise the workbox webpack plugin might [halt your app from compiling](https://github.com/quasarframework/quasar/issues/4998).
-:::
+### generateSW
 
-### GenerateSW
-
-When to use GenerateSW:
+When to use generateSW:
 
 * You want to precache files.
 * You have simple runtime configuration needs (e.g. the configuration allows you to define routes and strategies).
 
-When NOT to use GenerateSW:
+When NOT to use generateSW:
 
 * You want to use other Service Worker features (i.e. Web Push).
 * You want to import additional scripts or add additional logic.
 
 ::: tip
-Please check the available workboxOptions for this mode on [Workbox website](https://developers.google.com/web/tools/workbox/modules/workbox-webpack-plugin#full_generatesw_config).
+Please check the available workboxOptions for this mode on [Workbox website](https://developers.google.com/web/tools/workbox/reference-docs/latest/module-workbox-build#.generateSW).
 :::
 
 ### InjectManifest
@@ -163,61 +200,56 @@ When NOT to use InjectManifest:
 * You want the easiest path to adding a service worker to your site.
 
 ::: tip TIPS
-* If you want to use this mode, you will have to write the service worker (`/src-pwa/custom-service-worker.[js|ts]`) file by yourself.
-* Please check the available workboxOptions for this mode on [Workbox website](https://developers.google.com/web/tools/workbox/modules/workbox-webpack-plugin#full_injectmanifest_config).
+* If you want to use this mode, you will have to write the service worker (`/src-pwa/custom-service-worker.js`) file by yourself.
+* Please check the available workboxOptions for this mode on [Workbox website](https://developers.google.com/web/tools/workbox/reference-docs/latest/module-workbox-build#.injectManifest).
 :::
 
-The following snippet is the default code for a custom service worker (`/src-pwa/custom-service-worker.[js|ts]`):
+The following snippet is the default code for a custom service worker (`/src-pwa/custom-service-worker.js`) which mimics the behavior of `generateSW` mode:
 
 ```js
-import { precacheAndRoute } from 'workbox-precaching'
+/*
+ * This file (which will be your service worker)
+ * is picked up by the build system ONLY if
+ * quasar.config file > pwa > workboxMode is set to "injectManifest"
+ */
+
+import { clientsClaim } from 'workbox-core'
+import {
+  precacheAndRoute,
+  cleanupOutdatedCaches,
+  createHandlerBoundToURL,
+} from 'workbox-precaching'
+import { registerRoute, NavigationRoute } from 'workbox-routing'
+
+self.skipWaiting();
+clientsClaim();
 
 // Use with precache injection
 precacheAndRoute(self.__WB_MANIFEST)
+
+cleanupOutdatedCaches()
+
+// Non-SSR fallbacks to index.html
+// Production SSR fallbacks to offline.html (except for dev)
+if (process.env.MODE !== 'ssr' || process.env.PROD) {
+  registerRoute(
+    new NavigationRoute(
+      createHandlerBoundToURL(process.env.PWA_FALLBACK_HTML),
+      { denylist: [new RegExp(process.env.PWA_SERVICE_WORKER_REGEX), /workbox-(.)*\.js$/] }
+    )
+  )
+}
 ```
 
 ## Configuring Manifest File
-The Manifest file is generated by Quasar CLI with a default configuration for it. You can however tweak this configuration from the `/quasar.config` file:
+The Manifest file is located at `/src-pwa/manifest.json`. You can freely edit it.
+
+Should you need to change it dynamically at build time, you can do so by editing the `/quasar.config` file:
 
 ```js /quasar.config file
 pwa: {
-  // workboxPluginMode: 'InjectManifest',
-  // workboxOptions: {},
-  manifest: {
-    name: 'Quasar Play',
-    short_name: 'Quasar-Play',
-    description: 'Quasar Framework Showcase',
-    icons: [
-      {
-        'src': 'icons/icon-128x128.png',
-        'sizes': '128x128',
-        'type': 'image/png'
-      },
-      {
-        'src': 'icons/icon-192x192.png',
-        'sizes': '192x192',
-        'type': 'image/png'
-      },
-      {
-        'src': 'icons/icon-256x256.png',
-        'sizes': '256x256',
-        'type': 'image/png'
-      },
-      {
-        'src': 'icons/icon-384x384.png',
-        'sizes': '384x384',
-        'type': 'image/png'
-      },
-      {
-        'src': 'icons/icon-512x512.png',
-        'sizes': '512x512',
-        'type': 'image/png'
-      }
-    ],
-    display: 'standalone',
-    orientation: 'portrait',
-    background_color: '#ffffff',
-    theme_color: '#027be3'
+  extendManifestJson (json) {
+    // tamper with the json inline
   }
 }
 ```
@@ -225,11 +257,11 @@ pwa: {
 Please read about the [manifest config](https://developer.mozilla.org/en-US/docs/Web/Manifest) before diving in.
 
 ::: warning
-Note that you don't need to edit your index.html file (generated from /index.html or /src/index.template.html) to link to the manifest file. Quasar CLI takes care of embedding the right things for you.
+Note that you don't need to edit your index.html file (generated from `/index.html`) to link to the manifest file. Quasar CLI takes care of embedding the right things for you.
 ::::
 
 ::: tip
-If your PWA is behind basic auth or requires an Authorization header, set quasar.config file > pwa > useCredentials to true to include `crossorigin="use-credentials"` on the manifest.json meta tag.
+If your PWA is behind basic auth or requires an Authorization header, set quasar.config file > pwa > useCredentialsForManifestTag to `true` to include `crossorigin="use-credentials"` on the manifest.json meta tag.
 ::::
 
 ## PWA Checklist
@@ -240,15 +272,14 @@ Do not run [Lighthouse](https://developers.google.com/web/tools/lighthouse/) on 
 :::
 
 ## Reload & Update Automatically
-For those who don't want to manually reload the page when the service worker is updated **and are using the default GenerateSW workbox mode**, you can make it active at once. Update the workboxOptions config in the `/quasar.config` file as follows:
+
+For those who don't want to manually reload the page when the service worker is updated **and are using the default generateSW workbox mode**, Quasar CLI has configured Workbox to activate it at once. Should you need to disable this behavior:
 
 ```js /quasar.config file
 pwa: {
-  workboxOptions: {
-    skipWaiting: true,
-    clientsClaim: true
+  extendGenerateSWOptions (cfg) {
+    cfg.skipWaiting = false
+    cfg.clientsClaim = false
   }
 }
 ```
-
-[Source](https://developers.google.com/web/tools/workbox/guides/codelabs/webpack)

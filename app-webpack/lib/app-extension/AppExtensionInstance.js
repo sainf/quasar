@@ -12,6 +12,22 @@ const { UninstallAPI } = require('./api-classes/UninstallAPI.js')
 const { PromptsAPI } = require('./api-classes/PromptsAPI.js')
 const { getPackagePath } = require('../utils/get-package-path.js')
 
+const scriptsExtensionList = [ '', '.js', '.mjs', '.cjs' ]
+const scriptsTargetFolderList = [ 'dist', 'src' ]
+
+function getPackageScriptPath (packageFullName, scriptName, dir) {
+  for (const ext of scriptsExtensionList) {
+    for (const folder of scriptsTargetFolderList) {
+      const path = getPackagePath(
+        join(packageFullName, folder, `${ scriptName }${ ext }`),
+        dir
+      )
+
+      if (path !== void 0) return path
+    }
+  }
+}
+
 async function promptOverwrite ({ targetPath, options, ctx }) {
   const choices = [
     { name: 'Overwrite', value: 'overwrite' },
@@ -40,9 +56,7 @@ async function renderFile ({ sourcePath, targetPath, rawCopy, scope, overwritePr
       ctx
     })
 
-    if (answer.action === 'skip') {
-      return
-    }
+    if (answer.action === 'skip') return
   }
 
   fse.ensureFileSync(targetPath)
@@ -59,8 +73,8 @@ async function renderFile ({ sourcePath, targetPath, rawCopy, scope, overwritePr
 
 async function renderFolders ({ source, rawCopy, scope }, ctx) {
   let overwrite
-  const fglob = require('fast-glob')
-  const files = fglob.sync([ '**/*' ], { cwd: source })
+  const { globSync } = require('tinyglobby')
+  const files = globSync([ '**/*' ], { cwd: source })
 
   for (const rawPath of files) {
     const targetRelativePath = rawPath.split('/').map(name => {
@@ -138,28 +152,31 @@ module.exports.AppExtensionInstance = class AppExtensionInstance {
   }
 
   get isInstalled () {
-    if (this.#isInstalled !== null) {
-      return this.#isInstalled
+    if (this.#isInstalled === null) {
+      this.#loadPackageInfo()
     }
 
-    this.#loadPackageInfo()
     return this.#isInstalled
   }
 
-  get packagePath () {
-    if (this.#packagePath !== null) {
-      return this.#packagePath || void 0
-    }
-
-    this.#loadPackageInfo()
-    return this.#packagePath || void 0
-  }
-
   #loadPackageInfo () {
+    const { appDir } = this.#ctx.appPaths
+
     try {
-      const packagePath = getPackagePath(
-        join(this.packageFullName, 'package.json'),
-        this.#ctx.appPaths.appDir
+      const packagePath = (
+        getPackagePath(
+          join(this.packageFullName, 'package.json'),
+          appDir
+        )
+        || getPackagePath(
+          this.packageFullName,
+          appDir
+        )
+        || getPackageScriptPath(
+          this.packageFullName,
+          'index',
+          appDir
+        )
       )
 
       if (packagePath !== void 0) {
@@ -206,9 +223,7 @@ module.exports.AppExtensionInstance = class AppExtensionInstance {
         default: false
       } ])
 
-      if (!answer.reinstall) {
-        return
-      }
+      if (!answer.reinstall) return
     }
 
     if (skipPkgInstall !== true) {
@@ -303,9 +318,7 @@ module.exports.AppExtensionInstance = class AppExtensionInstance {
   async #getScriptPrompts () {
     const getPromptsObject = await this.#getScript('prompts')
 
-    if (typeof getPromptsObject !== 'function') {
-      return {}
-    }
+    if (typeof getPromptsObject !== 'function') return {}
 
     const api = new PromptsAPI({
       ctx: this.#ctx,
@@ -341,17 +354,13 @@ module.exports.AppExtensionInstance = class AppExtensionInstance {
    * as long as the corresponding file isn't available into the `src` folder, making the feature opt-in
    */
   #getScriptFile (scriptName) {
-    const { packagePath } = this
+    if (this.isInstalled === false) return
 
-    let scriptFile = join(packagePath, `dist/${ scriptName }.js`)
-    if (fse.existsSync(scriptFile)) {
-      return scriptFile
-    }
-
-    scriptFile = join(packagePath, `src/${ scriptName }.js`)
-    if (fse.existsSync(scriptFile)) {
-      return scriptFile
-    }
+    return getPackageScriptPath(
+      this.packageFullName,
+      scriptName,
+      this.#packagePath
+    )
   }
 
   async #getScript (scriptName, fatalError) {
@@ -396,9 +405,7 @@ module.exports.AppExtensionInstance = class AppExtensionInstance {
   async #runInstallScript (prompts) {
     const script = await this.#getScript('install')
 
-    if (typeof script !== 'function') {
-      return
-    }
+    if (typeof script !== 'function') return
 
     log('Running App Extension install script...')
 
@@ -435,9 +442,7 @@ module.exports.AppExtensionInstance = class AppExtensionInstance {
   async #runUninstallScript (prompts) {
     const script = await this.#getScript('uninstall')
 
-    if (typeof script !== 'function') {
-      return
-    }
+    if (typeof script !== 'function') return
 
     log('Running App Extension uninstall script...')
 

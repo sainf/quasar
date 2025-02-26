@@ -1,8 +1,8 @@
 import { h, ref, computed, watch, onActivated, onDeactivated, onBeforeMount, onBeforeUnmount, nextTick, getCurrentInstance } from 'vue'
 
-import debounce from '../../utils/debounce.js'
-import { noop } from '../../utils/event.js'
-import { rtlHasScrollBug } from '../../utils/private/rtl.js'
+import debounce from '../../utils/debounce/debounce.js'
+import { noop } from '../../utils/event/event.js'
+import { rtlHasScrollBug } from '../../utils/private.rtl/rtl.js'
 
 const aggBucketSize = 1000
 
@@ -20,18 +20,14 @@ const filterProto = Array.prototype.filter
 const setOverflowAnchor = __QUASAR_SSR__ || window.getComputedStyle(document.body).overflowAnchor === void 0
   ? noop
   : function (contentEl, index) {
-    if (contentEl === null) {
-      return
-    }
+    if (contentEl === null) return
 
     if (contentEl._qOverflowAnimationFrame !== void 0) {
       cancelAnimationFrame(contentEl._qOverflowAnimationFrame)
     }
 
     contentEl._qOverflowAnimationFrame = requestAnimationFrame(() => {
-      if (contentEl === null) {
-        return
-      }
+      if (contentEl === null) return
 
       contentEl._qOverflowAnimationFrame = void 0
       const children = contentEl.children || []
@@ -193,7 +189,7 @@ function sumSize (sizeAgg, size, from, to) {
 const commonVirtScrollProps = {
   virtualScrollSliceSize: {
     type: [ Number, String ],
-    default: null
+    default: 10
   },
 
   virtualScrollSliceRatioBefore: {
@@ -224,7 +220,7 @@ const commonVirtScrollProps = {
   tableColspan: [ Number, String ]
 }
 
-export const commonVirtPropsList = Object.keys(commonVirtScrollProps)
+export const commonVirtScrollPropsList = Object.keys(commonVirtScrollProps)
 
 export const useVirtualScrollProps = {
   virtualScrollHorizontal: Boolean,
@@ -279,9 +275,11 @@ export function useVirtualScroll ({
   function scrollTo (toIndex, edge) {
     const scrollEl = getVirtualScrollTarget()
 
-    if (scrollEl === void 0 || scrollEl === null || scrollEl.nodeType === 8) {
-      return
-    }
+    if (
+      scrollEl === void 0
+      || scrollEl === null
+      || scrollEl.nodeType === 8
+    ) return
 
     const scrollDetails = getScrollDetails(
       scrollEl,
@@ -308,9 +306,11 @@ export function useVirtualScroll ({
   function localOnVirtualScrollEvt () {
     const scrollEl = getVirtualScrollTarget()
 
-    if (scrollEl === void 0 || scrollEl === null || scrollEl.nodeType === 8) {
-      return
-    }
+    if (
+      scrollEl === void 0
+      || scrollEl === null
+      || scrollEl.nodeType === 8
+    ) return
 
     const
       scrollDetails = getScrollDetails(
@@ -326,9 +326,7 @@ export function useVirtualScroll ({
       listLastIndex = virtualScrollLength.value - 1,
       listEndOffset = scrollDetails.scrollMaxSize - scrollDetails.offsetStart - scrollDetails.offsetEnd - virtualScrollPaddingAfter.value
 
-    if (prevScrollStart === scrollDetails.scrollStart) {
-      return
-    }
+    if (prevScrollStart === scrollDetails.scrollStart) return
 
     if (scrollDetails.scrollMaxSize <= 0) {
       setVirtualScrollSliceRange(scrollEl, scrollDetails, 0, 0)
@@ -456,9 +454,7 @@ export function useVirtualScroll ({
     requestAnimationFrame(() => {
       // if the scroll was changed give up
       // (another call to setVirtualScrollSliceRange before animation frame)
-      if (prevScrollStart !== scrollDetails.scrollStart) {
-        return
-      }
+      if (prevScrollStart !== scrollDetails.scrollStart) return
 
       if (rangeChanged === true) {
         updateVirtualScrollSizes(from)

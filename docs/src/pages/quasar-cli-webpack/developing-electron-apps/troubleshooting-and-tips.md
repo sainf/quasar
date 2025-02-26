@@ -8,7 +8,7 @@ You probably want your app to only give access to the browser devtools on dev mo
 
 While we're at it, why not also open devtools by default when we're on dev mode.
 
-```js electron-main
+```js /src-electron/electron-main
 function createWindow () {
   mainWindow = new BrowserWindow({ ... })
 
@@ -32,3 +32,5 @@ When running your application in development you may have noticed a message from
 Debugger listening on ws://127.0.0.1:5858/b285586a-6091-4c41-b6ea-0d389e6f9c93
 For help, see: https://nodejs.org/en/docs/inspector
 ```
+
+The port can vary, based on the quasar.config > electron > inspectPort setting. If the specified port is already occupied, the next closest available port will be used.

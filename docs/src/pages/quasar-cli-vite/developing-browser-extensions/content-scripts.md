@@ -3,25 +3,33 @@ title: Content Scripts
 desc: (@quasar/app-vite) How to communicate using your content script with your Quasar App and Background Script in Quasar Browser Extension mode.
 ---
 
-`src-bex/my-content-script.js` is essentially a standard [content script](https://developer.chrome.com/extensions/content_scripts) and you are welcome to use it as such. Content scripts are able to access the DOM of the underlying webpage and thus you are able to manipulate the content of said page.
+The content script(s) run in the context of the web page. There will be a new content script instance per tab running the extension.
 
-::: tip
-You can have multiple content scripts with the name of your desire (that includes renaming the default `my-content-script.js`). Each time that you create a new one, please make sure that you reference it in `/src-bex/manifest.json`. Use the `.js` extension even if your filename ends in `.ts`.
-:::
+## Communication / Events
 
-The added benefit of this file is this function:
+You communicate between the BEX parts of your app (background, content scripts & devtools/popup/options page) through our [BEX Bridge](/quasar-cli-vite/developing-browser-extensions/bex-bridge).
 
-```js
-import { bexContent } from 'quasar/wrappers'
+## Registering a content script
 
-export default bexContent((bridge) => {
-  //
-})
+Your `/src-bex/manifest.json` is the central point that defines your BEX. This is the place where you also define your content script(s):
+
+```json /src-bex/manifest.json
+"content_scripts": [
+  {
+    "matches": [ "<all_urls>" ],
+    "css": [ "assets/content.css" ],
+    "js": [ "my-content-script.ts" ]
+  }
+]
 ```
 
-This function is called automatically via the Quasar BEX build chain and injects a bridge which is shared between your Quasar App instance and the background script of the BEX.
+::: warning For TS devs
+Your background and content scripts have the `.ts` extension. Use that extension in the manifest.json file as well! Examples: "background.ts", "my-content-script.ts". While the browser vendors do support only the `.js` extension, Quasar CLI will convert the file extensions automatically.
+:::
 
-For example, let's say we want to react to a button being pressed on our Quasar App and highlight some text on the underlying web page, this would be done via the content scripts like so:
+## Case study
+
+Let's say we want to react to a button being pressed on our Quasar App and highlight some text on the underlying web page, this would be done via the content scripts like so:
 
 ```js Quasar App, /src
 setup () {
@@ -36,30 +44,41 @@ setup () {
 }
 ```
 
-```css src-bex/assets/content.css
+```css /src-bex/assets/content.css
 .bex-highlight {
-    background-color: red;
+  background-color: red;
 }
 ```
 
 ```js /src-bex/my-content-script.js:
-import { bexContent } from 'quasar/wrappers'
+/**
+ * Importing the file below initializes the content script.
+ *
+ * Warning:
+ *   Do not remove the import statement below. It is required for the extension to work.
+ *   If you don't need createBridge(), leave it as "import '#q-app/bex/content'".
+ */
+import { createBridge } from '#q-app/bex/content'
 
-export default bexContent((bridge) => {
-  bridge.on('highlight.content', ({ data, respond }) => {
-    const el = document.querySelector(data.selector)
-    if (el !== null) {
-      el.classList.add('bex-highlight')
-    }
+// The use of the bridge is optional.
+const bridge = createBridge({ debug: false })
 
-    // Let's resolve the `send()` call's promise, this way we can await it on the other side then display a notification.
-    respond()
-  })
+bridge.on('highlight.content', ({ payload }) => {
+  const el = document.querySelector(data.selector)
+  if (el !== null) {
+    el.classList.add('bex-highlight')
+  }
 })
+
+bridge.connectToBackground()
+  .then(() => {
+    console.log('Connected to background')
+  })
+  .catch(err => {
+    console.error('Failed to connect to background:', err)
+  })
 ```
 
 Content scripts live in an [isolated world](https://developer.chrome.com/extensions/content_scripts#isolated_world), allowing a content script to makes changes to its JavaScript environment without conflicting with the page or additional content scripts.
 
 Isolated worlds do not allow for content scripts, the extension, and the web page to access any variables or functions created by the others. This also gives content scripts the ability to enable functionality that should not be accessible to the web page.
-
-This is where the `dom-script` comes in.

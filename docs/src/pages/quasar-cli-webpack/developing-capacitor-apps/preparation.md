@@ -60,7 +60,8 @@ If you haven't installed [CocoaPods](https://cocoapods.org/), please install it 
 
 ::: danger Xcode Error
 /path-to/your-project/src-capacitor/ios/App/Pods/Target Support Files/Pods-App/Pods-App.debug.xcconfig:1:1 unable to open configuration settings file
-::: 
+:::
+
 
 ## Step 2: Add Capacitor Quasar Mode
 

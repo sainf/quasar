@@ -7,7 +7,7 @@ const parseArgs = require('minimist')
 const argv = parseArgs(process.argv.slice(2), {
   alias: {
     m: 'mode',
-    T: 'target',
+    T: 'target', // cordova/capacitor/bex mode only
     A: 'arch',
     b: 'bundler',
     s: 'skip-pkg',
@@ -53,10 +53,12 @@ if (argv.help) {
                         [android|ios]
                       - Capacitor
                         [android|ios]
-                      - Electron with default "electron-packager" bundler (default: yours)
+                      - Electron with default "@electron/packager" bundler (default: yours)
                         [darwin|win32|linux|mas|all]
                       - Electron with "electron-builder" bundler (default: yours)
                         [darwin|mac|win32|win|linux|all]
+                      - Bex
+                        [chrome|firefox]
     --publish, -P   Also trigger publishing hooks (if any are specified)
                       - Has special meaning when building with Electron mode and using
                         electron-builder as bundler
@@ -69,13 +71,13 @@ if (argv.help) {
 
     ONLY for Cordova and Capacitor mode:
     --ide, -i       Open IDE (Android Studio / XCode) instead of finalizing with a
-                    terminal/console-only build
+                      terminal/console-only build
 
     ONLY for Electron mode:
-    --bundler, -b   Bundler (electron-packager or electron-builder)
+    --bundler, -b   Bundler (@electron/packager or electron-builder)
                       [packager|builder]
     --arch, -A      App architecture (default: yours)
-                      - with default "electron-packager" bundler:
+                      - with default "@electron/packager" bundler:
                           [ia32|x64|armv7l|arm64|mips64el|all]
                       - with "electron-builder" bundler:
                           [ia32|x64|armv7l|arm64|all]
@@ -83,6 +85,9 @@ if (argv.help) {
     ONLY for electron-builder (when using "publish" parameter):
     --publish, -P  Publish options [onTag|onTagOrDraft|always|never]
                      - see https://www.electron.build/configuration/publish
+
+    Only for BEX mode:
+    --target, -T     (required) Browser family target [chrome|firefox]
 
   `)
   process.exit(0)
@@ -113,7 +118,7 @@ const ctx = getCtx({
   publish: argv.publish
 })
 
-const { log } = require('../utils/logger.js')
+const { log, fatal } = require('../utils/logger.js')
 async function runBuild () {
   // install mode if it's missing
   const { addMode } = require(`../modes/${ argv.mode }/${ argv.mode }-installation.js`)
@@ -130,9 +135,6 @@ async function runBuild () {
 
   const quasarConf = await quasarConfFile.read()
 
-  const { regenerateTypesFeatureFlags } = require('../utils/types-feature-flags.js')
-  await regenerateTypesFeatureFlags(quasarConf)
-
   const { QuasarModeBuilder } = require(`../modes/${ argv.mode }/${ argv.mode }-builder.js`)
   const appBuilder = new QuasarModeBuilder({ argv, quasarConf })
 
@@ -144,6 +146,9 @@ async function runBuild () {
   const entryFiles = new EntryFilesGenerator(ctx)
   entryFiles.generate(quasarConf)
 
+  const { generateTypes } = require('../types-generator.js')
+  generateTypes(quasarConf)
+
   if (typeof quasarConf.build.beforeBuild === 'function') {
     await quasarConf.build.beforeBuild({ quasarConf })
   }
@@ -154,50 +159,76 @@ async function runBuild () {
     await hook.fn(hook.api, { quasarConf })
   })
 
-  appBuilder.build().then(async () => {
-    outputFolder = argv.mode === 'cordova'
-      ? path.join(outputFolder, '..')
-      : outputFolder
-
-    await displayBanner({
-      argv,
-      ctx,
-      cmd: 'build',
-      details: {
-        buildOutputFolder: outputFolder,
-        esbuildTarget: quasarConf.build.esbuildTarget,
-        webpackTranspileBanner: quasarConf.metaConf.webpackTranspileBanner
-      }
+  appBuilder.build()
+    .catch(err => {
+      console.error(err)
+      fatal('App build failed (check the log above)', 'FAIL')
     })
+    .then(async signal => {
+      if (signal !== void 0) {
+        const { SIGNALS } = require('../utils/signals.js')
+        if (signal === SIGNALS.BUILD_EXTERNAL_TOOL_SPAWNED) {
+          const { platform } = require('node:process')
 
-    if (typeof quasarConf.build.afterBuild === 'function') {
-      await quasarConf.build.afterBuild({ quasarConf })
-    }
-
-    // run possible beforeBuild hooks
-    await ctx.appExt.runAppExtensionHook('afterBuild', async hook => {
-      log(`Extension(${ hook.api.extId }): Running afterBuild hook...`)
-      await hook.fn(hook.api, { quasarConf })
-    })
-
-    if (argv.publish !== void 0) {
-      const opts = {
-        arg: argv.publish,
-        distDir: outputFolder,
-        quasarConf
+          // We simply return and let Windows be able to
+          // spawn the external tool
+          if (platform === 'win32') return
+          // Otherwise, we force exit the process.
+          // See process.exit(0) at the end of this then() for the explanation.
+          else process.exit(0)
+        }
       }
 
-      if (typeof quasarConf.build.onPublish === 'function') {
-        await quasarConf.build.onPublish(opts)
+      if (argv.mode === 'cordova') {
+        outputFolder = path.join(outputFolder, '..')
       }
 
-      // run possible onPublish hooks
-      await ctx.appExt.runAppExtensionHook('onPublish', async hook => {
-        log(`Extension(${ hook.api.extId }): Running onPublish hook...`)
-        await hook.fn(hook.api, opts)
+      await displayBanner({
+        argv,
+        ctx,
+        cmd: 'build',
+        details: {
+          buildOutputFolder: outputFolder,
+          esbuildTarget: quasarConf.build.esbuildTarget,
+          webpackTranspileBanner: quasarConf.metaConf.webpackTranspileBanner
+        }
       })
-    }
-  })
+
+      if (typeof quasarConf.build.afterBuild === 'function') {
+        await quasarConf.build.afterBuild({ quasarConf })
+      }
+
+      // run possible beforeBuild hooks
+      await ctx.appExt.runAppExtensionHook('afterBuild', async hook => {
+        log(`Extension(${ hook.api.extId }): Running afterBuild hook...`)
+        await hook.fn(hook.api, { quasarConf })
+      })
+
+      if (argv.publish !== void 0) {
+        const opts = {
+          arg: argv.publish,
+          distDir: outputFolder,
+          quasarConf
+        }
+
+        if (typeof quasarConf.build.onPublish === 'function') {
+          await quasarConf.build.onPublish(opts)
+        }
+
+        // run possible onPublish hooks
+        await ctx.appExt.runAppExtensionHook('onPublish', async hook => {
+          log(`Extension(${ hook.api.extId }): Running onPublish hook...`)
+          await hook.fn(hook.api, opts)
+        })
+      }
+
+      /**
+       * We're done, but there may be some underlying tools which
+       * haven't freed up the Node's JS execution stack yet (like esbuild or Vite).
+       * So, we're forcing the process to exit to avoid losing time.
+       */
+      process.exit(0)
+    })
 }
 
 const { displayBanner } = require('../utils/banner.js')

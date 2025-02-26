@@ -1,5 +1,6 @@
 import { quasar as quasarVitePlugin } from '@quasar/vite-plugin'
 import vueVitePlugin from '@vitejs/plugin-vue'
+import { mergeConfig } from 'vite'
 import { merge } from 'webpack-merge'
 
 import { cliPkg } from './utils/cli-runtime.js'
@@ -121,6 +122,9 @@ export async function createViteConfig (quasarConf, { compileId }) {
     build.viteVuePluginOptions
   )
 
+  /**
+   * @type {import('vite').UserConfig}
+   */
   const viteConf = {
     configFile: false,
     root: appPaths.appDir,
@@ -139,7 +143,23 @@ export async function createViteConfig (quasarConf, { compileId }) {
     }),
 
     resolve: {
-      alias: build.alias
+      alias: {
+        ...build.alias
+      }
+    },
+
+    css: {
+      preprocessorOptions: {
+        // Use sass-embedded for better stability and performance
+        sass: {
+          api: 'modern-compiler',
+          silenceDeprecations: [ 'import', 'global-builtin' ]
+        },
+        scss: {
+          api: 'modern-compiler',
+          silenceDeprecations: [ 'import', 'global-builtin' ]
+        }
+      }
     },
 
     build: {
@@ -187,9 +207,17 @@ export async function createViteConfig (quasarConf, { compileId }) {
   }
 
   if (ctx.dev) {
+    const warmup = compileId !== 'vite-ssr-server'
+      ? {
+          clientFiles: [
+            quasarConf.metaConf.entryScript.absolutePath
+          ]
+        }
+      : {}
+
     // protect against Vite (or a Vite plugin) mutating the original
     // and triggering endless cfg diff loop
-    viteConf.server = merge({}, quasarConf.devServer)
+    viteConf.server = merge({ warmup }, quasarConf.devServer)
   }
   else {
     viteConf.build.outDir = build.distDir
@@ -218,7 +246,10 @@ export function extendViteConfig (viteConf, quasarConf, invokeParams) {
   }
 
   if (typeof quasarConf.build.extendViteConf === 'function') {
-    quasarConf.build.extendViteConf(viteConf, opts)
+    const overrides = quasarConf.build.extendViteConf(viteConf, opts)
+    if (overrides) {
+      viteConf = mergeConfig(viteConf, overrides)
+    }
   }
 
   const { appExt } = quasarConf.ctx
@@ -242,7 +273,10 @@ export function createNodeEsbuildConfig (quasarConf, { format }) {
     ...cliPkgDependencies,
     ...Object.keys(appPkg.dependencies || {}),
     ...Object.keys(appPkg.devDependencies || {})
-  ])
+  ].filter(
+    // the possible imports of '#q-app/wrappers' / '@quasar/app-vite/wrappers'
+    dep => dep !== cliPkg.name
+  ))
 
   return {
     platform: 'node',
@@ -252,10 +286,11 @@ export function createNodeEsbuildConfig (quasarConf, { format }) {
     sourcemap: quasarConf.metaConf.debugging === true ? 'inline' : false,
     minify: quasarConf.build.minify !== false,
     alias: {
-      ...quasarConf.build.alias,
-      'quasar/wrappers': format === 'esm' ? 'quasar/wrappers/index.mjs' : 'quasar/wrappers/index.js'
+      ...quasarConf.build.alias
     },
-    resolveExtensions: [ format === 'esm' ? '.mjs' : '.cjs', '.js', '.mts', '.ts', '.json' ],
+    resolveExtensions: format === 'esm'
+      ? [ '.mjs', '.js', '.cjs', '.ts', '.json' ]
+      : [ '.cjs', '.js', '.mjs', '.ts', '.json' ],
     // we use a fresh list since this can be tampered with by the user:
     external: [ ...externalsList ],
     define: getBuildSystemDefine({
@@ -275,7 +310,9 @@ export function createBrowserEsbuildConfig (quasarConf) {
     bundle: true,
     sourcemap: quasarConf.metaConf.debugging === true ? 'inline' : false,
     minify: quasarConf.build.minify !== false,
-    alias: quasarConf.build.alias,
+    alias: {
+      ...quasarConf.build.alias
+    },
     define: getBuildSystemDefine({
       buildEnv: quasarConf.build.env,
       buildRawDefine: quasarConf.build.rawDefine,

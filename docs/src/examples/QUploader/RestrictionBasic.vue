@@ -49,7 +49,7 @@ export default {
 
     function onRejected (rejectedEntries) {
       // Notify plugin needs to be installed
-      // https://quasar.dev/quasar-plugins/notify#Installation
+      // https://v2.quasar.dev/quasar-plugins/notify#Installation
       $q.notify({
         type: 'negative',
         message: `${rejectedEntries.length} file(s) did not pass validation constraints`

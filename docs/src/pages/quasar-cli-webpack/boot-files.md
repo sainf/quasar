@@ -23,33 +23,35 @@ A boot file is a simple JavaScript file which can optionally export a function. 
 | --- | --- |
 | `app` | Vue app instance |
 | `router` | Instance of Vue Router from 'src/router/index.js' |
-| `store` | Instance of the Pinia or the Vuex store - **store only will be passed if your project uses Pinia (you have src/stores) or Vuex (you have src/store)** |
+| `store` | Instance of Pinia - **store only will be passed if your project uses Pinia (you have src/stores)** |
 | `ssrContext` | Available only on server-side, if building for SSR. [More info](/quasar-cli-webpack/developing-ssr/ssr-context) |
 | `urlPath` | The pathname (path + search) part of the URL. It also contains the hash on client-side. |
 | `publicPath` | The configured public path. |
 | `redirect` | Function to call to redirect to another URL. Accepts String (full URL) or a Vue Router location String or Object. |
 
 ```js
-export default ({ app, router, store }) => {
+import { defineBoot } from '#q-app/wrappers'
+export default defineBoot(({ app, router, store }) => {
   // something to do
-}
+})
 ```
 
 Boot files can also be async:
 
 ```js
-export default async ({ app, router, store }) => {
+import { defineBoot } from '#q-app/wrappers'
+export default defineBoot(async ({ app, router, store }) => {
   // something to do
   await something()
-}
+})
 ```
 
-You can wrap the returned function with `boot` helper to get a better IDE autocomplete experience (through Typescript):
+Notice the `defineBoot` import. This is essentially a no-op function, but its purpose is to help with a better IDE autocomplete experience:
 
 ```js
-import { boot } from 'quasar/wrappers'
+import { defineBoot } from '#q-app/wrappers'
 
-export default boot(async ({ app, router, store }) => {
+export default defineBoot(async ({ app, router, store }) => {
   // something to do
   await something()
 })
@@ -63,7 +65,7 @@ You may ask yourself why we need to export a function. This is actually optional
 // Outside of default export:
 //  - Code here gets executed immediately,
 //  - Good place for import statements,
-//  - No access to router, Vuex store, ...
+//  - No access to router, Pinia instance, ...
 
 export default async ({ app, router, store }) => {
   // Code here has access to the Object param above, connecting
@@ -73,7 +75,7 @@ export default async ({ app, router, store }) => {
 
   // Code here gets executed by Quasar CLI at the correct time in app's lifecycle:
   //  - we have a Router instantiated,
-  //  - we have the optional Vuex store instantiated,
+  //  - we have the optional Pinia instance (store),
   //  - we have the root app's component ["app" prop in Object param] Object with
   //      which Quasar will instantiate the Vue app
   //      ("new Vue(app)" -- do NOT call this by yourself),
@@ -95,7 +97,7 @@ Boot files fulfill one special purpose: they run code **before** the App's Vue r
 * You want to add a global mixin using `app.mixin()`.
 * You want to add something to the Vue app globalProperties for convenient access - An example would be to conveniently use `this.$axios` (for Options API) inside your Vue files instead of importing Axios in each such file.
 * You want to interfere with the router - An example would be to use `router.beforeEach` for authentication
-* You want to interfere with Pinia or the Vuex store instance - An example would be to use `vuex-router-sync` package
+* You want to interfere with the Pinia instance
 * Configure aspects of libraries - An example would be to create an instance of Axios with a base URL; you can then inject it into Vue prototype and/or export it (so you can import the instance from anywhere else in your app)
 
 ### Example of unneeded usage of boot files
@@ -117,9 +119,9 @@ This command creates a new file: `/src/boot/<name>.js` with the following conten
 
 // "async" is optional!
 // remove it if you don't need it
-export default async ({ /* app, router, store */ }) => {
+export default defineBoot(async ({ /* app, router, store */ }) => {
   // something to do
-}
+})
 ```
 
 You can also return a Promise:
@@ -127,11 +129,11 @@ You can also return a Promise:
 ```js
 // import something here
 
-export default ({ /* app, router, store */ }) => {
+export default defineBoot(({ /* app, router, store */ }) => {
   return new Promise((resolve, reject) => {
     // do something
   })
-}
+})
 ```
 
 ::: tip
@@ -191,7 +193,7 @@ Please be mindful when redirecting as you might configure the app to go into an 
 :::
 
 ```js
-export default ({ urlPath, redirect }) => {
+export default defineBoot(({ urlPath, redirect }) => {
   // ...
   const isAuthorized = // ...
   if (!isAuthorized && !urlPath.startsWith('/login')) {
@@ -199,7 +201,7 @@ export default ({ urlPath, redirect }) => {
     return
   }
   // ...
-}
+})
 ```
 
 The `redirect()` method accepts a String (full URL) or a Vue Router location String or Object. On SSR it can receive a second parameter which should be a Number for any of the HTTP STATUS codes that redirect the browser (3xx ones).
@@ -249,7 +251,7 @@ redirect('/#/one') // WRONG!
 As it was mentioned in the previous sections, the default export of a boot file can return a Promise. If this Promise gets rejected with an Object that contains a "url" property, then Quasar CLI will redirect the user to that URL:
 
 ```js
-export default ({ urlPath }) => {
+export default defineBoot(({ urlPath }) => {
   return new Promise((resolve, reject) => {
     // ...
     const isAuthorized = // ...
@@ -261,20 +263,20 @@ export default ({ urlPath }) => {
     }
     // ...
   })
-}
+})
 ```
 
 Or a simpler equivalent:
 
 ```js
-export default () => {
+export default defineBoot(() => {
   // ...
   const isAuthorized = // ...
   if (!isAuthorized && !urlPath.startsWith('/login')) {
     return Promise.reject({ url: '/login' })
   }
   // ...
-}
+})
 ```
 
 ### Quasar App Flow
@@ -284,8 +286,7 @@ In order to better understand how a boot file works and what it does, you need t
 2. Quasar Extras get imported (Roboto font -- if used, icons, animations, ...)
 3. Quasar CSS & your app's global CSS are imported
 4. App.vue is loaded (not yet being used)
-5. Store is imported (if using Pinia in src/stores or Vuex in src/store)
-6. Pinia (if using) is injected into the Vue app instance
+5. Pinia (if using) is injected into the Vue app instance
 6. Router is imported (in src/router)
 7. Boot files are imported
 8. Router default export function executed
@@ -299,12 +300,12 @@ In order to better understand how a boot file works and what it does, you need t
 ### Axios
 
 ```js
-import { boot } from 'quasar/wrappers'
+import { defineBoot } from '#q-app/wrappers'
 import axios from 'axios'
 
 const api = axios.create({ baseURL: 'https://api.example.com' })
 
-export default boot(({ app }) => {
+export default defineBoot(({ app }) => {
   // for use inside Vue files (Options API) through this.$axios and this.$api
 
   app.config.globalProperties.$axios = axios
@@ -322,11 +323,11 @@ export { axios, api }
 ### vue-i18n
 
 ```js
-import { boot } from 'quasar/wrappers'
+import { defineBoot } from '#q-app/wrappers'
 import { createI18n } from 'vue-i18n'
 import messages from 'src/i18n'
 
-export default boot(({ app }) => {
+export default defineBoot(({ app }) => {
   // Create I18n instance
   const i18n = createI18n({
     locale: 'en-US',
@@ -342,9 +343,9 @@ export default boot(({ app }) => {
 Some boot files might need to interfere with Vue Router configuration:
 
 ```js
-import { boot } from 'quasar/wrappers'
+import { defineBoot } from '#q-app/wrappers'
 
-export default boot(({ router, store }) => {
+export default defineBoot(({ router, store }) => {
   router.beforeEach((to, from, next) => {
     // Now you need to add your authentication logic here, like calling an API endpoint
   })
@@ -372,10 +373,10 @@ const api = axios.create({
 
 // for use inside Vue files through this.$axios and this.$api
 // (only in Vue Options API form)
-export default ({ app }) => {
+export default defineBoot(({ app }) => {
   app.config.globalProperties.$axios = axios
   app.config.globalProperties.$api = api
-}
+})
 
 // Here we define a named export
 // that we can later use inside .js files:

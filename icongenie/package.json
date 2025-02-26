@@ -42,14 +42,13 @@
   },
   "homepage": "https://quasar.dev/icongenie/introduction",
   "dependencies": {
-    "@hapi/joi": "^17.1.1",
-    "cross-spawn": "^7.0.2",
+    "cross-spawn": "^7.0.6",
     "elementtree": "^0.1.7",
-    "fast-glob": "^3.3.2",
     "fs-extra": "^11.2.0",
     "imagemin": "^8.0.1",
     "imagemin-pngquant": "^9.0.2",
     "is-png": "^3.0.1",
+    "joi": "^17.13.0",
     "kolorist": "^1.8.0",
     "minimist": "^1.2.8",
     "png2icons": "^2.0.1",
@@ -57,11 +56,12 @@
     "read-chunk": "^4.0.3",
     "sharp": "^0.32.6",
     "svgo": "^3.2.0",
+    "tinyglobby": "^0.2.10",
     "untildify": "^5.0.0",
     "update-notifier": "^7.0.0"
   },
   "devDependencies": {
-    "eslint": "^8.57.0",
+    "eslint": "^8.57.1",
     "eslint-plugin-n": "^16.6.2"
   },
   "resolutions": {

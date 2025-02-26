@@ -36,9 +36,7 @@ function downloadIcon (icon) {
       const name = (prefix + theme + '_' + icon.name)
         .replace(/(_\w)/g, m => m[ 1 ].toUpperCase())
 
-      if (iconNames[ theme ].has(name)) {
-        return
-      }
+      if (iconNames[ theme ].has(name)) return
 
       const formattedTheme = themeName.split('_').join('')
       const url = `https://fonts.gstatic.com/s/i/short-term/release/materialsymbols${ formattedTheme }/${ icon.name }/default/24px.svg`
@@ -76,10 +74,9 @@ async function run () {
     let icons = []
     data.icons.forEach(val => {
       for (const family in themeMap) {
-        if (val.unsupported_families.includes(themeMap[ family ])) {
-          return
-        }
+        if (val.unsupported_families.includes(themeMap[ family ])) return
       }
+
       icons.push(val)
     })
     icons = icons.map((icon, index) => ({ index, ...icon }))

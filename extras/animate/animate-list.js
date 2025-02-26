@@ -1,4 +1,3 @@
-
 module.exports.generalAnimations = [
   'bounce',
   'flash',

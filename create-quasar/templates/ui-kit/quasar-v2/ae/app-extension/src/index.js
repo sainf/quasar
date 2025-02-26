@@ -22,17 +22,17 @@ function extendConf (conf, api) {
   conf.css.push('~quasar-ui-<%= name %>/src/index.sass')
 }
 
-<%= aeCodeFormat === 'esm' ? 'export default' : 'module.exports =' %> function (api) {
+export default function (api) {
   // Quasar compatibility check; you may need
   // hard dependencies, as in a minimum version of the "quasar"
   // package or a minimum version of "@quasar/app-*" CLI
   api.compatibleWith('quasar', '^2.0.0')
 
   if (api.hasVite) {
-    api.compatibleWith('@quasar/app-vite', '^1.5.0 || ^2.0.0-beta.1')
+    api.compatibleWith('@quasar/app-vite', '^1.5.0 || ^2.0.0')
   }
   else if (api.hasWebpack) {
-    api.compatibleWith('@quasar/app-webpack', '^3.10.0 || ^4.0.0-beta.1')
+    api.compatibleWith('@quasar/app-webpack', '^3.10.0 || ^4.0.0')
   }
 
 <% if (features.component) { %>

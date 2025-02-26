@@ -1,5 +1,5 @@
-import { createDirective } from '../../utils/private/create.js'
-import morph from '../../utils/morph.js'
+import { createDirective } from '../../utils/private.create/create.js'
+import morph from '../../utils/morph/morph.js'
 
 const morphGroups = {}
 const props = [
@@ -21,9 +21,10 @@ function changeClass (ctx, action) {
 }
 
 function trigger (group) {
-  if (group.animating === true || group.queue.length < 2) {
-    return
-  }
+  if (
+    group.animating === true
+    || group.queue.length < 2
+  ) return
 
   const [ from, to ] = group.queue
 
@@ -45,9 +46,7 @@ function trigger (group) {
     onEnd (dir, aborted) {
       to.opts.onEnd !== void 0 && to.opts.onEnd(dir, aborted)
 
-      if (aborted === true) {
-        return
-      }
+      if (aborted === true) return
 
       from.animating = false
       to.animating = false

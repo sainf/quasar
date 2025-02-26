@@ -160,7 +160,7 @@ $ quasar dev -m ios '--' some params --and options --here
 
 This will also add Cordova mode and install the related Cordova platform automatically if it is missing.
 
-You will be able to run the app on your mobile device if you have one, or through the emulator. See [Mobile App Build Commands > Developing](https://quasar.dev/quasar-cli-vite/developing-cordova-apps/build-commands#developing) for more information.
+You will be able to run the app on your mobile device if you have one, or through the emulator. See [Mobile App Build Commands > Developing](/quasar-cli-vite/developing-cordova-apps/build-commands#developing) for more information.
 
 ::: warning
 In Android Studio, you will be greeted with a message recommending to upgrade the Gradle version. **DO NOT UPGRADE GRADLE** as it will break the Cordova project. The same goes for any other requested upgrades.

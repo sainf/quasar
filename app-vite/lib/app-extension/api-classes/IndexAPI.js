@@ -145,7 +145,7 @@ export class IndexAPI extends BaseAPI {
   }
 
   /**
-   * Extend Bex scripts (background/content/dom) Esbuild config
+   * Extend Bex scripts (background/content-script) Esbuild config
    *
    * @param {function} fn
    *   (cfg: Object, api) => undefined

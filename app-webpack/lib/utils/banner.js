@@ -85,9 +85,9 @@ module.exports.displayBanner = async function displayBanner ({ argv, ctx, cmd, d
       are already installed, then you can skip this step.
 
  Tip: Notice the package.json generated, where there's a script defined:
-        "start": "node index.js"
+        "start": "node index.mjs"
       Running "$ ${ packager.name === 'npm' ? 'npm run' : packager.name } start" from the output folder will
-      start the webserver. Alternatively you can call "$ node index.js"
+      start the webserver. Alternatively you can call "$ node index.mjs"
       yourself.`
     }
     else if (argv.mode === 'cordova') {
@@ -145,6 +145,10 @@ function getIPList () {
   return cache.ipList
 }
 
+function capitalize (str) {
+  return str.charAt(0).toUpperCase() + str.slice(1)
+}
+
 module.exports.printDevRunningBanner = function printDevRunningBanner (quasarConf) {
   const { ctx } = quasarConf
 
@@ -181,13 +185,14 @@ module.exports.printDevRunningBanner = function printDevRunningBanner (quasarCon
   }
 
   if (ctx.mode.bex === true) {
+    const folder = ctx.targetName === 'chrome'
+      ? quasarConf.build.distDir
+      : join(quasarConf.build.distDir, 'manifest.json')
+
     banner.push(
       line,
-      ` ${ greenBanner } Load the dev extension from:`,
-      `   · Chrome(ium): ${ green(quasarConf.build.distDir) }`,
-      `   · Firefox:     ${ green(join(quasarConf.build.distDir, 'manifest.json')) }`,
-      line,
-      ` ${ greenBanner } You will need to manually refresh the browser page to see changes after recompilations.`
+      ` ${ greenBanner } Load the dev extension in ${ capitalize(ctx.targetName) } from:`,
+      `   ${ green(folder) }`
     )
   }
 

@@ -1,194 +1,266 @@
 ---
 title: Supporting TypeScript
 desc: (@quasar/app-webpack) How to enable support for TypeScript in a Quasar app.
-badge: "@quasar/app-webpack v4+"
 related:
   - /quasar-cli-webpack/quasar-config-file
+  - /quasar-cli-webpack/linter
 ---
 
-The Typescript support is not added by default to your project (unless you selected TS when you created your project folder), but it can be easily integrated by following the guide on this page.
+If you didn't select TypeScript support when creating your project, you can still add it later. This guide will show you how to add TypeScript support to your existing JavaScript-based Quasar project.
 
 ::: tip
-The following steps are only required when you **have not** selected TypeScript support when creating a fresh Quasar project. If you selected the TS option on project creation, TypeScript support is already enabled.
+If you selected TypeScript support when creating your project, you can skip this guide.
 :::
 
 ## Installation of TypeScript Support
 
-In order to support TypeScript, you'll need to change the extension of your quasar.config file: `/quasar.config` file:
-
-```js
-import { configure } from "quasar/wrappers";
-
-module.exports = configure((ctx) => {
-  return {
-    supportTS: true,
-    // ...
-  }
-});
-```
-
-Then create `/tsconfig.json` file at the root of you project with this content:
-
-```json
-{
-  "extends": "@quasar/app-webpack/tsconfig-preset",
-  "compilerOptions": {
-    "baseUrl": "."
-  },
-  "exclude": [
-    "./dist",
-    "./.quasar",
-    "./node_modules",
-    "./src-capacitor",
-    "./src-cordova",
-    "./quasar.config.*.temporary.compiled*"
-  ]
-}
-```
-
-Now you can start using TypeScript into your project.
-
-::: tip
-Remember that you must change the extension of your JavaScript files to `.ts` to be allowed to write TypeScript code inside them. To write TS code into your components, instead, change the script opening tag like so `<script lang="ts">`.
-:::
-
-::: warning
-If you fail to add the `tsconfig.json` file, the application will break at compile time!
-:::
-
-## Handling TS Webpack loaders <q-badge label="@quasar/app-webpack =v3" />
-
-Behind the curtains, Quasar uses `ts-loader` and `fork-ts-checker-webpack-plugin` (provided by `@quasar/app-webpack` package) to manage TS files. If you ever need to provide a custom configuration for these libs you can do so by making `build` property like so:
-
-```js /quasar.config file
-module.exports = function (ctx) {
-  return {
-    supportTS: {
-      tsLoaderConfig: {
-        // `appendTsSuffixTo: [/\.vue$/]` and `transpileOnly: true` are added by default and cannot be overridden
-        ...
-      },
-      tsCheckerConfig: {
-        // `vue: true` is added by default and cannot be overridden
-        ...
-      }
-    },
-    ....
-  }
-}
-```
-
-### Linting setup
-
-First add the needed dependencies:
+Install the `typescript` package:
 
 ```tabs
 <<| bash Yarn |>>
-$ yarn add --dev eslint @typescript-eslint/parser @typescript-eslint/eslint-plugin
-# you might also want to install the `eslint-plugin-vue` package.
+$ yarn add --dev typescript@~5.5.3
 <<| bash NPM |>>
-$ npm install --save-dev eslint @typescript-eslint/parser @typescript-eslint/eslint-plugin
-# you might also want to install the `eslint-plugin-vue` package.
+$ npm install --save-dev typescript@~5.5.3
 <<| bash PNPM |>>
-$ pnpm add -D eslint @typescript-eslint/parser @typescript-eslint/eslint-plugin
-# you might also want to install the `eslint-plugin-vue` package.
+$ pnpm add -D typescript@~5.5.3
 <<| bash Bun |>>
-$ bun add --dev eslint @typescript-eslint/parser @typescript-eslint/eslint-plugin
-# you might also want to install the `eslint-plugin-vue` package.
+$ bun add --dev typescript@~5.5.3
 ```
 
-Then update your ESLint configuration accordingly, like in the following example:
+Then, create `/tsconfig.json` file at the root of you project with this content:
 
-```js /.eslintrc.cjs
-const { resolve } = require('node:path');
+```json /tsconfig.json
+{
+  "extends": "./.quasar/tsconfig.json"
+}
+```
 
-module.exports = {
-  // https://eslint.org/docs/user-guide/configuring#configuration-cascading-and-hierarchy
-  // This option interrupts the configuration hierarchy at this file
-  // Remove this if you have an higher level ESLint config file (it usually happens into a monorepos)
-  root: true,
+Run `$ quasar prepare` in the root of your project folder.
 
-  // https://eslint.vuejs.org/user-guide/#how-to-use-custom-parser
-  // Must use parserOptions instead of "parser" to allow vue-eslint-parser to keep working
-  // `parser: 'vue-eslint-parser'` is already included with any 'plugin:vue/**' config and should be omitted
-  parserOptions: {
-    // https://github.com/typescript-eslint/typescript-eslint/tree/master/packages/parser#configuration
-    // https://github.com/TypeStrong/fork-ts-checker-webpack-plugin#eslint
-    // Needed to make the parser take into account 'vue' files
-    extraFileExtensions: ['.vue'],
-    parser: '@typescript-eslint/parser',
-    project: resolve(__dirname, './tsconfig.json'),
-    tsconfigRootDir: __dirname,
-    ecmaVersion: 2021, // Allows for the parsing of modern ECMAScript features
-    sourceType: 'module', // Allows for the use of imports
-  },
+Now you can start using TypeScript into your project. Note that some IDEs might require a restart for the new setup to fully kick in.
 
-  // Rules order is important, please avoid shuffling them
-  extends: [
-    // Base ESLint recommended rules
-    'eslint:recommended',
+::: tip
+Remember that you must change the extension of your JavaScript files to `.ts` to be allowed to write TypeScript code inside them. To use TypeScript in Vue files, you must update the script tag to include the `lang="ts"` attribute, like `<script lang="ts">` or `<script setup lang="ts">`
+:::
 
-    // https://github.com/typescript-eslint/typescript-eslint/tree/master/packages/eslint-plugin#usage
-    // ESLint typescript rules
-    'plugin:@typescript-eslint/eslint-recommended',
-    'plugin:@typescript-eslint/recommended',
-    // consider disabling this class of rules if linting takes too long
-    'plugin:@typescript-eslint/recommended-requiring-type-checking',
+::: warning
+If you forget to add the `tsconfig.json` file, the application will break at compile time!
+:::
 
-    // https://eslint.vuejs.org/rules/#priority-a-essential-error-prevention
-    // consider switching to `plugin:vue/strongly-recommended` or `plugin:vue/recommended` for stricter rules
-    'plugin:vue/essential',
+## Linting setup
 
-    // --- ONLY WHEN USING PRETTIER ---
-    // https://github.com/prettier/eslint-config-prettier#installation
-    // usage with Prettier, provided by 'eslint-config-prettier'.
-    'prettier',
-    'prettier/@typescript-eslint',
-    'prettier/vue',
-  ],
+You might want to check the requirements for it [here](/quasar-cli-webpack/linter).
 
-  plugins: [
-    // required to apply rules which need type information
-    '@typescript-eslint',
+## TypeScript Declaration Files
 
-    // https://eslint.vuejs.org/user-guide/#why-doesn-t-it-work-on-vue-file
-    // required to lint *.vue files
-    'vue',
-  ],
+If you chose TypeScript support when scaffolding the project, the following declaration file was automatically scaffolded for you. If TypeScript support wasn't enabled during project creation, create it:
 
-  // add your custom rules here
-  rules: {
-    // others rules...
-
-    // TypeScript
-    'quotes': ['warn', 'single'],
-    '@typescript-eslint/explicit-function-return-type': 'off',
+```ts /src/env.d.ts
+declare namespace NodeJS {
+  interface ProcessEnv {
+    NODE_ENV: string;
+    VUE_ROUTER_MODE: 'hash' | 'history' | 'abstract' | undefined;
+    VUE_ROUTER_BASE: string | undefined;
+    // Define any custom env variables you have here, if you wish
   }
 }
 ```
 
-If anything goes wrong, read the [typescript-eslint guide](https://github.com/typescript-eslint/typescript-eslint/blob/master/docs/getting-started/linting/README.md), on which this example is based.
+See the following sections for the features and build modes you are using.
 
-As a last step, update your `yarn lint` command to also lint `.ts` files.
+### Pinia
 
-::: tip
-TypeScript Linting is really slow due to type-checking overhead, we suggest you to disable Webpack lint extension into the `/quasar.config` file for dev builds.
-:::
+If you are using Pinia, Quasar CLI augments the `router` property inside `.quasar/pinia.d.ts` automatically. So, don't manually add the `router` property from the `PiniaCustomProperties` interface in the `src/stores/index.ts` file.
 
-If you setup TypeScript linting and want `fork-ts-checker-webpack-plugin` (provided by `@quasar/app-webpack` package) to take it into account then you should make use of `tsCheckerConfig` property:
+```diff /src/stores/index.ts
+import { defineStore } from '#q-app/wrappers'
+import { createPinia } from 'pinia'
+- import { type Router } from 'vue-router';
 
-```js /quasar.config file
-module.exports = function (ctx) {
-  return {
-    supportTS: {
-      tsCheckerConfig: {
-        eslint: {
-          enabled: true,
-          files: './src/**/*.{ts,tsx,js,jsx,vue}'
-        }
-      }
-    },
-    ....
+/*
+ * When adding new properties to stores, you should also
+ * extend the `PiniaCustomProperties` interface.
+ * @see https://pinia.vuejs.org/core-concepts/plugins.html#Typing-new-store-properties
+ */
+declare module 'pinia' {
+  export interface PiniaCustomProperties {
+-    readonly router: Router;
++    // add your custom properties here, if any
+  }
+}
+```
+
+### PWA mode
+
+If you are using [PWA mode](/quasar-cli-webpack/developing-pwa/introduction), make the following modifications to your project, and create any files that do not exist:
+
+```ts /src-pwa/pwa-env.d.ts
+declare namespace NodeJS {
+  interface ProcessEnv {
+    SERVICE_WORKER_FILE: string;
+    PWA_FALLBACK_HTML: string;
+    PWA_SERVICE_WORKER_REGEX: string;
+  }
+}
+```
+
+```ts /src-pwa/custom-service-worker.ts
+// at the top of the file
+declare const self: ServiceWorkerGlobalScope &
+  typeof globalThis & { skipWaiting: () => void };
+```
+
+```json /src-pwa/tsconfig.json
+{
+  "extends": "../tsconfig.json",
+  "compilerOptions": {
+    "lib": ["WebWorker", "ESNext"]
+  },
+  "include": ["*.ts", "*.d.ts"]
+}
+```
+
+### Electron mode
+
+If you are using [Electron mode](/quasar-cli-webpack/developing-electron-apps/introduction), add the section below to your project.
+
+```ts /src-electron/electron-env.d.ts
+declare namespace NodeJS {
+  interface ProcessEnv {
+    QUASAR_PUBLIC_FOLDER: string;
+    QUASAR_ELECTRON_PRELOAD_FOLDER: string;
+    QUASAR_ELECTRON_PRELOAD_EXTENSION: string;
+    APP_URL: string;
+  }
+}
+```
+
+### BEX mode
+
+If you are using [BEX mode](/quasar-cli-webpack/developing-browser-extensions/introduction), add the section below to your project. You may need to adjust it to your needs depending on the events you are using. The key is the event name, the value is a tuple where the first element is the input and the second is the output type.
+
+```ts /src-bex/background.ts
+declare module '@quasar/app-webpack' {
+  interface BexEventMap {
+    /* eslint-disable @typescript-eslint/no-explicit-any */
+    log: [{ message: string; data?: any[] }, never];
+    getTime: [never, number];
+
+    'storage.get': [{ key: string | null }, any];
+    'storage.set': [{ key: string; value: any }, any];
+    'storage.remove': [{ key: string }, any];
+    /* eslint-enable @typescript-eslint/no-explicit-any */
+  }
+}
+```
+
+You'll also need this in every content script file:
+
+```ts /src-bex/my-content-script.ts
+declare module '@quasar/app-webpack' {
+  interface BexEventMap {
+    /* eslint-disable @typescript-eslint/no-explicit-any */
+    'some.event': [{ someProp: string }, void];
+    /* eslint-enable @typescript-eslint/no-explicit-any */
+  }
+}
+```
+
+## Configuring TypeScript
+
+### tsconfig.json
+
+Notice the `/tsconfig.json` file in your project folder. This file is used by the Quasar CLI to detect if you want TypeScript support or not. Its content should look like this:
+
+```json /tsconfig.json
+{
+  "extends": "./.quasar/tsconfig.json"
+}
+```
+
+For reviewing purposes, here is an example of the generated tsconfig (non strict) that your `/tsconfig.json` is extending:
+
+```json /.quasar/tsconfig.json
+{
+  "compilerOptions": {
+    "esModuleInterop": true,
+    "skipLibCheck": true,
+    "target": "esnext",
+    "allowJs": true,
+    "resolveJsonModule": true,
+    "moduleDetection": "force",
+    "isolatedModules": true,
+    "module": "preserve",
+    "noEmit": true,
+    "lib": [
+      "esnext",
+      "dom",
+      "dom.iterable"
+    ],
+    "paths": { ... }
+  },
+  "exclude": [ ... ]
+}
+```
+
+Properly running typechecking and linting requires the `.quasar/tsconfig.json` to be present. The file will be auto-generated when running `quasar dev` or `quasar build` commands. But, as a lightweight alternative, there is the CLI command `quasar prepare` that will generate the `.quasar/tsconfig.json` file and some types files. It is especially useful for CI/CD pipelines.
+
+```bash
+$ quasar prepare
+```
+
+You can add it as a `postinstall` script to make sure it's run after installing the dependencies. This would be helpful when someone is pulling the project for the first time.
+
+```json /package.json
+{
+  "scripts": {
+    "postinstall": "quasar prepare"
+  }
+}
+```
+
+Thanks to this setup, Capacitor dependencies are properly linked to the project's TypeScript configuration. That means you won't have to install dependencies twice, once in `/src-capacitor` and once in the root folder.
+
+Another benefit of this change is that folder aliases (`quasar.config file > build > alias`) are automatically recognized by TypeScript. So, you can remove `tsconfig.json > compilerOptions > paths`. If you are using plugins to handle this, you can uninstall them and use `quasar.config file > build > alias` as the source of truth.
+
+If you are using ESLint, we recommend enabling `@typescript-eslint/consistent-type-imports` rules in your ESLint configuration. If you don't have linting set up, we recommend using `verbatimModuleSyntax` in your `tsconfig.json` file as an alternative (_unlike ESLint rules, it's not auto-fixable_). These changes will help you unify your imports regarding regular and type-only imports. Please read [typescript-eslint Blog - Consistent Type Imports and Exports: Why and How](https://typescript-eslint.io/blog/consistent-type-imports-and-exports-why-and-how) for more information about this and how to set it up. Here is an example:
+
+```js /eslint.config.js
+rules: {
+  // ...
+  '@typescript-eslint/consistent-type-imports': [
+    'error',
+    { prefer: 'type-imports' },
+  ],
+  // ...
+}
+```
+
+### quasar.config.ts
+
+You can use `quasar.config file > build > typescript` to control the TypeScript-related behavior. Add this section into your configuration:
+
+```diff /quasar.config.ts
+  build: {
++  typescript: {
++    strict: true, // (recommended) enables strict settings for TypeScript
++    vueShim: true, // required when using ESLint with type-checked rules, will generate a shim file for `*.vue` files
++    extendTsConfig (tsConfig) {
++      // You can use this hook to extend tsConfig dynamically
++      // For basic use cases, you can still update the usual tsconfig.json file to override some settings
++    },
++  }
+}
+```
+
+Should you want, you should be able to set the `strict` option to `true` without facing much trouble. But, if you face any issues, you can either update your code to satisfy the stricter rules or set the "problematic" options to `false` in your `tsconfig.json` file, at least until you can fix them.
+
+If you are using ESLint with type-check rules, enable the `vueShim` option to preserve the previous behavior with the shim file. If your project is working fine without that option, you don't need to enable it.
+
+```diff /quasar.config.ts
+build: {
+  typescript: {
++    vueShim: true // required when using ESLint with type-checked rules, will generate a shim file for `*.vue` files
   }
 }
 ```

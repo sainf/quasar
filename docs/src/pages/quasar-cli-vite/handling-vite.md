@@ -14,17 +14,15 @@ You may have noticed that the `vite.config.js` / `vite.config.ts` file does not 
 In case you need to tweak it, you can do so through quasar.config file > build > extendViteConf like so:
 
 ```js /quasar.config file
-// use mergeConfig helper to avoid overwriting the default config
-const { mergeConfig } = require('vite')
-
-// ...
-
 build: {
   extendViteConf (viteConf, { isServer, isClient }) {
-    // example: change the chunk size warning limit
-    viteConf.build = mergeConfig(viteConf.build, {
-      chunkSizeWarningLimit: 750
-    })
+    // We return an Object which will get deeply merged into
+    // the config, instead of directly tampering with viteConf
+    return {
+      build: {
+        chunkSizeWarningLimit: 750
+      }
+    }
     // equivalent of following vite.config.js/vite.config.ts:
     // export default defineConfig({
     //   build: {
@@ -66,7 +64,7 @@ $ quasar inspect -h
     --help, -h       Displays this message
 ```
 
-## Adding Vite plugins <q-badge label="@quasar/app-vite 1.8+" />
+## Adding Vite plugins
 
 Make sure to yarn/npm install the vite plugin package that you want to use, then edit the `/quasar.config` file:
 
@@ -104,10 +102,12 @@ vitePlugins: [
 ]
 
 // or:
+import plugin1 from 'plugin1'
+import plugin2 from 'plugin2'
 
 vitePlugins: [
-  [ require('<plugin1-name>'), { /* plugin1 options */ }, { server: true, client: true } ],
-  [ require('<plugin2-name>'), { /* plugin2 options */ }, { server: true, client: true } ],
+  [ plugin1, { /* plugin1 options */ }, { server: true, client: true } ],
+  [ plugin2, { /* plugin2 options */ }, { server: true, client: true } ],
   // ...
 ]
 
@@ -115,35 +115,27 @@ vitePlugins: [
 // but this one has a drawback in that Quasar CLI cannot pick up
 // when you change the options param so you'll have to manually
 // restart the dev server
+import plugin1 from 'plugin1'
+import plugin2 from 'plugin2'
 
 vitePlugins: [
-  require('<plugin1-name>')({ /* plugin1 options */ }),
-  require('<plugin2-name>')({ /* plugin2 options */ })
+  plugin1({ /* plugin1 options */ }),
+  plugin2({ /* plugin2 options */ })
   // ...
 ]
 ```
-
-::: tip
-You might actually bump into Vite plugins that need to be used as `require('<package-name>').default` instead of `require('<package-name>')`. So:
-
-<br>
-
-```js
-vitePlugins: [
-  [ require('<plugin1-name>').default, { /* plugin1 options */ } ],
-  // ...
-]
-```
-:::
 
 And, should you want, you can also add Vite plugins through `extendViteConf()` in the `/quasar.config` file. This is especially useful for (but not limited to) SSR mode where you'd want a Vite plugin to be applied only on the server-side or the client-side:
 
 ```js
+import plugin1 from 'plugin1'
+import plugin2 from 'plugin2'
+
 build: {
   extendViteConf (viteConf, { isClient, isServer }) {
     viteConf.plugins.push(
-      require('<plugin1-name>')({ /* plugin1 options */ }),
-      require('<plugin2-name>')({ /* plugin2 options */ })
+      plugin1({ /* plugin1 options */ }),
+      plugin2({ /* plugin2 options */ })
       // ...
     )
   }
@@ -153,7 +145,7 @@ build: {
 Moreover, don't forget that your `/quasar.config` file exports a function that receives `ctx` as parameter. You can use it throughout the whole config file to apply settings only to certain Quasar modes or only to dev or prod:
 
 ```js
-module.exports = function (ctx) {
+export default defineConfig((ctx) => {
   return {
     build: {
       extendViteConf (viteConf, { isClient, isServer }) {
@@ -167,7 +159,7 @@ module.exports = function (ctx) {
       }
     }
   }
-}
+})
 ```
 
 ### Example: rollup-plugin-copy
@@ -238,35 +230,35 @@ Quasar comes with a bunch of useful folder aliases pre-configured. You can use t
 
 #### Adding folder aliases
 
-We will use `utils` as an example, which may be used as `import { formatTime } from 'utils/time'`. There are two ways to add a folder alias:
+We will use `utils` as an example, which may be used as `import { formatTime } from 'utils/time.js'`. There are two ways to add a folder alias:
 
-1. Through `/quasar.config file > build > alias` property. This is the simplest way to add a folder alias. Use Node's `path.join` helper to get the absolute path to your alias. Example:
+1. Through `/quasar.config file > build > alias` property. This is the simplest way to add a folder alias. Use an absolute path to your alias. Example:
 
 ```js /quasar.config file
-const path = require('node:path')
+import { fileURLToPath } from 'node:url'
 
-module.exports = function (ctx) {
+export default (ctx) => {
   return {
     build: {
       alias: {
-        utils: path.join(__dirname, './src/utils')
+        utils: fileURLToPath(new URL('./src/utils', import.meta.url))
       }
     }
   }
 }
 ```
 
-2. By extending the Vite config directly. Do not assign to `viteConf.resolve.alias` directly to preserve the built-in aliases, use `Object.assign` instead. Use Node's `path.join` helper to resolve the path to your intended alias.
+2. By extending the Vite config directly. Do not assign to `viteConf.resolve.alias` directly to preserve the built-in aliases, use `Object.assign` instead or return an Object with your extra aliases. Always use absolute paths.
 
 ```js /quasar.config file
-const path = require('node:path')
+import { fileURLToPath } from 'node:url'
 
-module.exports = function (ctx) {
+export default (ctx) => {
   return {
     build: {
       extendViteConf (viteConf, { isServer, isClient }) {
         Object.assign(viteConf.resolve.alias, {
-          utils: path.join(__dirname, './src/utils')
+          utils: fileURLToPath(new URL('./src/utils', import.meta.url))
         })
       }
     }
@@ -276,50 +268,10 @@ module.exports = function (ctx) {
 
 ##### Using with TypeScript
 
-If you are using TypeScript, you also have to add the aliases you defined in `quasar.config file` to your `tsconfig.json` file. To preserve the built-in aliases, you have to re-define them in your `tsconfig.json` file. Example:
-
-```json /tsconfig.json
-{
-  "extends": "@quasar/app-vite/tsconfig-preset",
-  "compilerOptions": {
-    "baseUrl": ".",
-    "paths": {
-      "src/*": ["src/*"],
-      "app/*": ["*"],
-      "components/*": ["src/components/*"],
-      "layouts/*": ["src/layouts/*"],
-      "pages/*": ["src/pages/*"],
-      "assets/*": ["src/assets/*"],
-      "boot/*": ["src/boot/*"],
-      "stores/*": ["src/stores/*"],
-
-      "utils/*": ["src/utils/*"]
-    }
-  }
-}
-```
-
-If you want to use `tsconfig.json` as the source of truth and let Vite pick them up from there automatically, you can use [`vite-tsconfig-paths`](https://github.com/aleclarson/vite-tsconfig-paths) plugin. This way, you will not have to update both `quasar.config file` and `tsconfig.json` whenever adding an alias, avoiding potential mistakes. Install it following the instructions in the link and then add it to your `quasar.config file`:
-
-```js /quasar.config file
-module.exports = function (ctx) {
-  return {
-    build: {
-      // no longer needed to define aliases here
-      // alias: {},
-
-      vitePlugins: [
-        ['vite-tsconfig-paths', {
-          // projects: ['./tsconfig.json', '../../tsconfig.json'] // if you have multiple tsconfig files (e.g. in a monorepo)
-        }]
-      ]
-    }
-  }
-}
-```
+If you are using TypeScript, you DON'T have to also add the aliases to your `tsconfig.json` file (nor use packages like vite-tsconfig-paths). These are taken care of by the Quasar CLI by default.
 
 ## PostCSS
 
 Styles in `*.vue` files (and all other style files) are piped through PostCSS by default, so you don't need to use a specific loader for it.
 
-By default, PostCSS is configured to use Autoprefixer. Take a look at `/postcss.config.cjs` where you can tweak it if you need to.
+By default, PostCSS is configured to use Autoprefixer. Take a look at `/postcss.config.js` where you can tweak it if you need to.

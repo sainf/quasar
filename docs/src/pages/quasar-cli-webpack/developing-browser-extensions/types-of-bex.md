@@ -13,7 +13,7 @@ This is the default way in which a BEX will run. It is accessed by clicking on t
 
 These all follow the same pattern, set up a route and configure the `manifest.json` file to look at that route when it's trying to show either one of the types. For instance:
 
-```js /src/router/routes.js
+```js routes.js:
 const routes = [
   { path: '/options', component: () => import('pages/OptionsPage.vue') },
   { path: '/popup', component: () => import('pages/PopupPage.vue') },
@@ -23,56 +23,88 @@ const routes = [
 
 You could configure your `manifest.json` file with the following so the options page is loaded from that route:
 
+#### manifest v2
+
 ```json
 {
-  "name": "My extension",
-  ...
+  "manifest_version": 2,
+
   "options_page": "www/index.html#/options", // Options Page
-  ...
   "browser_action": {
     "default_popup": "www/index.html#/popup" // Popup Page
   },
-  ...
   "devtools_page": "www/index.html#/devtools", // Dev Tools
 }
 ```
 
-## Web Page
+#### manifest v3
+
+```json
+{
+  "manifest_version": 3,
+
+  "action": {
+    "default_popup": "www/index.html#/popup" // Popup Page
+  },
+  "options_page": "www/index.html#/options", // Options Page
+  "devtools_page": "www/index.html#/devtools", // Dev Tools
+}
+```
+
+## Case study: Web Page
 
 This is where the real power comes in. With a little ingenuity we can inject our Quasar application into a web page and use it as an overlay making it seem like our Quasar App is part of the page experience.
 
 Here's a brief rundown of how you could achieve this:
 
-* `src-bex/js/content-hooks.js`
+* `src-bex/my-content-script.js`
 
 The idea here is to create an IFrame and add our Quasar app into it, then inject that into the page.
 
 Given our Quasar App might need to take the full height of the window (and thus stop any interaction with the underlying page) we have an event to handle setting the height of the IFrame. By default the IFrame height is just high enough to allow for the Quasar toolbar to show (and in turn allowing interaction with the rest of the page).
 
-We can call this event from our Quasar App any time we know we're opening the drawer and thus changing the height of the IFrame to allow the whole draw to be visible.
+```js /src-bex/my-content-script.js
+/**
+ * Importing the file below initializes the content script.
+ *
+ * Warning:
+ *   Do not remove the import statement below. It is required for the extension to work.
+ *   If you don't need createBridge(), leave it as "import '#q-app/bex/content'".
+ */
+import { createBridge } from '#q-app/bex/content'
 
-```js
-import { bexContent } from 'quasar/wrappers'
+const bridge = createBridge({ debug: false });
 
-const
-  iFrame = document.createElement('iframe'),
-  defaultFrameHeight = '62px'
+/**
+ * When the drawer is toggled set the iFrame height to take the whole page.
+ * Reset when the drawer is closed.
+ */
+bridge.on('wb.drawer.toggle', ({ data, respond }) => {
+  if (data.open) {
+    setIFrameHeight('100%')
+  } else {
+    resetIFrameHeight()
+  }
+  respond()
+})
+
+const iFrame = document.createElement('iframe')
+const defaultFrameHeight = '62px'
 
 /**
  * Set the height of our iFrame housing our BEX
  * @param height
  */
-const setIFrameHeight = height => {
+function setIFrameHeight (height) {
   iFrame.height = height
 }
 
 /**
  * Reset the iFrame to its default height e.g The height of the top bar.
  */
-const resetIFrameHeight = () => {
+function resetIFrameHeight () {
   setIFrameHeight(defaultFrameHeight)
 }
-
 
 /**
  * The code below will get everything going. Initialize the iFrame with defaults and add it to the page.
@@ -99,24 +131,11 @@ Object.assign(iFrame.style, {
   iFrame.src = chrome.runtime.getURL('www/index.html')
   document.body.prepend(iFrame)
 })()
-
-export default bexContent((bridge) => {
-  /**
-   * When the drawer is toggled set the iFrame height to take the whole page.
-   * Reset when the drawer is closed.
-   */
-  bridge.on('wb.drawer.toggle', ({ data, respond }) => {
-    if (data.open) {
-      setIFrameHeight('100%')
-    } else {
-      resetIFrameHeight()
-    }
-    respond()
-  })
-})
 ```
 
-* `src-bex/css/content-css.css`
+We can call this event from our Quasar App any time we know we're opening the drawer and thus changing the height of the IFrame to allow the whole draw to be visible.
+
+* `src-bex/assets/content.css`
 
 Add a margin to the top of our document so our Quasar toolbar doesn't overlap the actual page content.
 
@@ -160,3 +179,19 @@ setup () {
 
 Now you have a Quasar App running in a web page. You can now trigger other events from the Quasar App that the content
 script can listen to and interact with the underlying page.
+
+::: warning
+Be sure to check your manifest.json file, especially around the reference to `my-content-script.js`. Note that **you can have multiple content scripts**. Whenever you create a new one, you need to reference it in the manifest file. Same for any css files created in `/src-bex/assets` folder.
+
+<br>
+
+```json /src-bex/manifest.json
+"content_scripts": [
+  {
+    "matches": [ "<all_urls>" ],
+    "css": [ "assets/content.css" ],
+    "js": [ "my-content-script.js" ]
+  }
+]
+```
+:::

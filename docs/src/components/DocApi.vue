@@ -171,6 +171,7 @@ function getFilteredApi (parsedApi, filter, tabs, innerTabs) {
       acc[ tab ][ defaultInnerTabName ] = passesFilter(filter, name, '') === true
         ? name
         : {}
+
       return
     }
 
@@ -232,6 +233,7 @@ function getApiCount (parsedApi, tabs, innerTabs) {
           ? 0
           : 1
       }
+
       return
     }
 
@@ -244,6 +246,7 @@ function getApiCount (parsedApi, tabs, innerTabs) {
             ? 1
             : Object.keys(api.definition).length
       }
+
       return
     }
 

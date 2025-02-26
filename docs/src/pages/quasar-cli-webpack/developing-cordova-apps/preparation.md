@@ -104,7 +104,7 @@ To verify that everything is in order, type:
 $ cordova requirements
 ```
 
-> On some newer Debian-based operating systems you might face a very persistent problem when running `cordova requirements`. Please see the ["Android SDK not found" after installation](/quasar-cli-vite/developing-cordova-apps/troubleshooting-and-tips#Android-SDK-not-found-after-installation-of-the-SDK) section for assistance.
+> On some newer Debian-based operating systems you might face a very persistent problem when running `cordova requirements`. Please see the ["Android SDK not found" after installation](/quasar-cli-webpack/developing-cordova-apps/troubleshooting-and-tips#Android-SDK-not-found-after-installation-of-the-SDK) section for assistance.
 
 ### Switching to iOS WkWebView
 
@@ -160,7 +160,7 @@ $ quasar dev -m ios '--' some params --and options --here
 
 This will also add Cordova mode and install the related Cordova platform automatically if it is missing.
 
-You will be able to run the app on your mobile device if you have one, or through the emulator. See [Mobile App Build Commands > Developing](https://quasar.dev/quasar-cli-vite/developing-cordova-apps/build-commands#developing) for more information.
+You will be able to run the app on your mobile device if you have one, or through the emulator. See [Mobile App Build Commands > Developing](/quasar-cli-webpack/developing-cordova-apps/build-commands#developing) for more information.
 
 ::: warning
 In Android Studio, you will be greeted with a message recommending to upgrade the Gradle version. **DO NOT UPGRADE GRADLE** as it will break the Cordova project. The same goes for any other requested upgrades.

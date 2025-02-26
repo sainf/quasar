@@ -1,6 +1,6 @@
 import { ref, watch, nextTick } from 'vue'
 
-import { shouldIgnoreKey } from '../../utils/private/key-composition.js'
+import { shouldIgnoreKey } from '../../utils/private.keyboard/key-composition.js'
 
 // leave NAMED_MASKS at top of file (code referenced from docs)
 const NAMED_MASKS = {
@@ -241,7 +241,6 @@ export default function (props, emit, emitValue, inputRef) {
       if (masked === maskReplaced) {
         const cursor = props.reverseFillMask === true ? maskReplaced.length : 0
         inp.setSelectionRange(cursor, cursor, 'forward')
-
         return
       }
 
@@ -254,8 +253,8 @@ export default function (props, emit, emitValue, inputRef) {
             cursor++
           }
         }
-        moveCursor.right(inp, cursor)
 
+        moveCursor.right(inp, cursor)
         return
       }
 
@@ -438,9 +437,7 @@ export default function (props, emit, emitValue, inputRef) {
     if (
       shouldIgnoreKey(e) === true
       || e.altKey === true // let browser handle these
-    ) {
-      return
-    }
+    ) return
 
     const
       inp = inputRef.value,

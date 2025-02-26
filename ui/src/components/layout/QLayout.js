@@ -5,10 +5,10 @@ import { isRuntimeSsrPreHydration } from '../../plugins/platform/Platform.js'
 import QScrollObserver from '../scroll-observer/QScrollObserver.js'
 import QResizeObserver from '../resize-observer/QResizeObserver.js'
 
-import { createComponent } from '../../utils/private/create.js'
-import { getScrollbarWidth } from '../../utils/scroll.js'
-import { hMergeSlot } from '../../utils/private/render.js'
-import { layoutKey } from '../../utils/private/symbols.js'
+import { createComponent } from '../../utils/private.create/create.js'
+import { getScrollbarWidth } from '../../utils/scroll/scroll.js'
+import { hMergeSlot } from '../../utils/private.render/render.js'
+import { layoutKey } from '../../utils/private.symbols/symbols.js'
 
 export default createComponent({
   name: 'QLayout',
@@ -187,10 +187,7 @@ export default createComponent({
       function hideScrollbar () {
         if (timer === null) {
           // if it has no scrollbar then there's nothing to do
-
-          if (el.scrollHeight > $q.screen.height) {
-            return
-          }
+          if (el.scrollHeight > $q.screen.height) return
 
           el.classList.add('hide-scrollbar')
         }

@@ -9,10 +9,8 @@ scope:
     c:
     - l: middlewares/
       e: SSR middleware files
-    - l: directives/
-      e: SSR transformations for Vue directives
-    - l: production-export.js
-      e: SSR webserver production export
+    - l: server.js
+      e: (or .ts) SSR webserver
 ---
 
 ## quasar.config file
@@ -20,74 +18,92 @@ scope:
 This is the place where you can configure some SSR options. Like if you want the client side to takeover as a SPA (Single Page Application -- the default behaviour), or as a PWA (Progressive Web App).
 
 ```js /quasar.config file
-return {
-  // ...
-  ssr: {
-    pwa: true/false, // should a PWA take over (default: false), or just a SPA?
+ssr: {
+  /**
+   * If a PWA should take over or just a SPA.
+   * @default false
+   */
+  pwa?: boolean;
 
-    /**
-     * Manually serialize the store state and provide it yourself
-     * as window.__INITIAL_STATE__ to the client-side (through a <script> tag)
-     * (Requires @quasar/app-webpack v3.5+)
-     */
-    manualStoreSerialization: false,
+  /**
+   * When using SSR+PWA, this is the name of the
+   * PWA index html file that the client-side fallbacks to.
+   * For production only.
+   *
+   * Do NOT use index.html as name as it will mess SSR up!
+   *
+   * @default 'offline.html'
+   */
+  pwaOfflineHtmlFilename?: string;
 
-    /**
-     * Manually inject the store state into ssrContext.state
-     * (Requires @quasar/app-webpack v3.5+)
-     */
-    manualStoreSsrContextInjection: false,
+  /**
+   * Extend/configure the Workbox GenerateSW options
+   * Specify Workbox options which will be applied on top of
+   *  `pwa > extendGenerateSWOptions()`.
+   * More info: https://developer.chrome.com/docs/workbox/the-ways-of-workbox/
+   */
+  pwaExtendGenerateSWOptions?: (config: object) => void;
 
-    /**
-     * Manually handle the store hydration instead of letting Quasar CLI do it.
-     * For Pinia: store.state.value = window.__INITIAL_STATE__
-     * For Vuex: store.replaceState(window.__INITIAL_STATE__)
-     */
-    manualStoreHydration: false,
+  /**
+   * Extend/configure the Workbox InjectManifest options
+   * Specify Workbox options which will be applied on top of
+   *  `pwa > extendInjectManifestOptions()`.
+   * More info: https://developer.chrome.com/docs/workbox/the-ways-of-workbox/
+   */
+  pwaExtendInjectManifestOptions?: (config: object) => void;
 
-    /**
-     * Manually call $q.onSSRHydrated() instead of letting Quasar CLI do it.
-     * This announces that client-side code should takeover.
-     */
-    manualPostHydrationTrigger: false,
+  /**
+   * Manually serialize the store state and provide it yourself
+   * as window.__INITIAL_STATE__ to the client-side (through a <script> tag)
+   * @default false
+   */
+  manualStoreSerialization?: boolean;
 
-    prodPort: 3000, // The default port that the production server should use
-                    // (gets superseded if process∙env∙PORT is specified at runtime)
+  /**
+   * Manually inject the store state into ssrContext.state
+   * @default false
+   */
+  manualStoreSsrContextInjection?: boolean;
 
-    maxAge: 1000 * 60 * 60 * 24 * 30,
-        // Tell browser when a file from the server should expire from cache
-        // (the default value, in ms)
-        // Has effect only when server.static() is used
+  /**
+   * Manually handle the store hydration instead of letting Quasar CLI do it.
+   *
+   * For Pinia: store.state.value = window.__INITIAL_STATE__
+   *
+   * @default false
+   */
+  manualStoreHydration?: boolean;
 
-    // List of SSR middleware files (src-ssr/middlewares/*). Order is important.
-    middlewares: [
-      // ...
-      'render' // Should not be missing, and should be last in the list.
-    ],
+  /**
+   * Manually call $q.onSSRHydrated() instead of letting Quasar CLI do it.
+   * This announces that client-side code should takeover.
+   * @default false
+   */
+  manualPostHydrationTrigger?: boolean;
 
-    // optional; add/remove/change properties
-    // of production generated package.json
-    extendPackageJson (pkg) {
-      // directly change props of pkg;
-      // no need to return anything
-    },
+  /**
+   * The default port (3000) that the production server should use
+   * (gets superseded if process.env.PORT is specified at runtime)
+   * @default 3000
+   */
+  prodPort?: number;
 
-    // optional;
-    // handles the Webserver webpack config ONLY
-    // which includes the SSR middleware
-    extendWebpackWebserver (cfg) {
-      // directly change props of cfg;
-      // no need to return anything
-    },
+  /**
+   * List of middleware files in src-ssr/middlewares
+   * Order is important.
+   */
+  middlewares?: string[];
 
-    // optional; EQUIVALENT to extendWebpack() but uses webpack-chain;
-    // handles the Webserver webpack config ONLY
-    // which includes the SSR middleware
-    chainWebpackWebserver (chain) {
-      // chain is a webpack-chain instance
-      // of the Webpack configuration
-    }
-  }
+  /**
+   * Add/remove/change properties of production generated package.json
+   */
+  extendPackageJson?: (pkg: { [index in string]: any }) => void;
+
+  /**
+   * Extend the Esbuild config that is used for the SSR webserver
+   * (which includes the SSR middlewares)
+   */
+  extendSSRWebserverConf?: (config: EsbuildConfiguration) => void;
 }
 ```
 
@@ -105,21 +121,19 @@ If you want more information, please see this page that goes into more detail ab
 
 ### Manually triggering store hydration
 
-By default, Quasar CLI takes care of hydrating the Vuex store (if you use it) on client-side.
+By default, Quasar CLI takes care of hydrating the Pinia stores (if you use it) on client-side.
 
 However, should you wish to manually hydrate it yourself, you need to set quasar.config file > ssr > manualStoreHydration: true. One good example is doing it from [a boot file](/quasar-cli-webpack/boot-files):
 
 ```js Some boot file
 // MAKE SURE TO CONFIGURE THIS BOOT FILE
 // TO RUN ONLY ON CLIENT-SIDE
+import { defineBoot } from '#q-app/wrappers'
 
-export default ({ store }) => {
+export default defineBoot(({ store }) => {
   // For Pinia
   store.state.value = window.__INITIAL_STATE__
-
-  // For Vuex
-  store.replaceState(window.__INITIAL_STATE__)
-}
+})
 ```
 
 ### Manually triggering post-hydration
@@ -166,34 +180,21 @@ Notice a few things:
 
 1. If you import anything from node_modules, then make sure that the package is specified in package.json > "dependencies" and NOT in "devDependencies".
 
-2. The `/src-ssr/middlewares` is built through a separate Webpack config. **You will see this marked as "Webserver" when Quasar App CLI builds your app.** You can chain/extend the Webpack configuration of these files through the `/quasar.config` file:
+2. The `/src-ssr/middlewares` is built through a separate Esbuild config. You can extend the Esbuild configuration of these files through the `/quasar.config` file:
 
 ```js /quasar.config file
 return {
   // ...
   ssr: {
     // ...
-
-    // optional; webpack config Object for
-    // the Webserver part ONLY (/src-ssr/)
-    // which is invoked for production (NOT for dev)
-    extendWebpackWebserver (cfg) {
-      // directly change props of cfg;
-      // no need to return anything
+    extendSSRWebserverConf (esbuildConf) {
+      // tamper with esbuildConf here
     },
-
-    // optional; EQUIVALENT to extendWebpack() but uses webpack-chain;
-    // the Webserver part ONLY (/src-ssr/)
-    // which is invoked for production (NOT for dev)
-    chainWebpackWebserver (chain) {
-      // chain is a webpack-chain instance
-      // of the Webpack configuration
-    }
   }
 }
 ```
 
-4. The `/src-ssr/production-export.js` file is detailed in [SSR Production Export](/quasar-cli-webpack/developing-ssr/ssr-production-export) page. Read it especially if you need to support serverless functions.
+4. The `/src-ssr/server.js` file is detailed in [SSR Webserver](/quasar-cli-webpack/developing-ssr/ssr-webserver) page. Read it especially if you need to support serverless functions.
 
 ## Helping SEO
 
@@ -222,14 +223,14 @@ When a boot file runs on the server, you will have access to one more parameter 
 
 ```js Some boot file
 export default ({ app, ..., ssrContext }) => {
-  // You can add props to the ssrContext then use them in the src/index.template.html.
+  // You can add props to the ssrContext then use them in the /index.html.
   // Example - let's say we ssrContext.someProp = 'some value', then in index template we can reference it:
   // {{ someProp }}
 }
 ```
 
-When you add such references (`someProp` surrounded by brackets in the example above) into your /index.html or /src/index.template.html, make sure you tell Quasar it’s only valid for SSR builds:
+When you add such references (`someProp` surrounded by brackets in the example above) into your `/index.html`, make sure you tell Quasar it’s only valid for SSR builds:
 
-```html /index.html or /src/index.template.html
+```html /index.html
 <% if (ctx.mode.ssr) { %>{{ someProp }} <% } %>
 ```

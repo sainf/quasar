@@ -10,7 +10,7 @@ scope:
     - l: middlewares/
       e: SSR middleware files
     - l: server.js
-      e: SSR webserver
+      e: (or .ts) SSR webserver
 ---
 
 ## quasar.config file
@@ -21,52 +21,91 @@ This is the place where you can configure some SSR options. Like if you want the
 return {
   // ...
   ssr: {
-    ssrPwaHtmlFilename: 'offline.html', // do NOT use index.html as name!
-                                        // will mess up SSR
+    /**
+     * If a PWA should take over or just a SPA.
+     * @default false
+     */
+    pwa?: boolean;
 
-    extendSSRWebserverConf (esbuildConf) {},
+    /**
+     * When using SSR+PWA, this is the name of the
+     * PWA index html file that the client-side fallbacks to.
+     * For production only.
+     *
+     * Do NOT use index.html as name as it will mess SSR up!
+     *
+     * @default 'offline.html'
+     */
+    pwaOfflineHtmlFilename?: string;
 
-    // add/remove/change properties
-    // of production generated package.json
-    extendPackageJson (pkg) {
-      // directly change props of pkg;
-      // no need to return anything
-    },
+    /**
+     * Extend/configure the Workbox GenerateSW options
+     * Specify Workbox options which will be applied on top of
+     *  `pwa > extendGenerateSWOptions()`.
+     * More info: https://developer.chrome.com/docs/workbox/the-ways-of-workbox/
+     */
+    pwaExtendGenerateSWOptions?: (config: object) => void;
 
-    pwa: false,
+    /**
+     * Extend/configure the Workbox InjectManifest options
+     * Specify Workbox options which will be applied on top of
+     *  `pwa > extendInjectManifestOptions()`.
+     * More info: https://developer.chrome.com/docs/workbox/the-ways-of-workbox/
+     */
+    pwaExtendInjectManifestOptions?: (config: object) => void;
 
     /**
      * Manually serialize the store state and provide it yourself
      * as window.__INITIAL_STATE__ to the client-side (through a <script> tag)
-     * (Requires @quasar/app-vite v1.0.0-beta.14+)
+     * @default false
      */
-    manualStoreSerialization: false,
+    manualStoreSerialization?: boolean;
 
     /**
      * Manually inject the store state into ssrContext.state
-     * (Requires @quasar/app-vite v1.0.0-beta.14+)
+     * @default false
      */
-    manualStoreSsrContextInjection: false,
+    manualStoreSsrContextInjection?: boolean;
 
     /**
      * Manually handle the store hydration instead of letting Quasar CLI do it.
+     *
      * For Pinia: store.state.value = window.__INITIAL_STATE__
-     * For Vuex: store.replaceState(window.__INITIAL_STATE__)
+     *
+     * @default false
      */
-    manualStoreHydration: false,
+    manualStoreHydration?: boolean;
 
     /**
      * Manually call $q.onSSRHydrated() instead of letting Quasar CLI do it.
      * This announces that client-side code should takeover.
+     * @default false
      */
-    manualPostHydrationTrigger: false,
+    manualPostHydrationTrigger?: boolean;
 
-    prodPort: 3000, // The default port that the production server should use
-                    // (gets superseded if process∙env∙PORT is specified at runtime)
+    /**
+     * The default port (3000) that the production server should use
+     * (gets superseded if process.env.PORT is specified at runtime)
+     * @default 3000
+     */
+    prodPort?: number;
 
-    middlewares: [
-      'render' // keep this as last one
-    ]
+    /**
+     * List of middleware files in src-ssr/middlewares
+     * Order is important.
+     */
+    middlewares?: string[];
+
+    /**
+     * Add/remove/change properties of production generated package.json
+     */
+    extendPackageJson?: (pkg: { [index in string]: any }) => void;
+
+    /**
+     * Extend the Esbuild config that is used for the SSR webserver
+     * (which includes the SSR middlewares)
+     */
+    extendSSRWebserverConf?: (config: EsbuildConfiguration) => void;
   }
 }
 ```
@@ -76,36 +115,35 @@ return {
 Should you want to tamper with the Vite config for UI in /src:
 
 ```js /quasar.config file
-module.exports = function (ctx) {
+export default defineConfig((ctx) => {
   return {
     build: {
       extendViteConf (viteConf, { isClient, isServer }) {
         if (ctx.mode.ssr) {
-          // do something with ViteConf
+          // do something with viteConf
+          // or return an object to deeply merge with current viteConf
         }
       }
     }
   }
-}
+})
 ```
 
 ### Manually triggering store hydration
 
-By default, Quasar CLI takes care of hydrating the Vuex store (if you use it) on client-side.
+By default, Quasar CLI takes care of hydrating the Pinia stores (if you use it) on client-side.
 
 However, should you wish to manually hydrate it yourself, you need to set quasar.config file > ssr > manualStoreHydration: true. One good example is doing it from [a boot file](/quasar-cli-vite/boot-files):
 
 ```js Some boot file
 // MAKE SURE TO CONFIGURE THIS BOOT FILE
 // TO RUN ONLY ON CLIENT-SIDE
+import { defineBoot } from '#q-app/wrappers'
 
-export default ({ store }) => {
+export default defineBoot(({ store }) => {
   // For Pinia
   store.state.value = window.__INITIAL_STATE__
-
-  // For Vuex
-  store.replaceState(window.__INITIAL_STATE__)
-}
+})
 ```
 
 ### Manually triggering post-hydration

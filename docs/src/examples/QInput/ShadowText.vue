@@ -104,9 +104,7 @@ export default {
       inputShadowText,
 
       processInputFill (e) {
-        if (e === void 0) {
-          return
-        }
+        if (e === void 0) return
 
         if (e.keyCode === 27) {
           if (inputFillCancelled.value !== true) {
@@ -129,9 +127,7 @@ export default {
       textareaShadowText,
 
       processTextareaFill (e) {
-        if (e === void 0) {
-          return
-        }
+        if (e === void 0) return
 
         if (e.keyCode === 27) {
           if (textareaFillCancelled.value !== true) {

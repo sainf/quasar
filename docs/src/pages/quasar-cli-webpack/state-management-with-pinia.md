@@ -9,7 +9,7 @@ scope:
       e: Pinia
       c:
       - l: index.js
-        e: Pinia initialization
+        e: (or .ts) Pinia initialization
       - l: "<store>"
         e: Pinia store...
       - l: "<store>"
@@ -20,9 +20,9 @@ scope:
     - l: stores
       c:
       - l: index.js
-        e: Pinia initialization
+        e: (or .ts) Pinia initialization
       - l: counter.js
-        e: Pinia store
+        e: (or .ts) Pinia store
 ---
 In large applications, state management often becomes complex due to multiple pieces of state scattered across many components and the interactions between them. It is often overlooked that the source of truth in Vue instances is the raw data object - a Vue instance simply proxies access to it. Therefore, if you have a piece of state that should be shared by multiple instances, you should avoid duplicating it and share it by identity.
 
@@ -34,10 +34,10 @@ We won't go into details on how to configure or use Pinia since it has great doc
 
 When you scaffold a Quasar project folder you can choose to add Pinia. It will create all the necessary configuration for you. Like for example the creation of `/src/stores` which handles all the Pinia related code that you need.
 
-If you don't choose the Pinia option during project creation but would like to add it later then all you need to do is to check the next section and create the `src/stores/index.[js|ts]` file (it's automatically created when you run `quasar new store <name>`):
+If you don't choose the Pinia option during project creation but would like to add it later then all you need to do is to check the next section and create the `src/stores/index.js` file (it's automatically created when you run `quasar new store <name>`):
 
 ```js /src/stores/index.js
-import { store } from 'quasar/wrappers'
+import { defineStore } from '#q-app/wrappers'
 import { createPinia } from 'pinia'
 
 /*
@@ -49,7 +49,7 @@ import { createPinia } from 'pinia'
  * with the Store instance.
  */
 
-export default store((/* { ssrContext } */) => {
+export default defineStore((/* { ssrContext } */) => {
   const pinia = createPinia()
 
   // You can add Pinia plugins here
@@ -69,7 +69,7 @@ $ quasar new store <store_name> [--format ts]
 
 It will create a folder in `/src/stores` named by "store_name" from the command above. It will contain all the boilerplate that you need.
 
-Let's say that you want to create a "counter" Pinia store. You issue `$ quasar new store counter`. You then notice the newly created `/src/stores/counter.[js|ts]` file:
+Let's say that you want to create a "counter" Pinia store. You issue `$ quasar new store counter`. You then notice the newly created `/src/stores/counter.js` file:
 
 <DocTree :def="scope.newStore" />
 
@@ -192,7 +192,7 @@ import { defineStore } from 'pinia'
 export const useWhateverStore = defineStore('whatever', {
   // ...
   actions: {
-    whateverAction () {
+    whateverAction () { // do NOT use arrow function
       this.router.push('...')
     }
   }

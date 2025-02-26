@@ -5,14 +5,19 @@ const prefix = 'fa'
 
 // ------------
 
-const glob = require('glob')
+const { globSync } = require('tinyglobby')
 const { copySync } = require('fs-extra')
 const { writeFileSync } = require('fs')
 const { resolve, join } = require('path')
 
 const skipped = []
 const distFolder = resolve(__dirname, '../fontawesome-v6')
-const { defaultNameMapper, extract, writeExports, copyCssFile } = require('./utils')
+const {
+  defaultNameMapper,
+  extract,
+  writeExports,
+  copyCssFile
+} = require('./utils')
 
 const svgFolder = resolve(__dirname, `../node_modules/${ packageName }/svgs/`)
 const iconTypes = [ 'brands', 'regular', 'solid' ]
@@ -21,15 +26,13 @@ let iconNames = new Set()
 const svgExports = []
 const typeExports = []
 
-iconTypes.forEach(type => {
-  const svgFiles = glob.sync(svgFolder + `/${ type }/*.svg`)
+iconTypes.forEach((type) => {
+  const svgFiles = globSync(svgFolder + `/${ type }/*.svg`)
 
-  svgFiles.forEach(file => {
+  svgFiles.forEach((file) => {
     const name = defaultNameMapper(file, prefix + type.charAt(0))
 
-    if (iconNames.has(name)) {
-      return
-    }
+    if (iconNames.has(name)) return
 
     try {
       const { svgDef, typeDef } = extract(file, name)
@@ -56,7 +59,14 @@ iconNames.sort((a, b) => {
   return ('' + a).localeCompare(b)
 })
 
-writeExports(iconSetName, packageName, distFolder, svgExports, typeExports, skipped)
+writeExports(
+  iconSetName,
+  packageName,
+  distFolder,
+  svgExports,
+  typeExports,
+  skipped
+)
 
 // then update webfont files
 
@@ -71,7 +81,7 @@ const webfont = [
   'fa-v4compatibility.woff2'
 ]
 
-webfont.forEach(file => {
+webfont.forEach((file) => {
   copySync(
     resolve(__dirname, `../node_modules/${ packageName }/webfonts/${ file }`),
     resolve(__dirname, `../fontawesome-v6/${ file }`)
@@ -81,7 +91,7 @@ webfont.forEach(file => {
 copyCssFile({
   from: resolve(__dirname, `../node_modules/${ packageName }/css/all.css`),
   to: resolve(__dirname, '../fontawesome-v6/fontawesome-v6.css'),
-  replaceFn: content => content.replace(/\.\.\/webfonts/g, '\.')
+  replaceFn: (content) => content.replace(/\.\.\/webfonts/g, '.')
 })
 
 copySync(

@@ -93,7 +93,10 @@ function extractVariableType (init, isExported) {
   if (init.type === 'ArrayExpression') return 'Array'
   if (init.type === 'ObjectExpression') return 'Object'
 
-  if (init.type === 'FunctionExpression') {
+  if (
+    init.type === 'FunctionExpression'
+    || init.type === 'ArrowFunctionExpression'
+  ) {
     // we ended up with a function instead of variable
     // after a ConditionalExpression
     return parseFunction({
@@ -140,6 +143,13 @@ function extractVariableType (init, isExported) {
   ) {
     return 'Element'
   }
+}
+
+function extractValueType (raw) {
+  for (const { type, regex } of rawValueTypeList) {
+    if (regex.test(raw)) return type
+  }
+  return 'undefined'
 }
 
 function parseVar ({ declaration, isExported }) {
@@ -215,7 +225,7 @@ function injectVariableDeclaration ({
 export function getImportStatement ({ ctx, json }) {
   const list = []
   if (json.defaultExport === true) {
-    list.push(ctx.pascalName)
+    list.push(ctx.camelCaseName)
   }
   if (json.namedExports.size !== 0) {
     list.push(`{ ${ Array.from(json.namedExports).join(', ') } }`)
@@ -354,11 +364,83 @@ export function readAstJson (ctx) {
 
     // export default { ... }
     if (declaration.type === 'ObjectExpression') {
+      json.defaultExport = true
+
       declaration.properties.forEach(prop => {
         const { name } = prop.key
+        const { type } = prop.value
+
+        // <key>: 'str' | 123 | true | /regex/ | etc...
+        if (type === 'Literal') {
+          json.variables[ name ] = {
+            // should match parseVar().def
+            type: extractValueType(prop.value.raw),
+            accessor: `${ ctx.camelCaseName }.${ name }`
+          }
+          return
+        }
+
+        // <key>: []
+        if (type === 'ArrayExpression') {
+          json.variables[ name ] = {
+            // should match parseVar().def
+            type: 'Array',
+            accessor: `${ ctx.camelCaseName }.${ name }`
+          }
+          return
+        }
+
+        if (type === 'ObjectExpression') {
+          json.variables[ name ] = {
+            // should match parseVar().def
+            type: 'Object',
+            accessor: `${ ctx.camelCaseName }.${ name }`
+          }
+          return
+        }
+
+        // <key>: fn () {}
+        if (
+          type === 'FunctionDeclaration'
+          || type === 'ArrowFunctionExpression'
+          || type === 'FunctionExpression'
+        ) {
+          json.functions[ name ] = {
+            // should match parseFunction().def
+            accessor: `${ ctx.camelCaseName }.${ name }`,
+            params: getParams(prop.value.params)
+          }
+
+          return
+        }
+
+        // <key>: class X {}
+        if (type === 'ClassDeclaration') {
+          json.classes[ name ] = {
+            ...parseClass({
+              declaration: prop.value,
+              isExported: false
+            }).def,
+
+            accessor: ctx.camelCaseName
+          }
+
+          return
+        }
+
         const { name: ref } = (prop.value || prop.key)
 
         if (content[ ref ] === void 0) {
+          // <key>: <some_imported_identifier>
+          if (type === 'Identifier') {
+            json.variables[ name ] = { // should match parseVar().def
+              // we can't infer type without significant additional work
+              type: 'Any',
+              accessor: `${ ctx.camelCaseName }.${ name }`
+            }
+            return
+          }
+
           console.error(
             'AST: unregistered ExportDefaultDeclaration > ObjectExpression > properties:',
             name,
@@ -372,9 +454,8 @@ export function readAstJson (ctx) {
         const { jsonKey, def } = content[ ref ]
         delete content[ ref ]
 
-        def.accessor = `${ ctx.pascalName }.${ name }`
+        def.accessor = `${ ctx.camelCaseName }.${ name }`
         json[ jsonKey ][ name ] = def
-        json.defaultExport = true
       })
     }
     // export default function () {}
@@ -385,7 +466,7 @@ export function readAstJson (ctx) {
       json.defaultExport = true
       json.functions.default = {
         ...parseFunction({ declaration, isExported: false }).def,
-        accessor: ctx.pascalName
+        accessor: ctx.camelCaseName
       }
     }
     // export default class X {}
@@ -393,7 +474,16 @@ export function readAstJson (ctx) {
       json.defaultExport = true
       json.classes.default = {
         ...parseClass({ declaration, isExported: false }).def,
-        accessor: ctx.pascalName
+        accessor: ctx.camelCaseName
+      }
+    }
+    // export default fn(...)
+    else if (declaration.type === 'CallExpression') {
+      json.defaultExport = true
+      json.variables.default = {
+        // we can't infer type without significant additional work
+        type: 'Any',
+        accessor: ctx.camelCaseName
       }
     }
   })

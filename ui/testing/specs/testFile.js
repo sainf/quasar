@@ -1,16 +1,14 @@
 import fse from 'fs-extra'
 import { Parser } from 'acorn'
 
-import { pascalCase } from './specs.utils.js'
-import { getGenerator } from './generators/map.js'
+import { camelCase } from './specs.utils.js'
+import { getGenerator, generic as genericGenerator } from './generators/map.js'
 
 const ignoreCommentLineMaxLen = 100
-const ignoreCommentRE = /^(\/\*.*\n\s*\*\s*Ignored specs:\s*\n.+\n\s*\*\/\s*\n?\n?)/s
+const ignoreCommentRE = /^(\/\*.*\n\s*\*\s*Ignored specs:\s*\n.+\n\s*\*\/\s*\n?\n?)/
 const ignoreCommentEntryRE = /(\[[^\]]+\])/g
 
 const testIdRE = /\[\((?<token>[^)]+)\)(?<name>.+)\]/
-
-const NO_ASSOCIATED_JSON = '/* No associated JSON so we cannot generate anything */'
 
 function getIgnoreCommentIds (ignoreComment) {
   if (ignoreComment === void 0) return []
@@ -121,15 +119,21 @@ function getTestFileMisconfiguration ({
 
   if (content === null) return { errors, warnings }
 
-  if (Object.keys(testTree).length !== 1) {
-    const msg = content === NO_ASSOCIATED_JSON
-      ? 'No associated JSON so nothing was generated'
-      : (
-          'Should only have one (and only one) root describe(),'
-          + ` which should be: describe('${ testTreeRootId }')`
-        )
+  if (Object.keys(testTree).length === 0) {
+    errors.push(
+      'Should have one root describe(),'
+      + ` which should be: describe('${ testTreeRootId }')`
+    )
 
-    errors.push(msg)
+    // early exit... this is fatal
+    return { errors, warnings }
+  }
+
+  if (Object.keys(testTree).length !== 1) {
+    errors.push(
+      'Should only have one (and only one) root describe(),'
+      + ` which should be: describe('${ testTreeRootId }')`
+    )
 
     // early exit... this is fatal
     return { errors, warnings }
@@ -155,7 +159,7 @@ function getTestFileMisconfiguration ({
   const targetImport = `from './${ ctx.localName }'`
   if (content.indexOf(targetImport) === -1) {
     errors.push(
-      `Should contain: import ${ ctx.pascalName } ${ targetImport }`
+      `Should contain: import ${ ctx.camelCaseName } ${ targetImport }`
     )
   }
 
@@ -247,7 +251,7 @@ function getTestFileMisconfiguration ({
             `Found describe('${ testId }') but it should probably be describe('[${ idMap.token }]${ name }')`
           )
         }
-        else if (json[ idMap.jsonKey ][ name ] === void 0) {
+        else if (json[ idMap.jsonKey ]?.[ name ] === void 0) {
           errors.push(
             `Found describe('${ testId }') but there's no associated JSON entry`
           )
@@ -303,7 +307,7 @@ function getTestFileMissingTests ({ ctx, generator, json, testFile }) {
 
       const scope = {
         name: entryName,
-        pascalName: pascalCase(entryName),
+        camelCaseName: camelCase(entryName),
         testId,
         jsonEntry,
         json,
@@ -351,7 +355,7 @@ function generateTestFileSection ({ ctx, generator, json, jsonPath }) {
 
   return createTestFn({
     name: entryName,
-    pascalName: pascalCase(entryName),
+    camelCaseName: camelCase(entryName),
     testId,
     jsonEntry,
     json,
@@ -360,8 +364,6 @@ function generateTestFileSection ({ ctx, generator, json, jsonPath }) {
 }
 
 function createTestFileContent ({ ctx, json, generator }) {
-  if (json === void 0) return NO_ASSOCIATED_JSON
-
   const { identifiers, getFileHeader } = generator
 
   let hasContent = false
@@ -389,7 +391,7 @@ function createTestFileContent ({ ctx, json, generator }) {
 
         const scope = {
           name: entryName,
-          pascalName: pascalCase(entryName),
+          camelCaseName: camelCase(entryName),
           testId,
           jsonEntry,
           json,
@@ -440,8 +442,18 @@ function getInitialState (file) {
 export function getTestFile (ctx) {
   const file = ctx.testFileAbsolute
 
-  const generator = getGenerator(ctx.targetRelative)
-  const json = generator.getJson(ctx)
+  let generator = null
+  let json = null
+
+  const init = () => {
+    generator = getGenerator(ctx.targetRelative)
+    json = generator.getJson(ctx)
+
+    if (json === void 0) {
+      generator = genericGenerator
+      json = generator.getJson(ctx)
+    }
+  }
 
   const save = content => {
     testFile.testTree = getTestTree(content)
@@ -452,18 +464,22 @@ export function getTestFile (ctx) {
     ...getInitialState(file),
 
     createContent () {
+      generator === null && init()
       return createTestFileContent({ ctx, json, generator })
     },
 
     generateSection (jsonPath) {
+      generator === null && init()
       return generateTestFileSection({ ctx, generator, json, jsonPath })
     },
 
     getMissingTests () {
+      generator === null && init()
       return getTestFileMissingTests({ ctx, generator, json, testFile: this })
     },
 
     getMisconfiguration (opts) {
+      generator === null && init()
       return getTestFileMisconfiguration({ ctx, generator, json, testFile: this, opts })
     },
 

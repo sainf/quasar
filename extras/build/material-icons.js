@@ -37,9 +37,7 @@ function downloadIcon (icon) {
       const name = ((themeName === '' ? prefix : theme + '_') + icon.name)
         .replace(/(_\w)/g, m => m[ 1 ].toUpperCase())
 
-      if (iconNames[ theme ].has(name)) {
-        return
-      }
+      if (iconNames[ theme ].has(name)) return
 
       const formattedTheme = themeName.split('_').join('')
       const response = await fetch(

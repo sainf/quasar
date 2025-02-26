@@ -1,17 +1,13 @@
-import fs from 'node:fs'
 import fse from 'fs-extra'
 
 import { log, warn } from '../../utils/logger.js'
-
-export function isModeInstalled (appPaths) {
-  return fs.existsSync(appPaths.ssrDir)
-}
+import { isModeInstalled } from '../modes-utils.js'
 
 export async function addMode ({
   ctx: { appPaths, cacheProxy },
   silent
 }) {
-  if (isModeInstalled(appPaths)) {
+  if (isModeInstalled(appPaths, 'ssr')) {
     if (silent !== true) {
       warn('SSR support detected already. Aborting.')
     }
@@ -20,15 +16,10 @@ export async function addMode ({
 
   log('Creating SSR source folder...')
   const hasTypescript = await cacheProxy.getModule('hasTypescript')
-  const format = hasTypescript ? 'ts' : 'default'
+  const format = hasTypescript ? 'ts' : 'js'
   fse.copySync(
     appPaths.resolve.cli(`templates/ssr/${ format }`),
     appPaths.ssrDir
-  )
-
-  fse.copySync(
-    appPaths.resolve.cli('templates/ssr/ssr-flag.d.ts'),
-    appPaths.resolve.ssr('ssr-flag.d.ts')
   )
 
   log('SSR support was added')
@@ -37,7 +28,7 @@ export async function addMode ({
 export function removeMode ({
   ctx: { appPaths }
 }) {
-  if (!isModeInstalled(appPaths)) {
+  if (isModeInstalled(appPaths, 'ssr') === false) {
     warn('No SSR support detected. Aborting.')
     return
   }

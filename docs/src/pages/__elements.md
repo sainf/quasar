@@ -49,7 +49,7 @@ scope:
         - l: routes.js
           e: App Routes definitions
       - l: stores
-        e: Pinia Stores (if not using Vuex)
+        e: Pinia Stores
         url: "/quasar-cli-vite/state-management-with-pinia"
         c:
         - l: index.js
@@ -406,7 +406,7 @@ const x = {
 | --- | --- |
 | `app` | Vue app instance |
 | `router` | Instance of Vue Router from 'src/router/index.js' |
-| `store` | Instance of the Pinia or the Vuex store - **store only will be passed if your project uses Pinia (you have src/stores) or Vuex (you have src/store)** |
+| `store` | Instance of Pinia - **store only will be passed if your project uses Pinia (you have src/stores)** |
 | `ssrContext` | Available only on server-side, if building for SSR. [More info](/quasar-cli-vite/developing-ssr/ssr-context) |
 | `urlPath` | The pathname (path + search) part of the URL. It also contains the hash on client-side. |
 | `publicPath` | The configured public path. |
@@ -420,7 +420,7 @@ Lorem ipsum dolor sit amet, **consectetur adipiscing** elit, sed do *eiusmod* te
 2. Quasar Extras get imported (Roboto font -- if used, icons, animations, ...)
 3. Quasar CSS & your app's global CSS are imported
 4. App.vue is loaded (not yet being used)
-5. Store is imported (if using Pinia in src/stores or Vuex in src/store)
+5. Store is imported (if using Pinia in src/stores)
 6. Pinia (if using) is injected into the Vue app instance
 6. Router is imported (in src/router)
 

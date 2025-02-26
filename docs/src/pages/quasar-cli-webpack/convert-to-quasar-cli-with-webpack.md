@@ -3,94 +3,202 @@ title: Convert project to Quasar CLI with Webpack
 desc: (@quasar/app-webpack) How to convert a Quasar CLI with Vite project to a Quasar CLI with Webpack one.
 ---
 
-This page will guide you on how to convert a Quasar CLI with Vite (`@quasar/app-vite`) project into a Quasar CLI with Webpack one (`@quasar/app-webpack`).
+This page will guide you on how to convert a Quasar CLI with Vite (`@quasar/app-vite v2`) project into a Quasar CLI with Webpack one (`@quasar/app-webpack v4`).
 
-### Step 1: Create a Quasar CLI with Webpack project folder:
+### Step 1: Edit package.json
 
-```tabs
-<<| bash Yarn |>>
-$ yarn create quasar
-# then pick "App with Quasar CLI", "Quasar v2", "Quasar App CLI with Webpack"
-<<| bash NPM |>>
-$ npm init quasar
-# then pick "App with Quasar CLI", "Quasar v2", "Quasar App CLI with Webpack"
-<<| bash PNPM |>>
-# experimental support
-$ pnpm create quasar
-# then pick "App with Quasar CLI", "Quasar v2", "Quasar App CLI with Webpack"
-<<| bash Bun |>>
-# experimental support
-$ bun create quasar
-# then pick "App with Quasar CLI", "Quasar v2", "Quasar App CLI with Webpack"
+```diff /package.json
+dependencies: {
++ "core-js": "^3.6.5",
+},
+
+devDependencies: {
+- "@quasar/app-vite": "^2.0.0"
++ "@quasar/app-webpack": "^4.0.0"
+
++ "eslint-webpack-plugin": "^4.0.1",
++ "ts-loader": "^9.4.2", // if using TS
+
+- "postcss"
+- "postcss-rtlcss"
+
+// if you have PWA mode:
++ "workbox-webpack-plugin": "^7.0.0"
+- "workbox-build": "^7.0.0",
+- "workbox-cacheable-response": "^7.0.0",
+- "workbox-core": "^7.0.0",
+- "workbox-expiration": "^7.0.0",
+- "workbox-precaching": "^7.0.0",
+- "workbox-routing": "^7.0.0",
+- "workbox-strategies": "^7.0.0"
+}
+
++ "browserslist": [
++   "last 10 Chrome versions",
++   "last 10 Firefox versions",
++   "last 4 Edge versions",
++   "last 7 Safari versions",
++   "last 8 Android versions",
++   "last 8 ChromeAndroid versions",
++   "last 8 FirefoxAndroid versions",
++   "last 10 iOS versions",
++   "last 5 Opera versions"
++ ],
 ```
 
-There are significant changes to the root files so it's easier to generate a new project folder rather than explaining each of the many changes.
+Remember to yarn/npm/pnpm/bun install.
 
-### Step 2: Copy folders from original folder
+A Quasar CLI with Webpack project relies on `/package.json > browserslist` to specify which browsers you are targeting. More info: [Browser Compatibility](/quasar-cli-webpack/browser-compatibility) page.
+
+### Step 2: Various files
+
+* Create `/babel.config.js`:
+
+  ```js
+  export default api => {
+    return {
+      presets: [
+        [
+          '@quasar/babel-preset-app',
+          api.caller(caller => caller && caller.target === 'node')
+            ? { targets: { node: 'current' } }
+            : {}
+        ]
+      ]
+    }
+  }
+  ```
+  <br>
+
+* If you are using the RTL support, then edit `/postcss.config.js`. You will need to remove the `postcss-rtlcss` import and usage. This is handled automatically by Quasar CLI now:
+
+  ```diff /postcss.config.js
+  - import rtlcss from 'postcss-rtlcss'
+
+  export default {
+    plugins: [
+  -   rtlcss()
+    ]
+  }
+  ```
+  <br>
+
+  Also, uninstall the `postcss-rtlcss` package.
+
+### Step 3: Copy folders from original folder
 
 From your original project folder, copy these as they are:
-  * /src (with small caveat; see next steps)
+  * /src
   * /src-cordova
   * /src-capacitor
   * /src-electron
   * /src-pwa
   * /src-ssr (with small caveat; see next steps)
-  * ~~/src-bex~~ **Nope. Don't!**
+  * /src-bex (with small caveat; see next steps)
 
-Also move `/index.html` to `/src/index.template.html`. And make the following change:
+### Step 4: Check the new quasar.config file
 
+The following props are detailed in the [quasar.config file](/quasar-cli-vite/quasar-config-file) page.
+
+```diff
++ eslint: {
++   // fix: true,
++   // include: [],
++   // exclude: [],
++   // cache: false,
++   // rawEsbuildEslintOptions: {},
++   // rawWebpackEslintPluginOptions: {},
++   warnings: true,
++   errors: true
++ },
+
+build: {
+- target: {
++ esbuildTarget: {
+    browser: [ 'es2022', 'firefox115', 'chrome115', 'safari14' ],
+    node: 'node20'
+  },
+
++ webpackTranspile
++ webpackTranspileDependencies
++ webpackDevtool
+
++ htmlFilename
++ rtl
++ showProgress
++ gzip
++ vueCompiler
+
+- extendViteConf (viteConf, { isServer, isClient }) {}
++ extendWebpack () {}
++ chainWebpack () {}
+
+- viteVuePluginOptions
+- vitePlugins
+
+- useFilenameHashes
+- polyfillModulePreload
+
++ uglifyOptions
++ scssLoaderOptions
++ sassLoaderOptions
++ stylusLoaderOptions
++ lessLoaderOptions
++ vueLoaderOptions
++ tsLoaderOptions
+},
+
+devServer: {
++ server: {
++  type: 'http'
++ }
+},
+
+sourceFiles: {
++ indexHtmlTemplate: 'index.html'
+}
 ```
-<!-- quasar:entry-point -->
-
-// replace with:
-
-<!-- DO NOT touch the following DIV -->
-<div id="q-app"></div>
-```
-
-Also, edit `/src/router/index.js`:
-
-```js
-// old way
-history: createHistory(process.env.VUE_ROUTER_BASE)
-
-// new way
-history: createHistory(process.env.MODE === 'ssr' ? void 0 : process.env.VUE_ROUTER_BASE)
-```
-
-### Step 3: Check the new quasar.config file
-
-There are property changes in `build`, `devServer`, and all Quasar Modes (pwa, ssr, etc). The props are detailed in the [quasar.config file](/quasar-cli-webpack/quasar-config-file) page. You will have to manually port your configuration to the Quasar CLI with Webpack architecture.
-
-### Step 4: Browser compatibility
-
-A Quasar CLI with Webpack project relies on `/package.json > browserslist` to specify which browsers you are targetting. More info: [Browser Compatibility](/quasar-cli-webpack/browser-compatibility) page.
 
 ### Step 5: SSR related
 
-Port the `/src-ssr/server.js` to `/src-ssr/production-export.js` file. Make sure to read about the [SSR Production Export](/quasar-cli-webpack/developing-ssr/ssr-production-export) first. The production-export.js is essentially default exporting the `listen()` method from `src-ssr/server.js`. All the other functionality cannot be ported over.
+```diff /src-ssr/server.js
+export const renderPreloadTag = defineSsrRenderPreloadTag((file/* , { ssrContext } */) => {
+  if (jsRE.test(file) === true) {
+-   return `<link rel="modulepreload" href="${file}" crossorigin>`;
++   return `<script src="${file}" defer crossorigin></script>`;
+  }
+```
 
-More info: [Configuring SSR](/quasar-cli-webpack/developing-ssr/configuring-ssr)
+### Step 6: BEX related
 
-### Step 6: PWA related
+```diff /src-bex/background.js
+- declare module '@quasar/app-vite' {
++ declare module '@quasar/app-webpack' {
+  interface BexEventMap {
+    // ...
+  }
+}
+```
 
-The `/src-pwa/manifest.json` has no meaning for a Quasar CLI with Webpack project. You will need to use `quasar.config file > manifest` to declare it there. After that then delete the `/src-pwa/manifest.json` file.
+```diff /src-bex/my-content-script.js
+// for ALL content script files:
 
-Also check `quasar.config file > pwa` > `metaVariables` and `metaVariablesFn`.
+- declare module '@quasar/app-vite' {
++ declare module '@quasar/app-webpack' {
+  interface BexEventMap {
+    // ...
+  }
+}
+```
 
-More info: [Configuring PWA](/quasar-cli-webpack/developing-pwa/configuring-pwa)
+### Step 7: Linting
 
-### Step 7: BEX related
-
-The BEX mode differs quite a lot. The PWA mode in a Quasar CLI with Webpack project does NOT supports PWA manifest v3 and multiple content scripts. You will have to manually port over your BEX files to the new architecture.
-
-It's best to `$ quasar mode add bex` and port your BEX.
-
-More info: [Preparation and folder structure](/quasar-cli-webpack/developing-browser-extensions/preparation#2-understand-the-anatomy-of-src-bex) and [Configuring BEX](/quasar-cli-webpack/developing-browser-extensions/configuring-bex).
+If you are using ESLint, you might want to check the requirements for it [here](/quasar-cli-webpack/linter).
 
 ### Step 8: And we're done
 
 ```bash
+$ quasar prepare
 $ quasar dev
 $ quasar build
 ```

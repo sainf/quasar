@@ -1,7 +1,7 @@
 import fs from 'node:fs'
 import { join, resolve } from 'node:path'
 import { fileURLToPath } from 'node:url'
-import fg from 'fast-glob'
+import { globSync } from 'tinyglobby'
 import md from 'markdown-ast'
 
 import { parseFrontMatter } from './md/md-parse-utils.js'
@@ -10,26 +10,25 @@ import { slugify, capitalize } from './utils.js'
 
 const apiRE = /<DocApi .*file="([^"]+)".*\n/
 const installationRE = /<DocInstallation /
-const hiddenPageRE = /[\\/]__[a-zA-Z0-9_-]+\.md$/
+const hiddenPageRE = /__[a-zA-Z0-9_-]+\.md$/
 
 const thisFolder = fileURLToPath(new URL('.', import.meta.url))
 
 const mdPagesDir = join(thisFolder, '../src/pages')
-const mdPagesLen = mdPagesDir.length + 1
-const mdPagesList = fg.sync(join(mdPagesDir, '**/*.md'))
+const mdPagesList = globSync('**/*.md', { cwd: mdPagesDir })
   .filter(file => hiddenPageRE.test(file) === false)
   .map(key => {
     if (key.indexOf('elements') !== -1) {
       console.error('Not element:', key)
     }
-    const parts = key.substring(mdPagesLen, key.length - 3).split('/')
+    const parts = key.substring(0, key.length - 3).split('/')
     const len = parts.length
     const urlParts = parts[ len - 2 ] === parts[ len - 1 ]
       ? parts.slice(0, len - 1)
       : parts
 
     return {
-      file: key,
+      file: join(mdPagesDir, key),
       menu: urlParts.map(entry => entry.split('-').map(capitalize).join(' ')),
       url: '/' + urlParts.join('/')
     }
@@ -101,14 +100,6 @@ const addItem = (entries, item) => {
     id: getObjectID(),
     ...item
   }))
-}
-
-// returns the contents of the associated file
-const getFileContents = (mdPath) => {
-  const page = resolve(thisFolder, mdPath)
-  return fs.readFileSync(page, {
-    encoding: 'utf8'
-  })
 }
 
 const processNode = (node, prefix = '') => {
@@ -236,7 +227,7 @@ const processMarkdown = (syntaxTree, entries, entry) => {
 function processPage (page, entries) {
   const { file, menu, url } = page
 
-  const contents = getFileContents(file)
+  const contents = fs.readFileSync(file, 'utf-8')
   const frontMatter = parseFrontMatter(contents)
   let keys = null
 

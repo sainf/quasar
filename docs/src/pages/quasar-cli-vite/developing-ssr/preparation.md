@@ -10,7 +10,7 @@ scope:
     - l: middlewares/
       e: SSR middleware files
     - l: server.js
-      e: SSR webserver
+      e: (or .ts) SSR webserver
 ---
 
 We’ll be using Quasar CLI to develop and build a SSR website. The difference between building a SPA, Mobile App, Electron App, PWA or SSR is simply determined by the “mode” parameter in “quasar dev” and “quasar build” commands.

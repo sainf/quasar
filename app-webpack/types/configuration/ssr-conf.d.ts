@@ -49,8 +49,9 @@ export interface QuasarSsrConfiguration {
 
   /**
    * Manually handle the store hydration instead of letting Quasar CLI do it.
+   *
    * For Pinia: store.state.value = window.__INITIAL_STATE__
-   * For Vuex: store.replaceState(window.__INITIAL_STATE__)
+   *
    * @default false
    */
   manualStoreHydration?: boolean;

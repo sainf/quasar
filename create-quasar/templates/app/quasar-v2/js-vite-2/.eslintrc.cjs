@@ -18,7 +18,7 @@ module.exports = {
       // Quasar v2 - JS
       'css',
       'preset',
-      'lintConfig'
+      'prettier'
     ]
   }
 }

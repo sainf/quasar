@@ -13,11 +13,13 @@ scope:
       - l: icon.ico
         e: Icon file for win32 (Windows) platform
       - l: icon.png
-        e: Tray icon file for all platforms (especially Linux)
+        e: Tray icon file for all platforms
     - l: electron-preload.js
       e: "(or .ts) Electron preload script (injects Node.js stuff into renderer thread)"
     - l: electron-main.js
       e: "(or .ts) Main thread code"
+    - l: electron-env.d.ts
+      e: "TypeScript only"
 ---
 Before we dive in to the actual development, we need to do some preparation work.
 

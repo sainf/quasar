@@ -1,5 +1,5 @@
 {
-  "mixins": [ "composables/private/use-model-toggle" ],
+  "mixins": [ "composables/private.use-model-toggle/use-model-toggle" ],
 
   "meta": {
     "docsUrl": "https://v2.quasar.dev/layout/drawer"
@@ -36,7 +36,7 @@
     "mini-width": {
       "type": "Number",
       "desc": "Width of drawer (in pixels) when in mini mode",
-      "default": "60",
+      "default": "57",
       "category": "style"
     },
 
@@ -50,7 +50,7 @@
       "type": "Boolean",
       "desc": "Disables animation of the drawer when toggling mini mode",
       "category": "behavior",
-      "addedIn": "v2.12.0"
+      "addedIn": "v2.12"
     },
 
     "dark": {

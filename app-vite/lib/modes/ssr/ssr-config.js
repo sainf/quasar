@@ -6,6 +6,7 @@ import {
   createNodeEsbuildConfig, extendEsbuildConfig
 } from '../../config-tools.js'
 
+import { cliPkg } from '../../utils/cli-runtime.js'
 import { getBuildSystemDefine } from '../../utils/env.js'
 
 import { quasarPwaConfig } from '../pwa/pwa-config.js'
@@ -55,6 +56,7 @@ export const quasarSsrConfig = {
   viteServer: async quasarConf => {
     let cfg = await createViteConfig(quasarConf, { compileId: 'vite-ssr-server' })
     const { appPaths } = quasarConf.ctx
+    const ssrEntryFile = appPaths.resolve.entry('server-entry.js')
 
     cfg = mergeViteConfig(cfg, {
       target: quasarConf.build.target.node,
@@ -69,14 +71,23 @@ export const quasarSsrConfig = {
       }),
       appType: 'custom',
       server: {
+        ws: false, // let client config deal with it
         hmr: false, // let client config deal with it
-        middlewareMode: true
+        middlewareMode: true,
+        warmup: {
+          ssrFiles: [ ssrEntryFile ]
+        }
+      },
+      ssr: {
+        // we don't externalize ourselves because of
+        // the possible imports of '#q-app/wrappers' / '@quasar/app-vite/wrappers'
+        noExternal: [ cliPkg.name ]
       },
       build: {
         ssr: true,
         outDir: join(quasarConf.build.distDir, 'server'),
         rollupOptions: {
-          input: appPaths.resolve.entry('server-entry.mjs')
+          input: ssrEntryFile
         }
       }
     })
@@ -97,24 +108,20 @@ export const quasarSsrConfig = {
     }))
 
     if (quasarConf.ctx.dev) {
-      cfg.entryPoints = [ appPaths.resolve.entry('ssr-dev-webserver.mjs') ]
-      cfg.outfile = appPaths.resolve.entry('compiled-dev-webserver.mjs')
+      cfg.entryPoints = [ appPaths.resolve.entry('ssr-dev-webserver.js') ]
+      cfg.outfile = appPaths.resolve.entry('compiled-dev-webserver.js')
     }
     else {
       cfg.external = [
-        ...(cfg.external || []),
+        ...cfg.external,
         'vue/server-renderer',
         'vue/compiler-sfc',
         './render-template.js',
         './quasar.manifest.json',
-
-        // based on project's package.json > type (module | commonjs), one of the
-        // following will be compiled:
-        './server/server-entry.js',
-        './server/server-entry.mjs'
+        './server/server-entry.js'
       ]
 
-      cfg.entryPoints = [ appPaths.resolve.entry('ssr-prod-webserver.mjs') ]
+      cfg.entryPoints = [ appPaths.resolve.entry('ssr-prod-webserver.js') ]
       cfg.outfile = join(quasarConf.build.distDir, 'index.js')
     }
 

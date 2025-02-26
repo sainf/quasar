@@ -32,3 +32,5 @@ When running your application in development you may have noticed a message from
 Debugger listening on ws://127.0.0.1:5858/b285586a-6091-4c41-b6ea-0d389e6f9c93
 For help, see: https://nodejs.org/en/docs/inspector
 ```
+
+The port can vary, based on the quasar.config > electron > inspectPort setting. If the specified port is already occupied, the next closest available port will be used.

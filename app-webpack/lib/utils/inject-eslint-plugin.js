@@ -3,6 +3,9 @@ const fse = require('fs-extra')
 const { encodeForDiff } = require('./encode-for-diff.js')
 
 function extractPluginConfig ({
+  cwd, // injected by us
+  configType, // injected by us
+
   cache,
   cacheLocation, // injected by us
 
@@ -14,7 +17,8 @@ function extractPluginConfig ({
 
   rawWebpackEslintPluginOptions = {}
 }) {
-  return {
+  const acc = {
+    cwd,
     cache,
     cacheLocation,
     formatter,
@@ -28,6 +32,12 @@ function extractPluginConfig ({
     fix,
     ...rawWebpackEslintPluginOptions
   }
+
+  if (configType === 'flat') {
+    acc.configType = 'flat'
+  }
+
+  return acc
 }
 
 module.exports.injectESLintPlugin = function injectESLintPlugin (webpackChain, quasarConf, compileId) {
@@ -36,9 +46,12 @@ module.exports.injectESLintPlugin = function injectESLintPlugin (webpackChain, q
   const cacheId = `eslint-${ compileId }`
   const cacheLocation = appPaths.resolve.cache(cacheId)
   const { rawEsbuildEslintOptions, ...eslintOptions } = quasarConf.eslint
+  const { configType, EslintWebpackPlugin } = cacheProxy.getModule('eslint')
 
   const config = {
     ...eslintOptions,
+    cwd: appPaths.appDir,
+    configType,
     cacheLocation
   }
 
@@ -57,7 +70,6 @@ module.exports.injectESLintPlugin = function injectESLintPlugin (webpackChain, q
     }
   }
 
-  const { EslintWebpackPlugin } = cacheProxy.getModule('eslint')
   webpackChain.plugin('eslint-webpack-plugin')
     .use(EslintWebpackPlugin, [ extractPluginConfig(config) ])
 }

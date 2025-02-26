@@ -37,10 +37,10 @@ export default function (api) {
   api.compatibleWith('quasar', '^2.0.0')
 
   if (api.hasVite === true) {
-    api.compatibleWith('@quasar/app-vite', '^2.0.0-beta.1')
+    api.compatibleWith('@quasar/app-vite', '^2.0.0')
   }
   else { // api.hasWebpack === true
-    api.compatibleWith('@quasar/app-webpack', '^4.0.0-beta.1')
+    api.compatibleWith('@quasar/app-webpack', '^4.0.0')
   }
 
   // Here we extend /quasar.config file, so we can add

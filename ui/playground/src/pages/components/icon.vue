@@ -13,60 +13,58 @@
 
       <q-icon color="accent" size="5rem">
         <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
-          <path d="M0 0h24v24H0z" fill="none"/>
-          <path d="M19 3h-4.18C14.4 1.84 13.3 1 12 1c-1.3 0-2.4.84-2.82 2H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm-7 0c.55 0 1 .45 1 1s-.45 1-1 1-1-.45-1-1 .45-1 1-1zm0 4c1.66 0 3 1.34 3 3s-1.34 3-3 3-3-1.34-3-3 1.34-3 3-3zm6 12H6v-1.4c0-2 4-3.1 6-3.1s6 1.1 6 3.1V19z"/>
+          <path d="M0 0h24v24H0z" fill="none" />
+          <path
+            d="M19 3h-4.18C14.4 1.84 13.3 1 12 1c-1.3 0-2.4.84-2.82 2H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm-7 0c.55 0 1 .45 1 1s-.45 1-1 1-1-.45-1-1 .45-1 1-1zm0 4c1.66 0 3 1.34 3 3s-1.34 3-3 3-3-1.34-3-3 1.34-3 3-3zm6 12H6v-1.4c0-2 4-3.1 6-3.1s6 1.1 6 3.1V19z" />
         </svg>
       </q-icon>
 
       <q-icon name="android" size="5rem" />
-
     </div>
-      <!-- This is the raw SVG -->
-      <q-icon color="secondary" size="5rem">
-        <svg viewBox="0 0 21 21" xmlns="http://www.w3.org/2000/svg">
-          <g fill="none" fill-rule="evenodd" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" transform="translate(3 4)">
-            <path d="m3.5 10.5-1-.0345601c-1.10193561-.0037085-2-.93261826-2-2.03456011v-5.9654399c0-1.1045695.8954305-2 2-2l10-.00245977c1.1045695 0 2 .8954305 2 2v6.00245977c0 1.1045695-.8954305 2.00000001-2 2.00000001-.0014957 0-.3348291.01234-1 .0370199"/>
-            <path d="m7.5 12.5-3-3h6z" transform="matrix(1 0 0 -1 0 22)"/>
-          </g>
-        </svg>
-      </q-icon>
+    <!-- This is the raw SVG -->
+    <q-icon color="secondary" size="5rem">
+      <svg viewBox="0 0 21 21" xmlns="http://www.w3.org/2000/svg">
+        <g
+          fill="none"
+          fill-rule="evenodd"
+          stroke="currentColor"
+          stroke-linecap="round"
+          stroke-linejoin="round"
+          transform="translate(3 4)">
+          <path
+            d="m3.5 10.5-1-.0345601c-1.10193561-.0037085-2-.93261826-2-2.03456011v-5.9654399c0-1.1045695.8954305-2 2-2l10-.00245977c1.1045695 0 2 .8954305 2 2v6.00245977c0 1.1045695-.8954305 2.00000001-2 2.00000001-.0014957 0-.3348291.01234-1 .0370199" />
+          <path d="m7.5 12.5-3-3h6z" transform="matrix(1 0 0 -1 0 22)" />
+        </g>
+      </svg>
+    </q-icon>
 
-      <q-icon :name="suiAirplay" size="5rem" color="secondary" />
+    <q-icon :name="suiAirplay" size="5rem" color="secondary" />
 
-      <!-- This one has special hand-added handling to make it work -->
-      <q-icon :name="suiAirplay2" size="5rem" color="secondary" />
+    <!-- This one has special hand-added handling to make it work -->
+    <q-icon :name="suiAirplay2" size="5rem" color="secondary" />
 
-      <!-- Testing for 'M.' -->
-      <q-icon :name="oiBatteryEmpty" size="5rem" color="secondary" />
+    <!-- Testing for 'M.' -->
+    <q-icon :name="oiBatteryEmpty" size="5rem" color="secondary" />
 
-      <q-btn id="showInfoBtn" no-caps class="q-ml-sm">
-        <q-icon size="2em" name="img:https://www.gfbr.global/wp-content/uploads/2015/10/TwitterLogo_55acee-49x49.png" />
-      </q-btn>
+    <q-btn id="showInfoBtn" no-caps class="q-ml-sm">
+      <q-icon size="2em" name="img:https://www.gfbr.global/wp-content/uploads/2015/10/TwitterLogo_55acee-49x49.png" />
+    </q-btn>
 
-      <q-space />
+    <q-space />
 
-      <q-expansion-item
-        class="bg-white"
-        style="width: 300px; z-index: 1; border: 2px solid #ccc"
-        label="RE tests for SVG"
-        :caption="`${testSvgReTexts.filter(t => t.status === 'OK').length} / ${testSvgReTexts.length} OK`"
-      >
-        <div v-for="test in testSvgReTexts" :key="test.text" class="q-px-md row no-wrap items-center justify-between">
-          <div>{{test.text}}</div>
-          <div :class="test.class">{{test.status}}</div>
-        </div>
-      </q-expansion-item>
-    <div>
+    <q-expansion-item
+      class="bg-white"
+      style="width: 300px; z-index: 1; border: 2px solid #ccc"
+      label="RE tests for SVG"
+      :caption="`${testSvgReTexts.filter((t) => t.status === 'OK').length} / ${testSvgReTexts.length} OK`">
+      <div v-for="test in testSvgReTexts" :key="test.text" class="q-px-md row no-wrap items-center justify-between">
+        <div>{{ test.text }}</div>
+        <div :class="test.class">{{ test.status }}</div>
+      </div>
+    </q-expansion-item>
+    <div></div>
 
-    </div>
-
-    <q-option-group
-      type="radio"
-      v-model="icon"
-      inline
-      :options="iconOptions"
-      style="margin-top: 25px"
-    />
+    <q-option-group type="radio" v-model="icon" inline :options="iconOptions" style="margin-top: 25px" />
 
     <div class="q-mt-xl">
       <div v-for="set in sets" :key="set.setName">
@@ -137,21 +135,24 @@ import { laAtomSolid } from '@quasar/extras/line-awesome'
 import { biBugFill } from '@quasar/extras/bootstrap-icons'
 
 // currently does not work with QIcon because it only look for capital 'M'
-const suiAirplay = 'm3.5 10.5-1-.0345601c-1.10193561-.0037085-2-.93261826-2-2.03456011v-5.9654399c0-1.1045695.8954305-2 2-2l10-.00245977c1.1045695 0 2 .8954305 2 2v6.00245977c0 1.1045695-.8954305 2.00000001-2 2.00000001-.0014957 0-.3348291.01234-1 .0370199@@fill:none;fill-rule:evenodd;stroke:currentColor;stroke-linecap:round;stroke-linejoin:round;@@translate(3 4)&&m7.5 12.5-3-3h6z@@fill:none;fill-rule:evenodd;stroke:currentColor;stroke-linecap:round;stroke-linejoin:round;@@matrix(1 0 0 -1 3 26)|0 0 21 21'
+const suiAirplay
+  = 'm3.5 10.5-1-.0345601c-1.10193561-.0037085-2-.93261826-2-2.03456011v-5.9654399c0-1.1045695.8954305-2 2-2l10-.00245977c1.1045695 0 2 .8954305 2 2v6.00245977c0 1.1045695-.8954305 2.00000001-2 2.00000001-.0014957 0-.3348291.01234-1 .0370199@@fill:none;fill-rule:evenodd;stroke:currentColor;stroke-linecap:round;stroke-linejoin:round;@@translate(3 4)&&m7.5 12.5-3-3h6z@@fill:none;fill-rule:evenodd;stroke:currentColor;stroke-linecap:round;stroke-linejoin:round;@@matrix(1 0 0 -1 3 26)|0 0 21 21'
 
 // This only works if you add the '@@fill:none;stroke:none;&&' at the start, but this breaks other icon sets
-const suiAirplay2 = 'M0 0z@@fill:none;stroke:none;&&m3.5 10.5-1-.0345601c-1.10193561-.0037085-2-.93261826-2-2.03456011v-5.9654399c0-1.1045695.8954305-2 2-2l10-.00245977c1.1045695 0 2 .8954305 2 2v6.00245977c0 1.1045695-.8954305 2.00000001-2 2.00000001-.0014957 0-.3348291.01234-1 .0370199@@fill:none;fill-rule:evenodd;stroke:currentColor;stroke-linecap:round;stroke-linejoin:round;@@translate(3 4)&&M0 0zm7.5 12.5-3-3h6z@@fill:none;fill-rule:evenodd;stroke:currentColor;stroke-linecap:round;stroke-linejoin:round;@@matrix(1 0 0 -1 3 26)|0 0 21 21'
+const suiAirplay2
+  = 'M0 0z@@fill:none;stroke:none;&&m3.5 10.5-1-.0345601c-1.10193561-.0037085-2-.93261826-2-2.03456011v-5.9654399c0-1.1045695.8954305-2 2-2l10-.00245977c1.1045695 0 2 .8954305 2 2v6.00245977c0 1.1045695-.8954305 2.00000001-2 2.00000001-.0014957 0-.3348291.01234-1 .0370199@@fill:none;fill-rule:evenodd;stroke:currentColor;stroke-linecap:round;stroke-linejoin:round;@@translate(3 4)&&M0 0zm7.5 12.5-3-3h6z@@fill:none;fill-rule:evenodd;stroke:currentColor;stroke-linecap:round;stroke-linejoin:round;@@matrix(1 0 0 -1 3 26)|0 0 21 21'
 
 // test for 'M.'
-const oiBatteryEmpty = 'M.09 0c-.06 0-.09.04-.09.09v5.81c0 .05.04.09.09.09h6.81c.05 0 .09-.04.09-.09v-1.91h1v-2h-1v-1.91c0-.06-.04-.09-.09-.09h-6.81zm.91 1h5v4h-5v-4z@@@@translate(0 1)|0 0 8 8'
+const oiBatteryEmpty
+  = 'M.09 0c-.06 0-.09.04-.09.09v5.81c0 .05.04.09.09.09h6.81c.05 0 .09-.04.09-.09v-1.91h1v-2h-1v-1.91c0-.06-.04-.09-.09-.09h-6.81zm.91 1h5v4h-5v-4z@@@@translate(0 1)|0 0 8 8'
 
 const TOP_ICON = 'add_box'
 
 function parseSet (setName, set) {
   const icons = []
-  Object.keys(set).forEach(key => {
+  Object.keys(set).forEach((key) => {
     const prop = set[ key ]
-    Object.keys(prop).forEach(name => {
+    Object.keys(prop).forEach((name) => {
       const val = prop[ name ]
       if (typeof val === 'string') {
         icons.push({ name: `${ key }/${ name }`, val })
@@ -182,8 +183,8 @@ const testSvgReFill = (groups, texts) => {
   const curTexts = []
   const srcTexts = Array.isArray(texts) !== true || texts.length === 0 ? [ '' ] : texts
 
-  srcTexts.forEach(text => {
-    curGroup.forEach(char => {
+  srcTexts.forEach((text) => {
+    curGroup.forEach((char) => {
       curTexts.push(`${ text }${ char }`)
     })
   })
@@ -207,7 +208,7 @@ export default {
 
     const $q = useQuasar()
 
-    watch(useMapFn, val => {
+    watch(useMapFn, (val) => {
       if (val === true) {
         icon.value = TOP_ICON
         // IconSet.iconMapFn = customIconMapFn
@@ -222,7 +223,7 @@ export default {
     const mRE = /^[Mm]\s?[-+]?\.?\d/
 
     return {
-      testSvgReTexts: testSvgReTexts.map(text => ({
+      testSvgReTexts: testSvgReTexts.map((text) => ({
         text,
         ...(mRE.test(text) ? { status: 'OK', class: 'text-positive' } : { status: 'BAD', class: 'text-negative' })
       })),
@@ -275,15 +276,37 @@ export default {
       ],
 
       sets: [
-        matSet, matOutlinedSet, matRoundSet, matSharpSet,
-        symOutlinedSet, symRoundedSet, symSharpSet,
-        mdiSet, fontawesomeSet, ioniconsV4Set, evaSet, themifySet,
-        lineawesomeSet, bootstrapiconsSet,
-        svgMatSet, svgMatOutlinedSet, svgMatRoundSet, svgMatSharpSet,
-        svgSymOutlinedSet, svgSymRoundedSet, svgSymSharpSet,
-        svgMdiSet, svgIoniconsV4Set, svgIoniconsV5Set, svgIoniconsV6Set,
-        svgFontawesomeV5Set, svgFontawesomeV6Set,
-        svgEvaSet, svgThemifySet, svgLineawesomeSet, svgBootstrapiconsSet
+        matSet,
+        matOutlinedSet,
+        matRoundSet,
+        matSharpSet,
+        symOutlinedSet,
+        symRoundedSet,
+        symSharpSet,
+        mdiSet,
+        fontawesomeSet,
+        ioniconsV4Set,
+        evaSet,
+        themifySet,
+        lineawesomeSet,
+        bootstrapiconsSet,
+        svgMatSet,
+        svgMatOutlinedSet,
+        svgMatRoundSet,
+        svgMatSharpSet,
+        svgSymOutlinedSet,
+        svgSymRoundedSet,
+        svgSymSharpSet,
+        svgMdiSet,
+        svgIoniconsV4Set,
+        svgIoniconsV5Set,
+        svgIoniconsV6Set,
+        svgFontawesomeV5Set,
+        svgFontawesomeV6Set,
+        svgEvaSet,
+        svgThemifySet,
+        svgLineawesomeSet,
+        svgBootstrapiconsSet
       ].map(({ name, ...set }) => parseSet(name, set)),
 
       clicked () {

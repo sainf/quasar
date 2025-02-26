@@ -8,11 +8,10 @@ const { spawn } = require('../../utils/spawn.js')
 const { onShutdown } = require('../../utils/on-shutdown.js')
 const { openIDE } = require('../../utils/open-ide.js')
 const { quasarCapacitorConfig } = require('./capacitor-config.js')
-const { fixAndroidCleartext } = require('../../utils/fix-android-cleartext.js')
 
 module.exports.QuasarModeDevserver = class QuasarModeDevserver extends AppDevserver {
   #pid = 0
-  #server
+  #server = null
   #target
   #capacitorConfigFile = new CapacitorConfigFile()
 
@@ -20,10 +19,6 @@ module.exports.QuasarModeDevserver = class QuasarModeDevserver extends AppDevser
     super(opts)
 
     this.#target = this.ctx.targetName
-
-    if (this.#target === 'android') {
-      fixAndroidCleartext(this.ctx.appPaths, 'capacitor')
-    }
 
     onShutdown(() => {
       this.#stopCapacitor()
@@ -48,7 +43,7 @@ module.exports.QuasarModeDevserver = class QuasarModeDevserver extends AppDevser
   }
 
   async #runWebpack (quasarConf) {
-    if (this.#server) {
+    if (this.#server !== null) {
       await this.#server.stop()
       this.#server = null
     }
@@ -61,12 +56,10 @@ module.exports.QuasarModeDevserver = class QuasarModeDevserver extends AppDevser
       const compiler = webpack(webpackConf)
 
       compiler.hooks.done.tap('done-compiling', stats => {
-        if (started === true) { return }
+        if (started === true) return
 
         // start dev server if there are no errors
-        if (stats.hasErrors() === true) {
-          return
-        }
+        if (stats.hasErrors() === true) return
 
         started = true
         resolve()

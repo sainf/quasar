@@ -7,35 +7,39 @@ Notice that your generated `/src-ssr` contains a file named `server.js`. This fi
 
 ## Anatomy
 
-The `/src-ssr/server.[js|ts]` file is a simple JavaScript/Typescript file which boots up your SSR webserver and defines what how your webserver starts & handles requests and what it exports (if exporting anything).
+The `/src-ssr/server.js` file is a simple JavaScript/Typescript file which boots up your SSR webserver and defines what how your webserver starts & handles requests and what it exports (if exporting anything).
 
 ::: danger
-The `/src-ssr/server.[js|ts]` file is used for both DEV and PROD, so please be careful on how you configure it. To differentiate between the two states you can use `process∙env∙DEV` and `process∙env∙PROD`.
+The `/src-ssr/server.js` file is used for both DEV and PROD, so please be careful on how you configure it. To differentiate between the two states you can use `process∙env∙DEV` and `process∙env∙PROD`.
 :::
 
-``` js
+```js
 /**
- * More info about this file:
- * https://v2.quasar.dev/quasar-cli-vite/developing-ssr/ssr-webserver
- *
  * Runs in Node context.
  */
 
 /**
- * Make sure to yarn/npm/pnpm/bun install (in your project root)
+ * Make sure to yarn add / npm install (in your project root)
  * anything you import here (except for express and compression).
  */
 import express from 'express'
 import compression from 'compression'
+import {
+  defineSsrCreate,
+  defineSsrListen,
+  defineSsrClose,
+  defineSsrServeStaticContent,
+  defineSsrRenderPreloadTag
+} from '#q-app/wrappers'
 
 /**
  * Create your webserver and return its instance.
  * If needed, prepare your webserver to receive
  * connect-like middlewares.
  *
- * Should NOT be async!
+ * Can be async: defineSsrCreate(async ({ ... }) => { ... })
  */
-export function create (/* { ... } */) {
+export const create = defineSsrCreate((/* { ... } */) => {
   const app = express()
 
   // attackers can use this header to detect apps running Express
@@ -49,7 +53,7 @@ export function create (/* { ... } */) {
   }
 
   return app
-}
+})
 
 /**
  * You need to make the server listen to the indicated port
@@ -61,15 +65,17 @@ export function create (/* { ... } */) {
  *
  * For production, you can instead export your
  * handler for serverless use or whatever else fits your needs.
+ *
+ * Can be async: defineSsrListen(async ({ app, devHttpsApp, port }) => { ... })
  */
-export async function listen ({ app, port, isReady, ssrHandler }) {
-  await isReady()
-  return await app.listen(port, () => {
+export const listen = defineSsrListen(({ app, devHttpsApp, port }) => {
+  const server = devHttpsApp || app
+  return server.listen(port, () => {
     if (process.env.PROD) {
       console.log('Server listening at port ' + port)
     }
   })
-}
+})
 
 /**
  * Should close the server and free up any resources.
@@ -79,26 +85,31 @@ export async function listen ({ app, port, isReady, ssrHandler }) {
  * Should you need the result of the "listen()" call above,
  * you can use the "listenResult" param.
  *
- * Can be async.
+ * Can be async: defineSsrClose(async ({ listenResult }) => { ... })
  */
-export function close ({ listenResult }) {
+export const close = defineSsrClose(({ listenResult }) => {
   return listenResult.close()
-}
+})
 
 const maxAge = process.env.DEV
   ? 0
   : 1000 * 60 * 60 * 24 * 30
 
 /**
- * Should return middleware that serves the indicated path
- * with static content.
+ * Should return a function that will be used to configure the webserver
+ * to serve static content at "urlPath" from "pathToServe" folder/file.
+ *
+ * Notice resolve.urlPath(urlPath) and resolve.public(pathToServe) usages.
+ *
+ * Can be async: defineSsrServeStaticContent(async ({ app, resolve }) => {
+ * Can return an async function: return async ({ urlPath = '/', pathToServe = '.', opts = {} }) => {
  */
-export function serveStaticContent (path, opts) {
-  return express.static(path, {
-    maxAge,
-    ...opts
-  })
-}
+export const serveStaticContent = defineSsrServeStaticContent(({ app, resolve }) => {
+  return ({ urlPath = '/', pathToServe = '.', opts = {} }) => {
+    const serveFn = express.static(resolve.public(pathToServe), { maxAge, ...opts })
+    app.use(resolve.urlPath(urlPath), serveFn)
+  }
+})
 
 const jsRE = /\.js$/
 const cssRE = /\.css$/
@@ -112,13 +123,13 @@ const pngRE = /\.png$/
  * Should return a String with HTML output
  * (if any) for preloading indicated file
  */
-export function renderPreloadTag (file) {
+export const renderPreloadTag = defineSsrRenderPreloadTag((file/* , { ssrContext } */) => {
   if (jsRE.test(file) === true) {
     return `<link rel="modulepreload" href="${file}" crossorigin>`
   }
 
   if (cssRE.test(file) === true) {
-    return `<link rel="stylesheet" href="${file}">`
+    return `<link rel="stylesheet" href="${file}" crossorigin>`
   }
 
   if (woffRE.test(file) === true) {
@@ -130,19 +141,19 @@ export function renderPreloadTag (file) {
   }
 
   if (gifRE.test(file) === true) {
-    return `<link rel="preload" href="${file}" as="image" type="image/gif">`
+    return `<link rel="preload" href="${file}" as="image" type="image/gif" crossorigin>`
   }
 
   if (jpgRE.test(file) === true) {
-    return `<link rel="preload" href="${file}" as="image" type="image/jpeg">`
+    return `<link rel="preload" href="${file}" as="image" type="image/jpeg" crossorigin>`
   }
 
   if (pngRE.test(file) === true) {
-    return `<link rel="preload" href="${file}" as="image" type="image/png">`
+    return `<link rel="preload" href="${file}" as="image" type="image/png" crossorigin>`
   }
 
   return ''
-}
+})
 ```
 
 ::: tip
@@ -151,7 +162,7 @@ Remember that whatever the `listen()` function returns (if anything) will be exp
 
 ## Parameters
 
-``` js
+```js
 export function <functionName> ({
   app, port, isReady, ssrHandler,
   resolve, publicPath, folders, render, serve
@@ -160,7 +171,7 @@ export function <functionName> ({
 
 Detailing the Object:
 
-``` js
+```js
 {
   app,     // Expressjs app instance (or whatever you return from create())
 
@@ -191,7 +202,7 @@ Detailing the Object:
   },
   render(ssrContext),
   serve: {
-    static(path, opts),
+    static({ urlPath, pathToServe, opts }),
     error({ err, req, res })
   }
 }
@@ -208,10 +219,12 @@ Detailing the Object:
 
 You can replace the default Express.js Node server with any other connect API compatible one. Just make sure to yarn/npm install its package first.
 
-```js src-ssr/server.[js|ts]
+```js src-ssr/server.js
+import { defineSsrCreate } from '#q-app/wrappers'
 import connect from 'connect'
+import compression from 'compression'
 
-export function create (/* { ... } */) {
+export const create = defineSsrCreate((/* { ... } */) => {
   const app = connect()
 
   // place here any middlewares that
@@ -221,54 +234,46 @@ export function create (/* { ... } */) {
   }
 
   return app
-}
+})
 ```
 
 ### Listen on a port
 
 This is the default option that you get when adding SSR support in a Quasar CLI project. It starts listening on the configured port (process∙env∙PORT or quasar.config file > ssr > prodPort).
 
-```js src-ssr/server.[js|ts]
-export async function listen ({ app, port, isReady }) {
-  await isReady()
-  return await app.listen(port, () => {
+```js src-ssr/server.js
+export const listen = defineSsrListen(({ app, devHttpsApp, port }) => {
+  const server = devHttpsApp || app;
+  return server.listen(port, () => {
     if (process.env.PROD) {
-      console.log('Server listening at port ' + port)
+      console.log('Server listening at port ' + port);
     }
-  })
-}
+  });
+})
 ```
 
 ### Serverless
 
 If you have a serverless infrastructure, then you generally need to export a handler instead of starting to listen to a port.
 
-Say that your serverless service requires you to:
+Say that your serverless service requires you to name export a variable called `handler`. Then what you'd need to do is:
 
-```js
-module.exports.handler = __your_handler__
-```
-
-Then what you'd need to do is:
-
-```js src-ssr/server.[js|ts]
-export async function listen ({ app, port, ssrHandler }) {
+```js src-ssr/server.js
+import { defineSsrListen } from '#q-app/wrappers'
+export const listen = defineSsrListen(({ app, devHttpsApp, port }) => {
   if (process.env.DEV) {
-    await isReady()
-    return await app.listen(port, () => {
-      if (process.env.PROD) {
-        console.log('Server listening at port ' + port)
-      }
+    // for dev, start listening on the created server
+    const server = devHttpsApp || app;
+    return server.listen(port, () => {
+      // we're ready to serve clients
     })
   }
   else { // in production
-    // "ssrHandler" is a prebuilt handler which already
-    // waits for all the middlewares to run before serving clients
-
-    // whatever you return here is equivalent to module.exports.<key> = <value>
-    return { handler: ssrHandler }
+    // return an object with a "handler" property
+    // that the server script will named-export
+    return { handler: app }
   }
-}
+})
 ```
 
 Please note that the provided `ssrHandler` is a Function of form: `(req, res, next) => void`.
@@ -278,13 +283,15 @@ Should you require to export a handler of form `(event, context, callback) => vo
 
 You will need to manually yarn/npm install the `serverless-http` package.
 
-```js src-ssr/server.[js|ts]
+```js src-ssr/server.js
+import { defineSsrListen } from '#q-app/wrappers'
 import serverless from 'serverless-http'
 
-export async function listen (({ app, port, ssrHandler }) => {
+export const listen = defineSsrListen(({ app, devHttpsApp, port }) => {
   if (process.env.DEV) {
-    await isReady()
-    return await app.listen(port, () => {
+    // for dev, start listening on the created server
+    const server = devHttpsApp || app;
+    return server.listen(port, () => {
       // we're ready to serve clients
     })
   }
@@ -296,13 +303,15 @@ export async function listen (({ app, port, ssrHandler }) => {
 
 #### Example: Firebase function
 
-```js src-ssr/server.[js|ts]
+```js src-ssr/server.js
+import { defineSsrListen } from '#q-app/wrappers'
 import * as functions from 'firebase-functions'
 
-export async function listen (({ app, port, ssrHandler }) => {
+export const listen = defineSsrListen(({ app, devHttpsApp, port }) => {
   if (process.env.DEV) {
-    await isReady()
-    return await app.listen(port, () => {
+    // for dev, start listening on the created server
+    const server = devHttpsApp || app;
+    return server.listen(port, () => {
       // we're ready to serve clients
     })
   }

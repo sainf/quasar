@@ -166,9 +166,7 @@ export default {
       },
 
       onSelection ({ rows, added, evt }) {
-        if (rows.length === 0 || tableRef.value === void 0) {
-          return
-        }
+        if (rows.length === 0 || tableRef.value === void 0) return
 
         const row = rows[ 0 ]
         const filteredSortedRows = tableRef.value.filteredSortedRows

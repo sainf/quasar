@@ -130,22 +130,18 @@ function hasDeepProp (target /* , param1, param2, ... */) {
 function installSplashscreenPlugin () {
   const pkgPath = resolveDir('src-cordova/package.json')
 
-  if (!existsSync(pkgPath)) {
-    // malformed /src-cordova...
-    return
-  }
+  // malformed /src-cordova...
+  if (!existsSync(pkgPath)) return
 
   const pkg = JSON.parse(
     readFileSync(pkgPath, 'utf8')
   )
 
   if (
+    // it's already installed, so nothing to do
     hasDeepProp(pkg, 'dependencies', 'cordova-plugin-splashscreen')
     || hasDeepProp(pkg, 'cordova', 'plugins', 'cordova-plugin-splashscreen')
-  ) {
-    // it's already installed, so nothing to do
-    return
-  }
+  ) return
 
   log(`Installing cordova-plugin-splashscreen...`)
 

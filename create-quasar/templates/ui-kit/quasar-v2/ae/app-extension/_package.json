@@ -4,13 +4,7 @@
   "description": "<%= aeDescription %>",
   "author": "<%= author %>",
   "license": "<%= license %>",
-  "type": "<%= aeCodeFormat === 'esm' ? 'module' : 'commonjs' %>",
-  "repository": {
-    "type": "<%= repositoryType %>",
-    "url": "<%= repositoryURL %>"
-  },
-  "bugs": "<%= bugs %>",
-  "homepage": "<%= homepage %>",
+  "type": "module",
   "dependencies": {
     "quasar-ui-<%= name %>": "latest"
   },

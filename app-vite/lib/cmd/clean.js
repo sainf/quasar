@@ -71,8 +71,8 @@ if (cleanAll === true || argv.dist === true) {
 }
 
 if (cleanAll === true || argv.qconf === true) {
-  const { default: fglob } = await import('fast-glob')
-  const fileList = fglob.sync([ 'quasar.config.*.temporary.compiled.*' ], { cwd: appPaths.appDir })
+  const { globSync } = await import('tinyglobby')
+  const fileList = globSync([ 'quasar.config.*.temporary.compiled.*' ], { cwd: appPaths.appDir })
 
   fileList.forEach(file => {
     fse.removeSync(

@@ -2,24 +2,27 @@
 title: BEX Build Commands
 desc: (@quasar/app-webpack) The Quasar CLI list of commands when developing or building a Browser Extension (BEX).
 scope:
+  devTree:
+    l: "."
+    c:
+    - l: dist/bex-[chrome|firefox]--dev
+      c:
+      - l: "...files"
+        e: Built code from /src-bex
+      - l: www/
+        e: Built code from /src
   prodTree:
     l: "."
     c:
-    - l: dist
+    - l: dist/bex-[chrome|firefox]
       c:
-      - l: UnPackaged/
-        e: Built code ready for testing in your development environment
-      - l: Packaged
-        c:
-        - l: Chrome
-          c:
-          - l: your-project-name.zip
-            e: A zip file ready for submission to the Chrome Browser Extension Store
-              / Other Chromium based stores.
-        - l: Firefox
-          c:
-          - l: your-project-name.zip
-            e: A zip file ready for submission to the Firefox Extension Store
+      - l: "...files"
+        e: Built code from /src-bex
+      - l: www/
+        e: Built code from /src
+      - l: Packaged.your-project-name.zip
+        e: A zip file ready for submission to the Chrome Browser Extension Store /
+          Other Chromium based stores.
 ---
 
 ## Developing
@@ -27,19 +30,17 @@ scope:
 Start developing a Browser Extension with just one command.
 
 ```bash
-$ quasar dev -m bex
+$ quasar dev -m bex -T [chrome|firefox]
 
 # ..or the longer form:
-$ quasar dev --mode bex
+$ quasar dev --mode bex -T [chrome|firefox]
 ```
 
-You may or may not have already had a `src-bex` folder, but you will definitely have one now. You will also have a set of files under `src-bex/www`. These files are the output from the webpack development server. Normally, these files are kept in memory, which is why you wouldn't see them when creating an SPA, but for Browser Extension development, physical files are required in order for the process to work.
+You may or may not have already had a `src-bex` folder, but you will definitely have one now. Now that we've created a development environment, we need to load generated browser extension into your browser.
 
-::: warning
-Do not edit anything under the `src-bex/www` folder, as these changes are overridden via Hot Module Reloading (HMR). This folder is just the built output of your `src` folder, so make the changes there instead.
-:::
+While you develop your BEX, you will notice that Quasar CLI builds the actual extension in the dist folder (normally in `/dist/bex-chrome--dev/` or `/dist/bex-firefox--dev` based on the dev target in "quasar dev" command):
 
-Now that we've created a development environment, we need to load generated browser extension into your browser.
+<DocTree :def="scope.devTree" />
 
 ### Chrome
 
@@ -49,7 +50,7 @@ In line with the screenshot above, the following steps must be taken:
 
 1. In Chrome, navigate to `chrome://extensions`
 2. Toggle "Developer Mode".
-3. Click "Load unpacked". This will present you with the *folder* selection dialog. Navigate to and select your `src-bex` folder.
+3. Click "Load unpacked". This will present you with the *folder* selection dialog. Navigate to and select your `/dist/bex-chrome--dev/` folder.
 4. You should now see your BEX mounted in Chrome.
 
 More information about debugging Chrome Browser Extensions can be found in the [official documentation](https://developer.chrome.com/extensions/tut_debugging).
@@ -66,18 +67,20 @@ In line with the screenshot above, the following steps must be taken:
 
 1. In Firefox, navigate to `about:debugging`
 2. Click on "This Firefox"
-3. Click "Load Temporary Add-on...". This will present you with the *file* selection dialog. Navigate to and select your `src-bex/manifest.json` file. **Note:** Firefox requires the manifest file, not the `src-bex` folder like Chromium browsers.
+3. Click "Load Temporary Add-on...". This will present you with the *file* selection dialog. Navigate to and select your `/dist/bex-firefox--dev/manifest.json` file. **Note:** Firefox requires the manifest file, not the `/dist/bex-firefox--dev` folder like Chromium browsers.
 4. You should now see your BEX mounted in Firefox.
 
 More information about debugging Firefox temporary addons can be found in the [Firefox Extension Workshop](https://extensionworkshop.com/documentation/develop/temporary-installation-in-firefox/).
 
 ### Hot Module Reloading (HMR)
 
-HMR works with Browser Extension development but does work slightly differently depending on which browser you're developing on. In both cases, the Quasar application being built will reload when changes are made. The quasar application in this instance would refer to changes made to everything under the `src` folder.
+The best developer experience that you will have is with Chrome. We've managed to make HMR fully work for it:
+* Full HMR for devtools/options/popup page
+* When changing the background script, the extension will automatically reload.
+* When changing a content script, the extension will automatically reload & the tabs using those content scripts will auto-refresh.
+* The popup/page will not need to be compiled in its entirety. Instead, you will be able to benefit from on-the-fly compilation only for the browser requested files, which is VERY fast.
 
-::: tip
-**Chrome vs Firefox Nuances** - When developing your Browser Extension, you will often need to make changes to the files under the `src-bex` folder as well. This will be done when configuring hooks, setting up popups etc. Firefox will see these changes and automatically re-load the Browser Extension. Chrome on the other hand will not. When you have made these changes in Chrome, you will need to navigate to your Extension (see the Chrome section above) and click on the refresh icon in your Development Browser Extension.
-:::
+On the other hand, we cannot offer the same experience for Firefox too. However, Firefox watches for file changes and tries to auto-reload the extension on changes, but none of the HMR features above (specified for Chrome) will work.
 
 ## Debugging
 
@@ -87,8 +90,8 @@ Browser extensions runs in three different environments (more on upcoming pages)
 
 You can find following places to investigate the errors and outputs from the console in DevTools:
 
-1. Popup - right click on the page or on the extension icon  a choose `Inspect` pop-up for DevTools.
-2. Background scripts (e.g.: background-hooks.js) open DevTools from `Manage extensions - background page`.
+1. Popup - right click on the page or on the extension icon and choose `Inspect popup` for DevTools.
+2. Background scripts (e.g.: background-hooks.js) - open DevTools from `Manage extensions - background page`.
 3. Content scripts - page where your script is injected.
 4. Extension Errors - list of errors related to the extension (e.g. manifest configuration) are available in `Manage extension - Errors`.
 
@@ -106,15 +109,13 @@ For more information, please visit [Debugging extensions](https://developer.chro
 ## Building for Production
 
 ```bash
-$ quasar build -m bex
+$ quasar build -m bex -T [chrome|firefox]
 
 # ..or the longer form:
-$ quasar build --mode bex
+$ quasar build --mode bex -T [chrome|firefox]
 ```
 
-When building for production, multiple directories are generated:
-
-The new folder has the following structure:
+You will be instructed which is the output folder. Normally, it's `/dist/bex-chrome/` and `/dist/bex-firefox`, based on the target specified for the "quasar build" command.
 
 <DocTree :def="scope.prodTree" />
 

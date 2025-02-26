@@ -36,32 +36,20 @@ scope:
         url: "/quasar-cli-vite/routing"
         c:
         - l: index.js
-          e: Vue Router definition
+          e: (or .ts) Vue Router definition
         - l: routes.js
-          e: App Routes definitions
+          e: (or .ts) App Routes definitions
       - l: stores
-        e: Pinia Stores (if not using Vuex)
+        e: Pinia Stores
         url: "/quasar-cli-vite/state-management-with-pinia"
         c:
         - l: index.js
-          e: Pinia initialization
+          e: (or .ts) Pinia initialization
         - l: "<store>"
           e: Pinia stores...
         - l: "<store>..."
-      - l: store
-        e: Vuex Store (if not using Pinia)
-        url: "/quasar-cli-vite/state-management-with-vuex"
-        c:
-        - l: index.js
-          e: Vuex Store definition
-        - l: "<folder>"
-          e: Vuex Store Module...
-        - l: "<folder>"
-          e: Vuex Store Module...
       - l: App.vue
         e: Root Vue component of your App
-    - l: index.html
-      e: Template for index.html
     - l: src-ssr/
       e: SSR specific code (like production Node webserver)
       url: "/quasar-cli-vite/developing-ssr/introduction"
@@ -91,21 +79,20 @@ scope:
         e: Example when building Electron
       - l: "..."
     - l: quasar.config.js
-      e: Quasar App Config file
+      e: (or .ts) Quasar App Config file
       url: "/quasar-cli-vite/quasar-config-file"
+    - l: index.html
+      e: Template for index.html
     - l: ".gitignore"
       e: GIT ignore paths
       url: https://git-scm.com/docs/gitignore
     - l: ".editorconfig"
       e: EditorConfig file
       url: https://marketplace.visualstudio.com/items?itemName=EditorConfig.EditorConfig
-    - l: ".eslintignore"
-      e: ESLint ignore paths
-      url: https://eslint.org/docs/latest/user-guide/configuring/ignoring-code#the-eslintignore-file
-    - l: ".eslintrc.cjs"
+    - l: "eslint.config.js"
       e: ESLint config
       url: https://eslint.org/docs/latest/user-guide/configuring/configuration-files#using-configuration-files
-    - l: postcss.config.cjs
+    - l: postcss.config.js
       e: PostCSS config
       url: https://github.com/postcss/postcss
     - l: jsconfig.json

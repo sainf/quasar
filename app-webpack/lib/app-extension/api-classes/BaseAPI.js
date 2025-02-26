@@ -39,17 +39,13 @@ module.exports.BaseAPI = class BaseAPI {
   }
 
   /**
-   * Is the host project using Pinia or Vuex?
+   * Get the installed and active store package name, if any
    *
-   * @return {string} 'pinia' | 'vuex' | undefined
+   * @return {'pinia' | undefined}
    */
   getStorePackageName () {
     if (getPackagePath('pinia', this.ctx.appPaths.appDir) !== void 0) {
       return 'pinia'
-    }
-
-    if (getPackagePath('vuex', this.ctx.appPaths.appDir) !== void 0) {
-      return 'vuex'
     }
   }
 

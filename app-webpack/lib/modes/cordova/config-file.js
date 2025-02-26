@@ -86,9 +86,7 @@ module.exports.CordovaConfigFile = class CordovaConfigFile {
   }
 
   reset () {
-    if (!this.#appURL || this.#appURL === 'index.html') {
-      return
-    }
+    if (!this.#appURL || this.#appURL === 'index.html') return
 
     const doc = et.parse(fs.readFileSync(this.#filePath, 'utf-8'))
     const root = doc.getroot()

@@ -17,28 +17,37 @@ Some properties from this file will get overwritten as we'll see in next section
 ## quasar.config file
 There are two places in the `/quasar.config` file where you can configure Quasar specific features for Capacitor.
 
-```js
+```js /quasar.config file
 return {
   capacitor: {
-    // (Optional!)
-    hideSplashscreen: false, // disables auto-hiding the Splashscreen by Quasar CLI
+    /**
+     * Automatically hide the Capacitor Splashscreen when app is ready,
+     * (is using the Splashscreen Capacitor plugin).
+     *
+     * @default true
+     */
+    hideSplashscreen?: boolean;
 
-    // (Optional!)
-    capacitorCliPreparationParams: [ 'sync', ctx.targetName ],
+    /**
+     * Preparation params with which the Capacitor CLI is called
+     *
+     * @default [ 'sync', ctx.targetName ]
+     */
+    capacitorCliPreparationParams?: string[];
 
-    // (Optional) If not present, will look for package.json > name
-    appName: '...', // string
-    // (Optional) If not present, will look for package.json > version
-    version: '...', // string
-    // (Optional) If not present, will look for package.json > description
-    description: '...', // string
+    /** If not present, will look for `package.json > name` */
+    appName?: string;
+    /** If not present, will look for `package.json > version` */
+    version?: string;
+    /** If not present, will look for `package.json > description` */
+    description?: string;
   }
 }
 ```
 
 And you can also configure:
 
-```js
+```js /quasar.config file
 return {
   framework: {
     config: {
@@ -52,7 +61,7 @@ return {
 
 Finally, you can also disable or configure the back button hook (used for Dialogs):
 
-```js
+```js /quasar.config file
 return {
   framework: {
     config: {
@@ -66,5 +75,14 @@ return {
       }
     }
   }
+}
+```
+
+Should you want to tamper with the Webpack config for UI in /src you have two options:
+
+```js /quasar.config file
+build: {
+  extendWebpack(webpackCfg) { ... },
+  chainWebpack(webpackChain) { ... }
 }
 ```

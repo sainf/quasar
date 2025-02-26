@@ -1,15 +1,15 @@
 import { h, ref, computed, watch, onBeforeUnmount, onMounted, nextTick, getCurrentInstance } from 'vue'
 
-import useField, { useFieldState, useFieldProps, useFieldEmits, fieldValueIsFilled } from '../../composables/private/use-field.js'
+import useField, { useFieldState, useFieldProps, useFieldEmits, fieldValueIsFilled } from '../../composables/private.use-field/use-field.js'
 import useMask, { useMaskProps } from './use-mask.js'
-import { useFormProps, useFormInputNameAttr } from '../../composables/private/use-form.js'
-import useFileFormDomProps from '../../composables/private/use-file-dom-props.js'
-import useKeyComposition from '../../composables/private/use-key-composition.js'
+import { useFormProps, useFormInputNameAttr } from '../../composables/use-form/private.use-form.js'
+import useFileFormDomProps from '../../composables/private.use-file/use-file-dom-props.js'
+import useKeyComposition from '../../composables/private.use-key-composition/use-key-composition.js'
 
-import { createComponent } from '../../utils/private/create.js'
-import { stop } from '../../utils/event.js'
-import { addFocusFn } from '../../utils/private/focus-manager.js'
-import { injectProp } from '../../utils/private/inject-obj-prop.js'
+import { createComponent } from '../../utils/private.create/create.js'
+import { stop } from '../../utils/event/event.js'
+import { addFocusFn } from '../../utils/private.focus/focus-manager.js'
+import { injectProp } from '../../utils/private.inject-obj-prop/inject-obj-prop.js'
 
 export default createComponent({
   name: 'QInput',
@@ -21,7 +21,10 @@ export default createComponent({
     ...useMaskProps,
     ...useFormProps,
 
-    modelValue: { required: false },
+    // override of useFieldProps > modelValue
+    modelValue: __QUASAR_SSR_SERVER__
+      ? {} // SSR does not know about FileList
+      : [ String, Number, FileList ],
 
     shadowText: String,
 
@@ -68,7 +71,7 @@ export default createComponent({
 
     const onComposition = useKeyComposition(onInput)
 
-    const state = useFieldState()
+    const state = useFieldState({ changeEvent: true })
 
     const isTextarea = computed(() =>
       props.type === 'textarea' || props.autogrow === true
@@ -146,10 +149,7 @@ export default createComponent({
       if (hasMask.value === true) {
         if (stopValueWatcher === true) {
           stopValueWatcher = false
-
-          if (String(v) === emitCachedValue) {
-            return
-          }
+          if (String(v) === emitCachedValue) return
         }
 
         updateMaskValue(v)
@@ -216,9 +216,7 @@ export default createComponent({
     }
 
     function onInput (e) {
-      if (!e || !e.target) {
-        return
-      }
+      if (!e || !e.target) return
 
       if (props.type === 'file') {
         emit('update:modelValue', e.target.files)
@@ -229,7 +227,6 @@ export default createComponent({
 
       if (e.target.qComposing === true) {
         temp.value = val
-
         return
       }
 

@@ -8,7 +8,6 @@
 import readAssociatedJsonFile from '../readAssociatedJsonFile.js'
 import {
   testIndent,
-  capitalize,
   kebabCase,
   getComponentMount,
   getComponentPropAssignment,
@@ -68,8 +67,7 @@ function getRequiredPropTest ({ mountCall }) {
       ? mountCall.replace(': propVal', `: ${ val }`)
       : `const propVal = ${ val }\n${ testIndent }${ mountCall }`
 
-    return `\n
-      test.todo('${ testStrPrefix } has effect', () => {
+    return `test.todo('${ testStrPrefix } has effect', () => {
         ${ assignment }
 
         // TODO: test the effect of the prop
@@ -78,9 +76,9 @@ function getRequiredPropTest ({ mountCall }) {
   }
 }
 
-function getNonRequiredPropTest ({ mountCall, pascalName, cls, jsonEntry }) {
+function getNonRequiredPropTest ({ mountCall, camelCaseName, cls, jsonEntry }) {
   const assignmentCall = getComponentPropAssignment({
-    pascalName,
+    camelCaseName,
     jsonEntry,
     indent: testIndent
   })
@@ -96,11 +94,9 @@ function getNonRequiredPropTest ({ mountCall, pascalName, cls, jsonEntry }) {
           assignment: assignmentCall
         }
 
-    return `\n
-      test.todo('${ testStrPrefix } has effect', async () => {
+    return `test.todo('${ testStrPrefix } has effect', async () => {
         ${ preMount }${ mountCall }
 
-        // eslint-disable-next-line no-unused-vars
         const target = wrapper.get('.${ cls }')
 
         // TODO: write expectations without the prop
@@ -109,14 +105,12 @@ function getNonRequiredPropTest ({ mountCall, pascalName, cls, jsonEntry }) {
         ${ assignment }
 
         // TODO: test the effect of the prop
+        expect(target).toBeDefined() // this is here for linting only
       })`
   }
 }
 
-function getPropTest ({ name, pascalName, jsonEntry, json, ctx }) {
-  const type = filterDefExceptionTypes(jsonEntry.type)
-  if (type === void 0) return ''
-
+function getPropTest ({ name, camelCaseName, jsonEntry, json, ctx }) {
   const mountCall = getComponentMount({
     ctx,
     json,
@@ -128,8 +122,8 @@ function getPropTest ({ name, pascalName, jsonEntry, json, ctx }) {
     ? getRequiredPropTest({ mountCall })
     : getNonRequiredPropTest({
       mountCall,
-      pascalName,
-      cls: kebabCase(ctx.pascalName),
+      camelCaseName,
+      cls: kebabCase(ctx.camelCaseName),
       jsonEntry
     })
 
@@ -138,12 +132,10 @@ function getPropTest ({ name, pascalName, jsonEntry, json, ctx }) {
     return jsonEntry.values.map(val => getPropTestFn({
       testStrPrefix: `value ${ val.replace(quoteRE, '"') }`,
       val
-    })).join('')
+    })).join('\n\n      ')
   }
 
-  const typeList = Array.isArray(type)
-    ? type // example: QTable > props > virtual-scroll-slice-size
-    : [ type ]
+  const typeList = filterDefExceptionTypes(jsonEntry.type)
 
   return typeList.map(t => {
     const val = getTestValue({
@@ -155,28 +147,22 @@ function getPropTest ({ name, pascalName, jsonEntry, json, ctx }) {
       testStrPrefix: `type ${ t }`,
       val
     })
-  }).join('')
+  }).join('\n\n      ')
 }
 
 function createPropTest ({
   name,
-  pascalName,
+  camelCaseName,
   testId,
   jsonEntry,
   json,
   ctx
 }) {
-  const definedSuffix = jsonEntry.passthrough === true
-    ? 'toBeUndefined() // passthrough prop'
-    : 'toBeDefined()'
-
-  const propTest = getPropTest({ name, pascalName, jsonEntry, json, ctx })
+  const propTest = getPropTest({ name, camelCaseName, jsonEntry, json, ctx })
 
   return `
     describe('${ testId }', () => {
-      test('is defined correctly', () => {
-        expect(${ ctx.pascalName }.props.${ pascalName }).${ definedSuffix }
-      })${ propTest }
+      ${ propTest }
     })\n`
 }
 
@@ -246,25 +232,21 @@ function getEventParamsTest (jsonEntry, varName) {
 }
 
 function createEventTest ({
-  pascalName,
+  camelCaseName,
   testId,
   jsonEntry,
   json,
   ctx
 }) {
-  const [ emitAccessor, propsAccessor ] = pascalName.indexOf(':') === -1
-    ? [ `.${ pascalName }`, `.on${ capitalize(pascalName) }` ]
+  const emitAccessor = camelCaseName.indexOf(':') === -1
+    ? `.${ camelCaseName }`
     // example: 'update:modelValue'
-    : [ `[ '${ pascalName }' ]`, `.[ 'on${ capitalize(pascalName) }' ]` ]
+    : `[ '${ camelCaseName }' ]`
 
   const varName = `eventList${ emitAccessor }`
   const paramsTest = jsonEntry.params !== void 0
     ? getEventParamsTest(jsonEntry, `${ varName }[ 0 ]`)
     : `expect(${ varName }[ 0 ]).toHaveLength(0)`
-
-  const [ isDefinedBitwiseOperator, isDefinedSuffix ] = jsonEntry.passthrough === true
-    ? [ '&', 'toBe(0) // passthrough event' ]
-    : [ '^', 'toBe(1)' ]
 
   const mountCall = getComponentMount({
     ctx,
@@ -274,20 +256,13 @@ function createEventTest ({
 
   return `
     describe('${ testId }', () => {
-      test('is defined correctly', () => {
-        expect(
-          ${ ctx.pascalName }.emits?.includes('${ pascalName }')
-          ${ isDefinedBitwiseOperator } (${ ctx.pascalName }.props?${ propsAccessor } !== void 0)
-        ).${ isDefinedSuffix }
-      })
-
       test.todo('is emitting', () => {
         ${ mountCall }
 
         // TODO: trigger the event
 
         const eventList = wrapper.emitted()
-        expect(eventList).toHaveProperty('${ pascalName }')
+        expect(eventList).toHaveProperty('${ camelCaseName }')
         expect(${ varName }).toHaveLength(1)
 
         ${ paramsTest }
@@ -296,7 +271,7 @@ function createEventTest ({
 }
 
 function createMethodTest ({
-  pascalName,
+  camelCaseName,
   testId,
   jsonEntry,
   json,
@@ -310,7 +285,7 @@ function createMethodTest ({
 
   const callTest = getFunctionCallTest({
     jsonEntry: { ...jsonEntry, type: 'Function' },
-    ref: `wrapper.vm.${ pascalName }`,
+    ref: `wrapper.vm.${ camelCaseName }`,
     indent: testIndent
   })
 
@@ -327,7 +302,7 @@ function createMethodTest ({
 }
 
 function createComputedPropTest ({
-  pascalName,
+  camelCaseName,
   testId,
   jsonEntry,
   json,
@@ -341,7 +316,7 @@ function createComputedPropTest ({
 
   const typeTest = getTypeTest({
     jsonEntry,
-    ref: `wrapper.vm.${ pascalName }`,
+    ref: `wrapper.vm.${ camelCaseName }`,
     indent: testIndent
   })
 
@@ -369,14 +344,14 @@ export default {
       `import { mount${ flushPromises } } from '@vue/test-utils'`,
       'import { describe, test, expect } from \'vitest\'',
       '',
-      `import ${ ctx.pascalName } from './${ ctx.localName }'`
+      `import ${ ctx.camelCaseName } from './${ ctx.localName }'`
     ].join('\n')
   },
   getGenericTest: ({ ctx }) => {
     return `
   describe('[Generic]', () => {
     test('should not throw error on render', () => {
-      const wrapper = mount(${ ctx.pascalName })
+      const wrapper = mount(${ ctx.camelCaseName })
 
       expect(
         wrapper.get('div')

@@ -14,7 +14,7 @@ Quasar documentation assumes you are already familiar with [Vue Router](https://
 :::
 
 ```js
-import SomePage from 'pages/SomePage'
+import SomePage from 'pages/SomePage.vue'
 
 const routes = [
   {
@@ -30,7 +30,7 @@ Now let's change this and make the page be loaded on demand only, using dynamic 
 const routes = [
   {
     path: '/some-page',
-    component: () => import('pages/SomePage')
+    component: () => import('pages/SomePage.vue')
   }
 ]
 ```
@@ -42,7 +42,7 @@ Normally you would import a component and then register it to the Page, Layout o
 
 ```html
 <script>
-import SomeComponent from 'components/SomeComponent'
+import SomeComponent from 'components/SomeComponent.vue'
 
 export default {
   components: {
@@ -58,7 +58,7 @@ Now let's change this and make the component be loaded on demand only, using dyn
 import { defineAsyncComponent } from 'vue'
 export default {
   components: {
-    SomeComponent: defineAsyncComponent(() => import('components/SomeComponent')),
+    SomeComponent: defineAsyncComponent(() => import('components/SomeComponent.vue')),
   }
 }
 </script>

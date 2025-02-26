@@ -8,19 +8,8 @@
 
 <script setup>
 import TutorialLink from './TutorialLink.vue'
-import quasarV1Tutorials from 'assets/tutorials-quasar-v1.js'
-import quasarV2Tutorials from 'assets/tutorials-quasar-v2.js'
-import vueTutorials from 'assets/tutorials-vue.js'
+import listing from 'assets/tutorials.js'
 
-const props = defineProps({
-  which: String
-})
-
-const listing = {
-  'quasar-v2': quasarV2Tutorials,
-  'quasar-v1': quasarV1Tutorials,
-  vue: vueTutorials
-}
-
+const props = defineProps({ which: String })
 const tutorials = listing[ props.which ]
 </script>

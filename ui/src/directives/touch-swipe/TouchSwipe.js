@@ -1,10 +1,10 @@
 import { client } from '../../plugins/platform/Platform.js'
 
-import { createDirective } from '../../utils/private/create.js'
-import { getModifierDirections, shouldStart } from '../../utils/private/touch.js'
-import { addEvt, cleanEvt, position, leftClick, stopAndPrevent, preventDraggable, noop } from '../../utils/event.js'
-import { clearSelection } from '../../utils/private/selection.js'
-import getSSRProps from '../../utils/private/noop-ssr-directive-transform.js'
+import { createDirective } from '../../utils/private.create/create.js'
+import { getModifierDirections, shouldStart } from '../../utils/private.touch/touch.js'
+import { addEvt, cleanEvt, position, leftClick, stopAndPrevent, preventDraggable, noop } from '../../utils/event/event.js'
+import { clearSelection } from '../../utils/private.selection/selection.js'
+import getSSRProps from '../../utils/private.noop-ssr-directive-transform/noop-ssr-directive-transform.js'
 
 function parseArg (arg) {
   // delta (min velocity -- dist / time)
@@ -29,9 +29,10 @@ export default createDirective(__QUASAR_SSR_SERVER__
 
       beforeMount (el, { value, arg, modifiers }) {
         // early return, we don't need to do anything
-        if (modifiers.mouse !== true && client.has.touch !== true) {
-          return
-        }
+        if (
+          modifiers.mouse !== true
+          && client.has.touch !== true
+        ) return
 
         const mouseCapture = modifiers.mouseCapture === true ? 'Capture' : ''
 
@@ -79,9 +80,7 @@ export default createDirective(__QUASAR_SSR_SERVER__
           },
 
           move (evt) {
-            if (ctx.event === void 0) {
-              return
-            }
+            if (ctx.event === void 0) return
 
             if (ctx.event.dir !== false) {
               stopAndPrevent(evt)
@@ -90,9 +89,7 @@ export default createDirective(__QUASAR_SSR_SERVER__
 
             const time = Date.now() - ctx.event.time
 
-            if (time === 0) {
-              return
-            }
+            if (time === 0) return
 
             const
               pos = position(evt),
@@ -220,9 +217,7 @@ export default createDirective(__QUASAR_SSR_SERVER__
           },
 
           end (evt) {
-            if (ctx.event === void 0) {
-              return
-            }
+            if (ctx.event === void 0) return
 
             cleanEvt(ctx, 'temp')
             client.is.firefox === true && preventDraggable(el, false)

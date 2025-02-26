@@ -11,22 +11,14 @@ import TutorialListing from './TutorialListing.vue'
 
 <IntroductionVideo />
 
-The video tutorials below have been created by the community.
-
 ::: tip
-If you want to have your own video tutorial listed here, please email `razvan.stoenescu [at] gmail [dot] com` with the details. Thank you.
+The video tutorials below have been created by the community.
 :::
 
-## Quasar v2 video tutorials
+## Quasar Tutorials
 
 <tutorial-listing which="quasar-v2" />
 
-## Quasar v1 (legacy) video tutorials
+## Vue 3 Tutorials
 
-<tutorial-listing which="quasar-v1" />
-
-## Vue 2 (legacy) video tutorials
-
-Quasar is based on Vue, so knowledge about it is important too.
-
-<tutorial-listing which="vue" />
+<tutorial-listing which="vue-v3" />

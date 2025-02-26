@@ -15,5 +15,7 @@ packages:
   - cli
   - docs
 
+  - playground/app-vite-ts
+
   # private packages
   - utils/eslint-config

@@ -4,28 +4,32 @@ const iconSetName = 'Line Awesome'
 
 // ------------
 
-const glob = require('glob')
+const { globSync } = require('tinyglobby')
 const { copySync } = require('fs-extra')
 const { writeFileSync } = require('fs')
 const { resolve, join } = require('path')
 
 const skipped = []
 const distFolder = resolve(__dirname, '../line-awesome')
-const { defaultNameMapper, extract, writeExports, copyCssFile, getBanner } = require('./utils')
+const {
+  defaultNameMapper,
+  extract,
+  writeExports,
+  copyCssFile,
+  getBanner
+} = require('./utils')
 
 const svgFolder = resolve(__dirname, `../node_modules/${ packageName }/svg/`)
-const svgFiles = glob.sync(svgFolder + '/*.svg')
+const svgFiles = globSync(svgFolder + '/*.svg')
 let iconNames = new Set()
 
 const svgExports = []
 const typeExports = []
 
-svgFiles.forEach(file => {
+svgFiles.forEach((file) => {
   const name = defaultNameMapper(file, 'la')
 
-  if (iconNames.has(name)) {
-    return
-  }
+  if (iconNames.has(name)) return
 
   try {
     const { svgDef, typeDef } = extract(file, name)
@@ -51,7 +55,14 @@ iconNames.sort((a, b) => {
   return ('' + a).localeCompare(b)
 })
 
-writeExports(iconSetName, packageName, distFolder, svgExports, typeExports, skipped)
+writeExports(
+  iconSetName,
+  packageName,
+  distFolder,
+  svgExports,
+  typeExports,
+  skipped
+)
 
 // then update webfont files
 
@@ -64,28 +75,40 @@ const webfont = [
   'la-solid-900.woff2'
 ]
 
-webfont.forEach(file => {
+webfont.forEach((file) => {
   copySync(
-    resolve(__dirname, `../node_modules/${ packageName }/dist/line-awesome/fonts/${ file }`),
+    resolve(
+      __dirname,
+      `../node_modules/${ packageName }/dist/line-awesome/fonts/${ file }`
+    ),
     resolve(__dirname, `../line-awesome/${ file }`)
   )
 })
 
 copyCssFile({
-  from: resolve(__dirname, `../node_modules/${ packageName }/dist/line-awesome/css/line-awesome.css`),
+  from: resolve(
+    __dirname,
+    `../node_modules/${ packageName }/dist/line-awesome/css/line-awesome.css`
+  ),
   to: resolve(__dirname, '../line-awesome/line-awesome.css'),
-  replaceFn: content => (
+  replaceFn: (content) =>
     getBanner('Line Awesome', packageName)
-    + (
-      content
-        .replace(/src:[^;]+la-brands-400[^;]+;/, '')
-        .replace(/src:[^;]+la-brands-400[^;]+;/, 'src: url("./la-brands-400.woff2") format("woff2"), url("./la-brands-400.woff") format("woff");')
-        .replace(/src:[^;]+la-regular-400[^;]+;/, '')
-        .replace(/src:[^;]+la-regular-400[^;]+;/, 'src: url("./la-regular-400.woff2") format("woff2"), url("./la-regular-400.woff") format("woff");')
-        .replace(/src:[^;]+la-solid-900[^;]+;/, '')
-        .replace(/src:[^;]+la-solid-900[^;]+;/, 'src: url("./la-solid-900.woff2") format("woff2"), url("./la-solid-900.woff") format("woff");')
-    )
-  )
+    + content
+      .replace(/src:[^;]+la-brands-400[^;]+;/, '')
+      .replace(
+        /src:[^;]+la-brands-400[^;]+;/,
+        'src: url("./la-brands-400.woff2") format("woff2"), url("./la-brands-400.woff") format("woff");'
+      )
+      .replace(/src:[^;]+la-regular-400[^;]+;/, '')
+      .replace(
+        /src:[^;]+la-regular-400[^;]+;/,
+        'src: url("./la-regular-400.woff2") format("woff2"), url("./la-regular-400.woff") format("woff");'
+      )
+      .replace(/src:[^;]+la-solid-900[^;]+;/, '')
+      .replace(
+        /src:[^;]+la-solid-900[^;]+;/,
+        'src: url("./la-solid-900.woff2") format("woff2"), url("./la-solid-900.woff") format("woff");'
+      )
 })
 
 copySync(

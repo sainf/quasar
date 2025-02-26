@@ -2,7 +2,7 @@ import { join } from 'node:path'
 import { fileURLToPath } from 'node:url'
 import axios from 'axios'
 import fse from 'fs-extra'
-import fg from 'fast-glob'
+import { globSync } from 'tinyglobby'
 
 axios.defaults.withCredentials = true
 
@@ -11,13 +11,11 @@ const baseUrl = 'http://localhost:3111'
 const clientDir = join(rootFolder, 'dist/quasar.dev/client')
 const themeList = [ 'light', 'dark' ]
 
-const mdPagesDir = join(rootFolder, 'src/pages')
-const mdPagesLen = mdPagesDir.length + 1
 const themedRouteList = [
   '', // landing page
   ...(
-    fg.sync(join(mdPagesDir, '**/*.md')).map(key => {
-      const parts = key.substring(mdPagesLen, key.length - 3).split('/')
+    globSync('**/*.md', { cwd: join(rootFolder, 'src/pages') }).map(key => {
+      const parts = key.substring(0, key.length - 3).split('/')
       const len = parts.length
       const _path = parts[ len - 2 ] === parts[ len - 1 ]
         ? parts.slice(0, len - 1)
@@ -28,14 +26,12 @@ const themedRouteList = [
   )
 ]
 
-const layoutGalleryDir = join(rootFolder, 'src/layouts/gallery')
-const layoutGalleryLen = layoutGalleryDir.length + 1
 const lowerCaseRE = /^[a-z]/
 const lightRouteList = [
   'layout-builder',
   ...(
-    fg.sync(join(layoutGalleryDir, '*.vue'))
-      .map(entry => entry.substring(layoutGalleryLen, entry.length - 4))
+    globSync('*.vue', { cwd: join(rootFolder, 'src/layouts/gallery') })
+      .map(entry => entry.substring(0, entry.length - 4))
       .filter(entry => lowerCaseRE.test(entry))
       .map(entry => 'layout/gallery/' + entry)
   )
@@ -70,7 +66,7 @@ async function generate () {
         const file = join(clientDir, _path, `index-${ theme }.html`)
         fse.ensureFileSync(file)
         fse.writeFileSync(file, res.data, 'utf8')
-        console.log(`[ Quasar SSG ] [ ${ theme } ] Rendered: ${ _path }`)
+        console.log(`[ Quasar SSG ] [ ${ theme } ] Rendered: /${ _path }`)
       })
     }
   }
@@ -84,7 +80,7 @@ async function generate () {
       const file = join(clientDir, _path, 'index.html')
       fse.ensureFileSync(file)
       fse.writeFileSync(file, res.data, 'utf8')
-      console.log(`[ Quasar SSG ] [ light (only) ] Rendered: ${ _path }`)
+      console.log(`[ Quasar SSG ] [ light (only) ] Rendered: /${ _path }`)
     })
   }
 

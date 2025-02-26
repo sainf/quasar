@@ -1,16 +1,17 @@
 export async function script ({ scope, utils }) {
   await utils.prompts(scope, [
-    utils.commonPrompts.quasarVersion,
-
     {
       type: 'text',
       name: 'name',
       message: 'Project name (npm name, kebab-case, without "quasar-ui" prefix)',
       validate: (val) =>
         utils.isValidPackageName(val) || 'Invalid package.json name'
-    },
+    }
+  ])
 
-    utils.commonPrompts.author,
+  await utils.injectAuthor(scope)
+
+  await utils.prompts(scope, [
     utils.commonPrompts.license,
 
     {
@@ -93,26 +94,10 @@ export async function script ({ scope, utils }) {
           value: 'uninstall'
         }
       ]
-    },
-
-    {
-      type: (_, { quasarVersion, features }) => (quasarVersion === 'v2' && features.ae ? 'select' : null),
-      name: 'aeCodeFormat',
-      message: 'Pick the App Extension format:',
-      initial: 0,
-      choices: [
-        { title: 'ESM (q/app-vite >= 1.5, q/app-webpack >= 3.10)', value: 'esm', description: 'recommended' },
-        { title: 'CommonJS', value: 'commonjs' }
-      ]
-    },
-
-    utils.commonPrompts.repositoryType,
-    utils.commonPrompts.repositoryURL,
-    utils.commonPrompts.homepage,
-    utils.commonPrompts.bugs
+    }
   ])
 
-  const { script } = await import(`./quasar-${ scope.quasarVersion }/index.js`)
+  const { script } = await import(`./quasar-v2/index.js`)
   await script({ scope, utils })
 
   // we don't want to install

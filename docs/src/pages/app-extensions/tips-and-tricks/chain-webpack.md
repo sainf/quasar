@@ -36,7 +36,7 @@ export default function (api) {
   // hard dependencies, as in a minimum version of the "quasar"
   // package or a minimum version of Quasar App CLI
   api.compatibleWith('quasar', '^2.0.0')
-  api.compatibleWith('@quasar/app-webpack', '^4.0.0-beta.1')
+  api.compatibleWith('@quasar/app-webpack', '^4.0.0')
 
   // chain webpack
   api.chainWebpack((chain) => chainWebpack(api.ctx, chain))
@@ -46,10 +46,11 @@ export default function (api) {
 Our "chainWebpack" method, in the same file as above:
 
 ```js File: /index.js
-const MarkdownIt = require('markdown-it')
+import MarkdownIt from 'markdown-it'
+
 const md = new MarkdownIt()
 
-const chainWebpack = function (ctx, chain) {
+const chainWebpack = (ctx, chain) => {
   const rule = chain.module.rule('md')
     .test(/\.md$/)
     .pre()

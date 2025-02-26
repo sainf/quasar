@@ -11,21 +11,31 @@ import QItemLabel from '../item/QItemLabel.js'
 import QMenu from '../menu/QMenu.js'
 import QDialog from '../dialog/QDialog.js'
 
-import useField, { useFieldState, useFieldProps, useFieldEmits, fieldValueIsFilled } from '../../composables/private/use-field.js'
+import useField, { useFieldState, useFieldProps, useFieldEmits, fieldValueIsFilled } from '../../composables/private.use-field/use-field.js'
 import { useVirtualScroll, useVirtualScrollProps } from '../virtual-scroll/use-virtual-scroll.js'
-import { useFormProps, useFormInputNameAttr } from '../../composables/private/use-form.js'
-import useKeyComposition from '../../composables/private/use-key-composition.js'
+import { useFormProps, useFormInputNameAttr } from '../../composables/use-form/private.use-form.js'
+import useKeyComposition from '../../composables/private.use-key-composition/use-key-composition.js'
 
-import { createComponent } from '../../utils/private/create.js'
-import { isDeepEqual } from '../../utils/is.js'
-import { stop, prevent, stopAndPrevent } from '../../utils/event.js'
-import { normalizeToInterval } from '../../utils/format.js'
-import { shouldIgnoreKey, isKeyCode } from '../../utils/private/key-composition.js'
-import { hMergeSlot } from '../../utils/private/render.js'
+import { createComponent } from '../../utils/private.create/create.js'
+import { isDeepEqual } from '../../utils/is/is.js'
+import { stop, prevent, stopAndPrevent } from '../../utils/event/event.js'
+import { normalizeToInterval } from '../../utils/format/format.js'
+import { shouldIgnoreKey, isKeyCode } from '../../utils/private.keyboard/key-composition.js'
+import { hMergeSlot } from '../../utils/private.render/render.js'
 
 const validateNewValueMode = v => [ 'add', 'add-unique', 'toggle' ].includes(v)
 const reEscapeList = '.*+?^${}()|[]\\'
 const fieldPropsList = Object.keys(useFieldProps)
+
+function getPropValueFn (userPropName, defaultPropName) {
+  if (typeof userPropName === 'function') return userPropName
+
+  const propName = userPropName !== void 0
+    ? userPropName
+    : defaultPropName
+
+  return opt => ((opt !== null && typeof opt === 'object' && propName in opt) ? opt[ propName ] : opt)
+}
 
 export default createComponent({
   name: 'QSelect',
@@ -37,6 +47,7 @@ export default createComponent({
     ...useFormProps,
     ...useFieldProps,
 
+    // override of useFieldProps > modelValue
     modelValue: {
       required: true
     },
@@ -92,6 +103,8 @@ export default createComponent({
     mapOptions: Boolean,
     emitValue: Boolean,
 
+    disableTabSelection: Boolean,
+
     inputDebounce: {
       type: [ Number, String ],
       default: 500
@@ -107,9 +120,9 @@ export default createComponent({
 
     autocomplete: String,
 
-    transitionShow: String,
-    transitionHide: String,
-    transitionDuration: [ String, Number ],
+    transitionShow: {},
+    transitionHide: {},
+    transitionDuration: {},
 
     behavior: {
       type: String,
@@ -117,10 +130,8 @@ export default createComponent({
       default: 'default'
     },
 
-    virtualScrollItemSize: {
-      type: [ Number, String ],
-      default: void 0
-    },
+    // override of useVirtualScrollProps > virtualScrollItemSize (no default)
+    virtualScrollItemSize: useVirtualScrollProps.virtualScrollItemSize.type,
 
     onNewValue: Function,
     onFilter: Function
@@ -130,6 +141,7 @@ export default createComponent({
     ...useFieldEmits,
     'add', 'remove', 'inputValue',
     'keyup', 'keypress', 'keydown',
+    'popupShow', 'popupHide',
     'filterAbort'
   ],
 
@@ -393,7 +405,7 @@ export default createComponent({
     // takes into account 'option-disable' prop
     const isOptionDisabled = computed(() => getPropValueFn(props.optionDisable, 'disable'))
 
-    const innerOptionsValue = computed(() => innerValue.value.map(opt => getOptionValue.value(opt)))
+    const innerOptionsValue = computed(() => innerValue.value.map(getOptionValue.value))
 
     const inputControlEvents = computed(() => {
       const evt = {
@@ -484,13 +496,15 @@ export default createComponent({
         return
       }
 
-      if (unique === true && isOptionSelected(opt) === true) {
-        return
-      }
+      if (
+        unique === true
+        && isOptionSelected(opt) === true
+      ) return
 
-      if (props.maxValues !== void 0 && props.modelValue.length >= props.maxValues) {
-        return
-      }
+      if (
+        props.maxValues !== void 0
+        && props.modelValue.length >= props.maxValues
+      ) return
 
       const model = props.modelValue.slice()
 
@@ -500,9 +514,11 @@ export default createComponent({
     }
 
     function toggleOption (opt, keepOpen) {
-      if (state.editable.value !== true || opt === void 0 || isOptionDisabled.value(opt) === true) {
-        return
-      }
+      if (
+        state.editable.value !== true
+        || opt === void 0
+        || isOptionDisabled.value(opt) === true
+      ) return
 
       const optValue = getOptionValue.value(opt)
 
@@ -525,6 +541,7 @@ export default createComponent({
         ) {
           emit('update:modelValue', props.emitValue === true ? optValue : opt)
         }
+
         return
       }
 
@@ -547,9 +564,10 @@ export default createComponent({
         emit('remove', { index, value: model.splice(index, 1)[ 0 ] })
       }
       else {
-        if (props.maxValues !== void 0 && model.length >= props.maxValues) {
-          return
-        }
+        if (
+          props.maxValues !== void 0
+          && model.length >= props.maxValues
+        ) return
 
         const val = props.emitValue === true ? optValue : opt
 
@@ -605,16 +623,6 @@ export default createComponent({
       return props.options.find(fn) || valueCache.find(fn) || value
     }
 
-    function getPropValueFn (propValue, defaultVal) {
-      const val = propValue !== void 0
-        ? propValue
-        : defaultVal
-
-      return typeof val === 'function'
-        ? val
-        : opt => (opt !== null && typeof opt === 'object' && val in opt ? opt[ val ] : opt)
-    }
-
     function isOptionSelected (opt) {
       const val = getOptionValue.value(opt)
       return innerOptionsValue.value.find(v => isDeepEqual(v, val)) !== void 0
@@ -668,11 +676,9 @@ export default createComponent({
       if (typeof value === 'string' && value.length !== 0) {
         const needle = value.toLocaleLowerCase()
         const findFn = extractFn => {
-          const option = props.options.find(opt => extractFn.value(opt).toLocaleLowerCase() === needle)
+          const option = props.options.find(opt => String(extractFn.value(opt)).toLocaleLowerCase() === needle)
 
-          if (option === void 0) {
-            return false
-          }
+          if (option === void 0) return false
 
           if (innerValue.value.indexOf(option) === -1) {
             toggleOption(option)
@@ -684,14 +690,13 @@ export default createComponent({
           return true
         }
         const fillFn = afterFilter => {
-          if (findFn(getOptionValue) === true) {
-            return
+          if (
+            findFn(getOptionValue) !== true
+            && afterFilter !== true
+            && findFn(getOptionLabel) !== true
+          ) {
+            filter(value, true, () => fillFn(true))
           }
-          if (findFn(getOptionLabel) === true || afterFilter === true) {
-            return
-          }
-
-          filter(value, true, () => fillFn(true))
         }
 
         fillFn()
@@ -708,14 +713,13 @@ export default createComponent({
     function onTargetKeydown (e) {
       emit('keydown', e)
 
-      if (shouldIgnoreKey(e) === true) {
-        return
-      }
+      if (shouldIgnoreKey(e) === true) return
 
       const newValueModeValid = inputValue.value.length !== 0
         && (props.newValueMode !== void 0 || props.onNewValue !== void 0)
 
       const tabShouldSelect = e.shiftKey !== true
+        && props.disableTabSelection !== true
         && props.multiple !== true
         && (optionIndex.value !== -1 || newValueModeValid === true)
 
@@ -764,6 +768,7 @@ export default createComponent({
         else if (props.multiple !== true && props.modelValue !== null) {
           emit('update:modelValue', null)
         }
+
         return
       }
 
@@ -875,9 +880,7 @@ export default createComponent({
       if (newValueModeValid === true) {
         const done = (val, mode) => {
           if (mode) {
-            if (validateNewValueMode(mode) !== true) {
-              return
-            }
+            if (validateNewValueMode(mode) !== true) return
           }
           else {
             mode = props.newValueMode
@@ -885,9 +888,7 @@ export default createComponent({
 
           updateInputValue('', props.multiple !== true, true)
 
-          if (val === void 0 || val === null) {
-            return
-          }
+          if (val === void 0 || val === null) return
 
           const fn = mode === 'toggle' ? toggleOption : add
           fn(val, mode === 'add-unique')
@@ -905,9 +906,7 @@ export default createComponent({
           done(inputValue.value)
         }
 
-        if (props.multiple !== true) {
-          return
-        }
+        if (props.multiple !== true) return
       }
 
       if (menu.value === true) {
@@ -1044,9 +1043,11 @@ export default createComponent({
         inputValueTimer = null
       }
 
-      if (e && e.target && e.target.qComposing === true) {
-        return
-      }
+      if (
+        e
+        && e.target
+        && e.target.qComposing === true
+      ) return
 
       setInputValue(e.target.value || '')
       // mark it here as user input so that if updateInputValue is called
@@ -1100,9 +1101,10 @@ export default createComponent({
     }
 
     function filter (val, keepClosed, afterUpdateFn) {
-      if (props.onFilter === void 0 || (keepClosed !== true && state.focused.value !== true)) {
-        return
-      }
+      if (
+        props.onFilter === void 0
+        || (keepClosed !== true && state.focused.value !== true)
+      ) return
 
       if (state.innerLoading.value === true) {
         emit('filterAbort')
@@ -1309,9 +1311,7 @@ export default createComponent({
     }
 
     function closeMenu () {
-      if (dialog.value === true) {
-        return
-      }
+      if (dialog.value === true) return
 
       optionIndex.value = -1
 
@@ -1334,9 +1334,7 @@ export default createComponent({
     }
 
     function showPopup (e) {
-      if (state.editable.value !== true) {
-        return
-      }
+      if (state.editable.value !== true) return
 
       if (hasDialog === true) {
         state.onControlFocusin(e)

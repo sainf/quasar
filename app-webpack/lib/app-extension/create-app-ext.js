@@ -1,5 +1,6 @@
 const { existsSync, readFileSync, writeFileSync } = require('node:fs')
 const { merge } = require('webpack-merge')
+const { parseJSON, stringifyJSON } = require('confbox')
 
 const { log, fatal } = require('../utils/logger.js')
 const { AppExtensionInstance } = require('./AppExtensionInstance.js')
@@ -10,7 +11,7 @@ function readJson (file) {
   }
 
   try {
-    return JSON.parse(
+    return parseJSON(
       readFileSync(file, 'utf-8')
     )
   }
@@ -21,10 +22,13 @@ function readJson (file) {
 }
 
 function getAppExtJson ({ file, json, onListUpdate }) {
+  const fileExists = Object.keys(json).length > 0
+
   function save () {
     writeFileSync(
       file,
-      JSON.stringify(json, null, 2),
+      // if file exists, preserve indentation, otherwise use 2 spaces
+      stringifyJSON(json, { indent: fileExists ? undefined : 2 }),
       'utf-8'
     )
   }

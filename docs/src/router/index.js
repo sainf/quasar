@@ -42,7 +42,7 @@ export default function () {
   })
 
   process.env.CLIENT === true && Router.afterEach(to => {
-    gtag('config', 'UA-6317975-6', {
+    gtag('config', 'G-WRH1VBGG35', {
       page_path: to.path
     })
   })

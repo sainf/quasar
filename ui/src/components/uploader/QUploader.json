@@ -1,5 +1,5 @@
 {
-  "mixins": [ "composables/private/use-file", "components/uploader/xhr-uploader-plugin" ],
+  "mixins": [ "composables/private.use-file/use-file", "components/uploader/xhr-uploader-plugin" ],
 
   "meta": {
     "docsUrl": "https://v2.quasar.dev/vue-components/uploader"
@@ -53,6 +53,15 @@
       "type": "Boolean",
       "desc": "Don't show the upload button",
       "category": "behavior"
+    },
+
+    "thumbnail-fit": {
+      "type": "String",
+      "desc": "How the thumbnail image will fit into the container; Equivalent of the background-size prop",
+      "default": "'cover'",
+      "examples": [ "'cover'", "'contain'", "'auto'", "'50%'" ],
+      "category": "style",
+      "addedIn": "v2.17"
     },
 
     "disable": {
@@ -200,18 +209,6 @@
           "extends": "evt",
           "required": true,
           "desc": "JS event object of the original user interaction handler"
-        }
-      },
-      "returns": null
-    },
-
-    "addFiles": {
-      "desc": "Manually add files to the queue",
-      "params": {
-        "files": {
-          "type": "Array",
-          "required": true,
-          "desc": "Must be an array of instances of JS File type"
         }
       },
       "returns": null

@@ -5,7 +5,7 @@ const prefix = 'ion'
 
 // ------------
 
-const glob = require('glob')
+const { globSync } = require('tinyglobby')
 const { copySync } = require('fs-extra')
 const { writeFileSync } = require('fs')
 const { resolve, join } = require('path')
@@ -14,19 +14,20 @@ const skipped = []
 const distFolder = resolve(__dirname, `../${ distName }`)
 const { defaultNameMapper, extract, writeExports } = require('./utils')
 
-const svgFolder = resolve(__dirname, `../node_modules/${ packageName }/dist/svg/`)
-const svgFiles = glob.sync(svgFolder + '/*.svg')
+const svgFolder = resolve(
+  __dirname,
+  `../node_modules/${ packageName }/dist/svg/`
+)
+const svgFiles = globSync(svgFolder + '/*.svg')
 let iconNames = new Set()
 
 const svgExports = []
 const typeExports = []
 
-svgFiles.forEach(file => {
+svgFiles.forEach((file) => {
   const name = defaultNameMapper(file, prefix)
 
-  if (iconNames.has(name)) {
-    return
-  }
+  if (iconNames.has(name)) return
 
   try {
     const { svgDef, typeDef } = extract(file, name)
@@ -52,7 +53,14 @@ iconNames.sort((a, b) => {
   return ('' + a).localeCompare(b)
 })
 
-writeExports(iconSetName, packageName, distFolder, svgExports, typeExports, skipped)
+writeExports(
+  iconSetName,
+  packageName,
+  distFolder,
+  svgExports,
+  typeExports,
+  skipped
+)
 
 copySync(
   resolve(__dirname, `../node_modules/${ packageName }/LICENSE`),

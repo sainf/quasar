@@ -21,30 +21,73 @@ For determining the values for each of the properties mentioned above, Quasar CL
 1. Looks in the `/quasar.config` file for a "cordova" Object. Does it have "version", "description" and/or "androidVersionCode"? If yes, it will use them.
 2. If not, then it looks into your `/package.json` for "cordovaId", "version" and "description" fields.
 
-```js
-return {
-  capacitor: {
-    // If not present, will look for package.json > version
-    version: '..', // string
-    // If not present, will look for package.json > description
-    description: '...', // string
-    androidVersionCode: '..', // string
+```js /quasar.config file > cordova
+cordova: {
+  /** If not present, will look for `package.json > version` */
+  version?: string;
+  /** If not present, will look for `package.json > description` */
+  description?: string;
+  androidVersionCode?: string;
+  /**
+   * Enable Xcode modern build even if after considering iOS-Cordova issues.
+   * You can enable it if you know what you are doing,
+   *  for example if you want to specify the build type in your “build.json”.
+   *
+   * @default false
+   */
+  noIosLegacyBuildFlag?: boolean;
 
-    /**
-     * Enable Xcode modern build even if after considering iOS-Cordova issues.
-     * You can enable it if you know what you are doing,
-     *  for example if you want to specify the build type in your “build.json”.
-     *
-     * Default: false
-     */
-    noIosLegacyBuildFlag: true/false
-  }
+  /**
+   * Function to return the Cordova build command parameters that
+   * will be executed after the UI has compiled.
+   *
+   * @param context.debug - True if in debug mode
+   * @param context.target - The target platform (ios/android)
+   * @returns Array of strings (command parameters)
+   *
+   * @default: [ 'build', '--debug'/'--release', '--device', 'ios'/'android' ]
+   * @example: ({ isDebug, target }) => [ 'build', `--${isDebug ? 'debug' : 'release'}`, '--device', 'target' ]
+   */
+  getCordovaBuildParams?: (context: { debug: boolean; target: 'ios' | 'android' }) => string[];
+
+  /**
+   * Function to return the Cordova output folder after the "cordova build"
+   * command is executed.
+   * The relative to /src-cordova path is used to copy the Cordova output
+   * to the /dist folder.
+   *
+   * @param context.debug - True if in debug mode
+   * @param context.target - The target platform (ios/android)
+   * @returns string | string[] | undefined - (relative path(s) from /src-cordova)
+   *
+   * @default ios: platforms/ios/build/... and android: platforms/android/app/build/outputs
+   * @example:
+   *    ({ isDebug, target }) => {
+   *       return target === 'ios'
+   *          ? `platforms/ios/build/${isDebug ? 'Debug' : 'Release'}-iphoneos
+   *          : 'platforms/android/app/build/outputs'
+   *    }
+   * @example: (when interested in only one platform, leaving the other to the default value)
+   *    ({ isDebug, target }) => {
+   *       if (target === 'ios') {
+   *          return `platforms/ios/build/${isDebug ? 'Debug' : 'Release'}-iphoneos`
+   *       }
+   *    }
+   * @example: ()
+   *    ({ isDebug, target }) => {
+   *       if (target === 'ios') {
+   *          // try these two folders
+   *          return [ 'platforms/ios/build/device', 'platforms/ios/build/emulator' ]
+   *       }
+   *    }
+   */
+  getCordovaBuildOutputFolder?: (context: { debug: boolean; target: 'ios' | 'android' }) => string | string[] | undefined;
 }
 ```
 
 Other options you can configure:
 
-```js
+```js /quasar.config file
 return {
   framework: {
     config: {
@@ -67,15 +110,16 @@ return {
 Should you want to tamper with the Vite config for UI in /src:
 
 ```js /quasar.config file
-module.exports = function (ctx) {
+export default defineConfig((ctx) => {
   return {
     build: {
       extendViteConf (viteConf) {
         if (ctx.mode.cordova) {
-          // do something with ViteConf
+          // do something with viteConf
+          // or return an object to deeply merge with current viteConf
         }
       }
     }
   }
-}
+})
 ```

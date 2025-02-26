@@ -157,9 +157,7 @@ export function useTablePagination (vm, innerPagination, computedPagination, isS
   })
 
   watch(pagesNumber, (lastPage, oldLastPage) => {
-    if (lastPage === oldLastPage) {
-      return
-    }
+    if (lastPage === oldLastPage) return
 
     const currentPage = computedPagination.value.page
     if (lastPage && !currentPage) {

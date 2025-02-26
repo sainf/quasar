@@ -789,10 +789,6 @@ export default [
         path: 'state-management-with-pinia'
       },
       {
-        name: 'State Management with Vuex',
-        path: 'state-management-with-vuex'
-      },
-      {
         name: 'Linter',
         path: 'linter'
       },
@@ -833,10 +829,6 @@ export default [
           {
             name: 'Writing Universal Code',
             path: 'writing-universal-code'
-          },
-          {
-            name: 'Upgrade guide',
-            path: 'ssr-upgrade-guide'
           },
           {
             name: 'Preparation',
@@ -1117,8 +1109,8 @@ export default [
             path: 'types-of-bex'
           },
           {
-            name: 'BEX Communication / Events',
-            path: 'bex-communication'
+            name: 'BEX Bridge Communication',
+            path: 'bex-bridge'
           },
           {
             name: 'Background Script',
@@ -1127,10 +1119,6 @@ export default [
           {
             name: 'Content Scripts',
             path: 'content-scripts'
-          },
-          {
-            name: 'DOM Script',
-            path: 'dom-script'
           }
         ]
       },
@@ -1219,10 +1207,6 @@ export default [
         path: 'state-management-with-pinia'
       },
       {
-        name: 'State Management with Vuex',
-        path: 'state-management-with-vuex'
-      },
-      {
         name: 'Linter',
         path: 'linter'
       },
@@ -1265,10 +1249,6 @@ export default [
             path: 'writing-universal-code'
           },
           {
-            name: 'Upgrade guide',
-            path: 'ssr-upgrade-guide'
-          },
-          {
             name: 'Preparation',
             path: 'preparation'
           },
@@ -1285,8 +1265,8 @@ export default [
             path: 'ssr-middleware'
           },
           {
-            name: 'SSR Production Export',
-            path: 'ssr-production-export'
+            name: 'SSR Webserver',
+            path: 'ssr-webserver'
           },
           {
             name: 'Vue SSR Directives',
@@ -1313,7 +1293,7 @@ export default [
             path: 'ssr-with-pwa'
           },
           {
-            name: 'SSR Frequently Asked Questions',
+            name: 'SSR FAQ',
             path: 'ssr-frequently-asked-questions'
           },
           {
@@ -1547,20 +1527,16 @@ export default [
             path: 'types-of-bex'
           },
           {
-            name: 'BEX Communication / Events',
-            path: 'bex-communication'
+            name: 'BEX Bridge Communication',
+            path: 'bex-bridge'
           },
           {
-            name: 'Background Hooks',
-            path: 'background-hooks'
+            name: 'Background Script',
+            path: 'background-script'
           },
           {
-            name: 'Content Hooks',
-            path: 'content-hooks'
-          },
-          {
-            name: 'DOM Hooks',
-            path: 'dom-hooks'
+            name: 'Content Scripts',
+            path: 'content-scripts'
           }
         ]
       },

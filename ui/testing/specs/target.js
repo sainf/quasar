@@ -1,5 +1,5 @@
 import { fileURLToPath } from 'node:url'
-import fglob from 'fast-glob'
+import { globSync } from 'tinyglobby'
 
 const rootFolder = fileURLToPath(new URL('../..', import.meta.url))
 
@@ -9,7 +9,7 @@ export function getTargetList (argv) {
     ? [ `src/**/${ argv.target }.js`, `src/${ argv.target }/**/*.js`, `src/**/*${ argv.target }*.js` ]
     : [ 'src/**/*.js' ]
 
-  return fglob.sync(
+  return globSync(
     targetList,
     { cwd: rootFolder }
   ).filter(

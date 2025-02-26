@@ -294,6 +294,12 @@ myApp.mount('#app')
 `
 })
 
+const extraImports = computed(() => {
+  return useSassVariables.value === true
+    ? 'import { fileURLToPath } from \'node:url\'\n'
+    : ''
+})
+
 const vitePluginOptions = computed(() => {
   const acc = []
 
@@ -302,7 +308,11 @@ const vitePluginOptions = computed(() => {
   }
 
   if (useSassVariables.value === true) {
-    acc.push('      sassVariables: \'src/quasar-variables.sass\'')
+    acc.push(
+      '      sassVariables: fileURLToPath(\n'
+      + '        new URL(\'./src/quasar-variables.sass\', import.meta.url)\n'
+      + '      )'
+    )
   }
 
   return acc.length === 0
@@ -313,7 +323,7 @@ const vitePluginOptions = computed(() => {
 const fileViteConfigJs = computed(() => {
   return `// FILE: vite.config.js
 
-import { defineConfig } from 'vite'
+${ extraImports.value }import { defineConfig } from 'vite'
 import vue from '@vitejs/plugin-vue'
 import { quasar, transformAssetUrls } from '@quasar/vite-plugin'
 

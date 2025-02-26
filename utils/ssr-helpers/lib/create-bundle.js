@@ -14,8 +14,8 @@ function createCompile () {
   const _compileCache = {}
 
   return function compile (filename, code) {
-    if (_compileCache[filename]) {
-      return _compileCache[filename]
+    if (_compileCache[ filename ]) {
+      return _compileCache[ filename ]
     }
 
     const wrapper = NativeModule.wrap(code)
@@ -24,7 +24,7 @@ function createCompile () {
       displayErrors: true
     })
 
-    _compileCache[filename] = script
+    _compileCache[ filename ] = script
 
     return script
   }
@@ -38,13 +38,13 @@ function createRequire (basedir, files, evaluateModule) {
   function resolveFromFiles (id) {
     const _id = id.replace(/^\.\//, '')
 
-    if (files[_id]) {
+    if (files[ _id ]) {
       return _id
     }
   }
 
   function _resolve (id) {
-    return resolveFromFiles(id) || nativeRequire.resolve(id, { paths: [basedir] })
+    return resolveFromFiles(id) || nativeRequire.resolve(id, { paths: [ basedir ] })
   }
 
   _resolve.paths = nativeRequire.resolve.paths.bind(nativeRequire.resolve)
@@ -82,11 +82,11 @@ function createEvaluateModule (files, basedir) {
   const require = createRequire(basedir || process.cwd(), files, evaluateModule)
 
   function evaluateModule (filename) {
-    if (_evalCache[filename]) {
-      return _evalCache[filename]
+    if (_evalCache[ filename ]) {
+      return _evalCache[ filename ]
     }
 
-    const code = files[filename]
+    const code = files[ filename ]
     const script = compile(filename, code)
 
     const compiledWrapper = script.runInThisContext()
@@ -99,7 +99,7 @@ function createEvaluateModule (files, basedir) {
       ? module.exports.default
       : module.exports
 
-    _evalCache[filename] = res
+    _evalCache[ filename ] = res
 
     return res
   }
@@ -111,17 +111,15 @@ function getRewriteErrorTrace (rawMaps) {
   const _consumersCache = {}
 
   function getConsumer (source) {
-    const rawMap = rawMaps[source]
+    const rawMap = rawMaps[ source ]
 
-    if (!rawMap) {
-      return
+    if (!rawMap) return
+
+    if (!_consumersCache[ source ]) {
+      _consumersCache[ source ] = Promise.resolve(new SourceMapConsumer(rawMap))
     }
 
-    if (!_consumersCache[source]) {
-      _consumersCache[source] = Promise.resolve(new SourceMapConsumer(rawMap))
-    }
-
-    return _consumersCache[source]
+    return _consumersCache[ source ]
   }
 
   async function rewriteTraceLine (_trace) {
@@ -131,15 +129,15 @@ function getRewriteErrorTrace (rawMaps) {
       return _trace
     }
 
-    const consumer = await getConsumer(m[1])
+    const consumer = await getConsumer(m[ 1 ])
 
     if (!consumer) {
       return _trace
     }
 
     const originalPosition = consumer.originalPositionFor({
-      line: Number(m[2]),
-      column: Number(m[3])
+      line: Number(m[ 2 ]),
+      column: Number(m[ 3 ])
     })
 
     if (!originalPosition.source) {
@@ -147,7 +145,7 @@ function getRewriteErrorTrace (rawMaps) {
     }
 
     const { source, line, column } = originalPosition
-    const mappedPosition = `(${source.replace(webpackRE, '')}:${line}:${column})`
+    const mappedPosition = `(${ source.replace(webpackRE, '') }:${ line }:${ column })`
     return _trace.replace(filenameRE, mappedPosition)
   }
 
@@ -162,7 +160,7 @@ function getRewriteErrorTrace (rawMaps) {
   }
 }
 
-function loadBundle(bundle, basedir) {
+function loadBundle (bundle, basedir) {
   if (!bundle) {
     throw new Error('Cannot load bundle!')
   }

@@ -97,9 +97,6 @@ const quasarSsrConfig = {
         appPaths.resolve.entry('server-entry.js')
       )
 
-    webpackChain.resolve.alias
-      .set('quasar$', 'quasar/dist/quasar.cjs.prod.js')
-
     webpackChain.target('node')
 
     if (quasarConf.metaConf.debugging) {
@@ -136,7 +133,7 @@ const quasarSsrConfig = {
       //  5. Quasar icon sets files
       //  6. Quasar extras
       allowlist: [
-        /(\.(vue|css|styl|scss|sass|less)$|\?vue&type=style|^quasar[\\/]lang[\\/]|^quasar[\\/]icon-set[\\/]|^@quasar[\\/]extras[\\/])/,
+        /(\.(vue|css|styl|scss|sass|less)$|\?vue&type=style|^quasar[\\/]lang[\\/]|^quasar[\\/]icon-set[\\/]|^@quasar[\\/]extras[\\/]|@quasar[\\/]app-webpack[\\/])/,
         ...quasarConf.build.webpackTranspileDependencies
       ],
       additionalModuleDirs
@@ -173,11 +170,12 @@ const quasarSsrConfig = {
 
     if (ctx.dev) {
       cfg.entryPoints = [ appPaths.resolve.entry('ssr-dev-webserver.js') ]
-      cfg.outfile = appPaths.resolve.entry('compiled-dev-webserver.js')
+      cfg.outfile = appPaths.resolve.entry('compiled-dev-webserver.cjs')
     }
     else {
       cfg.external = [
-        ...(cfg.external || []),
+        ...cfg.external,
+
         'vue/server-renderer',
         'vue/compiler-sfc',
         './render-template.js',
@@ -186,7 +184,7 @@ const quasarSsrConfig = {
       ]
 
       cfg.entryPoints = [ appPaths.resolve.entry('ssr-prod-webserver.js') ]
-      cfg.outfile = join(quasarConf.build.distDir, 'index.js')
+      cfg.outfile = join(quasarConf.build.distDir, 'start.js')
     }
 
     return extendEsbuildConfig(cfg, quasarConf.ssr, ctx, 'extendSSRWebserverConf')

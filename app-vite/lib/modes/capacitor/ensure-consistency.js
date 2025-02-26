@@ -15,13 +15,13 @@ export function ensureWWW ({ appPaths, forced }) {
 }
 
 export async function ensureDeps ({ appPaths, cacheProxy }) {
-  if (existsSync(appPaths.resolve.capacitor('node_modules'))) {
-    return
-  }
+  if (existsSync(appPaths.resolve.capacitor('node_modules'))) return
 
   const nodePackager = await cacheProxy.getModule('nodePackager')
   nodePackager.install({
     cwd: appPaths.capacitorDir,
+    // See https://github.com/orgs/pnpm/discussions/4735
+    params: nodePackager.name === 'pnpm' ? ['i', '--ignore-workspace'] : undefined,
     displayName: 'Capacitor'
   })
 }

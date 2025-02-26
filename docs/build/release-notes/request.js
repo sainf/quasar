@@ -16,9 +16,7 @@ export default async (packages, versionRE) => {
     const response = await gitFetch.request(request)
     const releases = response.data
 
-    if (releases.length === 0) {
-      return
-    }
+    if (releases.length === 0) return
 
     let stopQuery = false
 

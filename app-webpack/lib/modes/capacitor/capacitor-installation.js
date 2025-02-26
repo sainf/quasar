@@ -1,24 +1,20 @@
 const fs = require('node:fs')
 const fse = require('fs-extra')
 const compileTemplate = require('lodash/template.js')
-const fglob = require('fast-glob')
+const { globSync } = require('tinyglobby')
 
 const { log, warn } = require('../../utils/logger.js')
 const { spawnSync } = require('../../utils/spawn.js')
 
 const { ensureDeps, ensureConsistency } = require('./ensure-consistency.js')
-
-function isModeInstalled (appPaths) {
-  return fs.existsSync(appPaths.capacitorDir)
-}
-module.exports.isModeInstalled = isModeInstalled
+const { isModeInstalled } = require('../modes-utils.js')
 
 module.exports.addMode = async function addMode ({
   ctx: { appPaths, cacheProxy, pkg: { appPkg } },
   silent,
   target
 }) {
-  if (isModeInstalled(appPaths)) {
+  if (isModeInstalled(appPaths, 'capacitor')) {
     if (target) {
       addPlatform(target, appPaths, cacheProxy)
     }
@@ -63,7 +59,7 @@ module.exports.addMode = async function addMode ({
     nodePackager: nodePackager.name
   }
 
-  fglob.sync([ '**/*' ], {
+  globSync([ '**/*' ], {
     cwd: appPaths.resolve.cli('templates/capacitor')
   }).forEach(filePath => {
     const dest = appPaths.resolve.capacitor(filePath)
@@ -103,7 +99,7 @@ module.exports.addMode = async function addMode ({
 module.exports.removeMode = function removeMode ({
   ctx: { appPaths }
 }) {
-  if (!isModeInstalled(appPaths)) {
+  if (isModeInstalled(appPaths, 'capacitor') === false) {
     warn('No Capacitor support detected. Aborting.')
     return
   }
@@ -118,9 +114,7 @@ function addPlatform (target, appPaths, cacheProxy) {
   ensureConsistency({ appPaths, cacheProxy })
 
   // if it has the platform
-  if (fs.existsSync(appPaths.resolve.capacitor(target))) {
-    return
-  }
+  if (fs.existsSync(appPaths.resolve.capacitor(target))) return
 
   const { capBin, capVersion } = cacheProxy.getModule('capCli')
 

@@ -1,6 +1,6 @@
 {
   "name": "@quasar/vite-plugin",
-  "version": "1.6.0",
+  "version": "1.9.0",
   "description": "Vite plugin for Quasar Framework",
   "type": "module",
   "exports": {
@@ -13,15 +13,13 @@
   },
   "types": "index.d.ts",
   "scripts": {
-    "build": "node ./build/clean.js && rollup --config ./build/rollup.config.js",
     "lint": "eslint --ext .js,.vue ./ --fix --report-unused-disable-directives",
-    "test": "pnpm test:unit:ci && pnpm test:e2e:ci",
-    "test:unit:dev": "vitest",
-    "test:unit:ci": "vitest run",
-    "test:e2e:start:dev": "cd ./playground && pnpm dev --port 9000",
-    "test:e2e:start:serve": "cd ./playground && pnpm start --port 9000",
-    "test:e2e:dev": "start-test \"pnpm test:e2e:start:dev\" http-get://localhost:9000 \"pnpm cypress open --e2e\"",
-    "test:e2e:ci": "start-test \"pnpm test:e2e:start:serve\" http-get://localhost:9000 \"pnpm cypress run --e2e\""
+    "dev": "cd ./playground && pnpm dev",
+    "build": "node ./build/clean.js && rollup --config ./build/rollup.config.js",
+    "test": "pnpm test:usage && pnpm test:runtime",
+    "test:watch": "vitest run --watch --config ./testing/runtime/vitest.config.js",
+    "test:usage": "vitest run --config ./testing/usage/vitest.config.js",
+    "test:runtime": "vitest run --config ./testing/runtime/vitest.config.js"
   },
   "files": [
     "dist",
@@ -45,21 +43,23 @@
     "url": "https://github.com/quasarframework/quasar"
   },
   "devDependencies": {
-    "cypress": "^13.0.0",
-    "eslint": "^8.57.0",
-    "eslint-config-quasar": "^0.0.1",
+    "@vue/test-utils": "^2.4.6",
+    "eslint": "^8.57.1",
+    "eslint-config-quasar": "workspace:*",
     "fs-extra": "^11.2.0",
-    "quasar": "^2.11.10",
-    "rollup": "^4.12.0",
-    "start-server-and-test": "^2.0.0",
-    "typescript": "^5.0.4",
-    "vite-plugin-checker": "^0.6.4",
-    "vitest": "^1.3.1"
+    "jsdom": "^24.1.3",
+    "pug": "^3.0.3",
+    "quasar": "workspace:*",
+    "rollup": "^4.24.2",
+    "vite": "^6.0.0",
+    "vite-plugin-checker": "^0.7.2",
+    "vitest": "^2.1.1",
+    "vue": "^3.5.5"
   },
   "peerDependencies": {
     "@vitejs/plugin-vue": "^2.0.0 || ^3.0.0 || ^4.0.0 || ^5.0.0",
-    "quasar": "^2.8.0",
-    "vite": "^2.0.0 || ^3.0.0 || ^4.0.0 || ^5.0.0",
+    "quasar": "^2.16.0",
+    "vite": "^2.0.0 || ^3.0.0 || ^4.0.0 || ^5.0.0 || ^6.0.0",
     "vue": "^3.0.0"
   },
   "license": "MIT",

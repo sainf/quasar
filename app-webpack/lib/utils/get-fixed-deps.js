@@ -13,16 +13,12 @@ const urlRangePattern = /^[a-zA-Z]/
  * ```
  */
 module.exports.getFixedDeps = function getFixedDeps (deps, rootDir) {
-  if (!deps) {
-    return {}
-  }
+  if (!deps) return {}
 
   const appDeps = { ...deps }
 
   Object.entries(deps).forEach(([ name, versionRange ]) => {
-    if (urlRangePattern.test(versionRange)) {
-      return
-    }
+    if (urlRangePattern.test(versionRange)) return
 
     const pkg = getPackageJson(name, rootDir)
     appDeps[ name ] = pkg !== void 0 ? pkg.version : versionRange

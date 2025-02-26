@@ -317,7 +317,7 @@ Running `pnpm dev` starts up a dev server which uses HMR (Hot Module Reload) for
 
 Quasar Framework is an MIT-licensed open source project. Its ongoing development is made possible thanks to the support by these awesome [backers](https://github.com/quasarframework/quasar/blob/dev/backers.md).
 
-**Please read our manifest on [Why donations are important](https://quasar.dev/why-donate)**. If you'd like to become a donator, check out [Quasar Framework's Donator campaign](https://donate.quasar.dev).
+**Please read our manifest on [Why donations are important](/why-donate)**. If you'd like to become a donator, check out [Quasar Framework's Donator campaign](https://donate.quasar.dev).
 
 ## Quasar Contributors
 

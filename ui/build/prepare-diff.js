@@ -1,18 +1,9 @@
-const path = require('node:path')
-const fse = require('fs-extra')
-const { sync: fastGlob, convertPathToPattern } = require('fast-glob')
-const { createPatch } = require('diff')
-const { highlight } = require('cli-highlight')
+import fse from 'fs-extra'
+import { globSync, convertPathToPattern } from 'tinyglobby'
+import { createPatch } from 'diff'
+import { highlight } from 'cli-highlight'
 
-const rootFolder = path.resolve(__dirname, '..')
-
-function resolve (_path) {
-  return path.resolve(rootFolder, _path)
-}
-
-function relative (_path) {
-  return path.relative(rootFolder, _path)
-}
+import { resolveToRoot, relativeToRoot } from './build.utils.js'
 
 /**
  * Call this with the path to file (or folder) you want to track, before the file gets updated.
@@ -20,8 +11,8 @@ function relative (_path) {
  *
  * @param {string} locationPath
  */
-module.exports = function prepareDiff (locationPath) {
-  const absolutePath = resolve(locationPath)
+export default function prepareDiff (locationPath) {
+  const absolutePath = resolveToRoot(locationPath)
 
   // If there is no "old" file/folder, then there is no diff (everything will be new)
   if (!fse.existsSync(absolutePath)) {
@@ -35,7 +26,7 @@ module.exports = function prepareDiff (locationPath) {
   }
 
   const originalsMap = new Map()
-  const originalFiles = fastGlob(pattern)
+  const originalFiles = globSync(pattern)
 
   // If no files, then there is no diff (everything will be new)
   if (originalFiles.length === 0) {
@@ -51,13 +42,13 @@ module.exports = function prepareDiff (locationPath) {
   process.on('exit', code => {
     if (code !== 0) return
 
-    const currentFiles = fastGlob(pattern)
+    const currentFiles = globSync(pattern)
     const currentMap = new Map()
 
     let somethingChanged = false
 
     currentFiles.forEach(filePath => {
-      const relativePath = relative(filePath)
+      const relativePath = relativeToRoot(filePath)
       currentMap.set(filePath, true)
 
       if (originalsMap.has(filePath) === false) {
@@ -80,7 +71,7 @@ module.exports = function prepareDiff (locationPath) {
 
     originalsMap.forEach((_, filePath) => {
       if (currentMap.has(filePath) === false) {
-        console.log(`\n 📜 Removed file: ${ relative(filePath) }\n`)
+        console.log(`\n 📜 Removed file: ${ relativeToRoot(filePath) }\n`)
         somethingChanged = true
       }
     })

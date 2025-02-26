@@ -1,17 +1,11 @@
-/* eslint-env node */
-
 // Configuration for your app
-// https://v2.quasar.dev/quasar-cli-webpack/quasar-config-js
+// https://v2.quasar.dev/quasar-cli-webpack/quasar-config-file
 
-<% if (preset.lint && lintConfig === 'airbnb') { %>
-/* eslint func-names: 0 */
-/* eslint global-require: 0 */
-<% } %>
-import { configure } from 'quasar/wrappers';
+import { defineConfig } from '#q-app/wrappers'
 
-export default configure((ctx) => {
-  return {
-    <% if (preset.lint) { %>eslint: {
+export default defineConfig((ctx) => {
+  return {<% if (preset.eslint) { %>
+    eslint: {
       // fix: true,
       // include: [],
       // exclude: [],
@@ -20,20 +14,20 @@ export default configure((ctx) => {
       // rawWebpackEslintPluginOptions: {},
       warnings: true,
       errors: true
-    },<% } %>
-
+    },
+<% } %>
     // https://v2.quasar.dev/quasar-cli-webpack/prefetch-feature
     // preFetch: true,
 
     // app boot file (/src/boot)
     // --> boot files are part of "main.js"
     // https://v2.quasar.dev/quasar-cli-webpack/boot-files
-    boot: [
-      <% if (preset.i18n) { %>'i18n',<% } %>
-      <% if (preset.axios) { %>'axios',<% } %>
+    boot: [<% if (preset.i18n) { %>
+      'i18n'<% } %><% if (preset.axios) { %><%= preset.i18n ? ',' : '' %>
+      'axios'<% } %>
     ],
 
-    // https://v2.quasar.dev/quasar-cli-webpack/quasar-config-js#Property%3A-css
+    // https://v2.quasar.dev/quasar-cli-webpack/quasar-config-file#css
     css: [
       'app.<%= css %>'
     ],
@@ -52,7 +46,7 @@ export default configure((ctx) => {
       'material-icons', // optional, you are not bound to it
     ],
 
-    // Full list of options: https://v2.quasar.dev/quasar-cli-webpack/quasar-config-js#Property%3A-build
+    // Full list of options: https://v2.quasar.dev/quasar-cli-webpack/quasar-config-file#build
     build: {
       // publicPath: '/',
       vueRouterMode: 'hash', // available values: 'hash', 'history'
@@ -70,7 +64,6 @@ export default configure((ctx) => {
       },
 
       // rtl: true, // https://quasar.dev/options/rtl-support
-      // preloadChunks: true,
       // showProgress: false,
       // gzip: true,
       // analyze: true,
@@ -83,7 +76,7 @@ export default configure((ctx) => {
       // chainWebpack (/* chain, { isClient, isServer } */) {}
     },
 
-    // Full list of options: https://v2.quasar.dev/quasar-cli-webpack/quasar-config-js#Property%3A-devServer
+    // Full list of options: https://v2.quasar.dev/quasar-cli-webpack/quasar-config-file#devserver
     devServer: {
       server: {
         type: 'http'
@@ -91,7 +84,7 @@ export default configure((ctx) => {
       open: true // opens browser window automatically
     },
 
-    // https://v2.quasar.dev/quasar-cli-webpack/quasar-config-js#Property%3A-framework
+    // https://v2.quasar.dev/quasar-cli-webpack/quasar-config-file#framework
     framework: {
       config: {},
 
@@ -113,7 +106,7 @@ export default configure((ctx) => {
     // https://quasar.dev/options/animations
     animations: [],
 
-    // https://v2.quasar.dev/quasar-cli-webpack/quasar-config-js#property-sourcefiles
+    // https://v2.quasar.dev/quasar-cli-webpack/quasar-config-file#sourcefiles
     // sourceFiles: {
     //   rootComponent: 'src/App.vue',
     //   router: 'src/router/index',
@@ -145,9 +138,7 @@ export default configure((ctx) => {
       // manualPostHydrationTrigger: true,
 
       pwa: false
-
       // pwaOfflineHtmlFilename: 'offline.html', // do NOT use index.html as name!
-                                                 // will mess up SSR
 
       // pwaExtendGenerateSWOptions (cfg) {},
       // pwaExtendInjectManifestOptions (cfg) {}
@@ -157,7 +148,7 @@ export default configure((ctx) => {
     pwa: {
       workboxMode: 'GenerateSW' // 'GenerateSW' or 'InjectManifest'
       // swFilename: 'sw.js',
-      // manifestFilename: 'manifest.json'
+      // manifestFilename: 'manifest.json',
       // extendManifestJson (json) {},
       // useCredentialsForManifestTag: true,
       // injectPwaMetaTags: false,
@@ -216,9 +207,15 @@ export default configure((ctx) => {
       // extendBexScriptsConf (esbuildConf) {},
       // extendBexManifestJson (json) {},
 
-      contentScripts: [
-        'my-content-script'
-      ]
+      /**
+       * The list of extra scripts (js/ts) not in your bex manifest that you want to
+       * compile and use in your browser extension. Maybe dynamic use them?
+       *
+       * Each entry in the list should be a relative filename to /src-bex/
+       *
+       * @example [ 'my-script.ts', 'sub-folder/my-other-script.js' ]
+       */
+      extraScripts: []
     }
   }
-});
+})

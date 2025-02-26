@@ -5,14 +5,14 @@ import QIcon from '../icon/QIcon.js'
 import QSpinner from '../spinner/QSpinner.js'
 import QCircularProgress from '../circular-progress/QCircularProgress.js'
 
-import useDark, { useDarkProps } from '../../composables/private/use-dark.js'
-import useFile, { useFileProps, useFileEmits } from '../../composables/private/use-file.js'
+import useDark, { useDarkProps } from '../../composables/private.use-dark/use-dark.js'
+import useFile, { useFileProps, useFileEmits } from '../../composables/private.use-file/use-file.js'
 
-import { stop } from '../../utils/event.js'
-import { humanStorageSize } from '../../utils/format.js'
-import { uploaderKey } from '../../utils/private/symbols.js'
-import { injectProp, injectMultipleProps } from '../../utils/private/inject-obj-prop.js'
-import { vmIsDestroyed } from '../../utils/private/vm.js'
+import { stop } from '../../utils/event/event.js'
+import { humanStorageSize } from '../../utils/format/format.js'
+import { uploaderKey } from '../../utils/private.symbols/symbols.js'
+import { injectProp, injectMultipleProps } from '../../utils/private.inject-obj-prop/inject-obj-prop.js'
+import { vmIsDestroyed } from '../../utils/private.vm/vm.js'
 
 function getProgressLabel (p) {
   return (p * 100).toFixed(2) + '%'
@@ -32,9 +32,13 @@ export const coreProps = {
   bordered: Boolean,
 
   noThumbnails: Boolean,
+  thumbnailFit: {
+    type: String,
+    default: 'cover'
+  },
+
   autoUpload: Boolean,
   hideUploadBtn: Boolean,
-
   disable: Boolean,
   readonly: Boolean
 }
@@ -199,9 +203,7 @@ export function getRenderer (getPlugin, expose) {
   }
 
   function batchRemoveFiles (statusList, cb) {
-    if (props.disable === true) {
-      return
-    }
+    if (props.disable === true) return
 
     const removed = {
       files: [],
@@ -389,7 +391,7 @@ export function getRenderer (getPlugin, expose) {
             : (file.__status === 'uploaded' ? ' q-uploader__file--uploaded' : '')
         ),
       style: props.noThumbnails !== true && file.__img !== void 0
-        ? { backgroundImage: 'url("' + file.__img.src + '")' }
+        ? { backgroundImage: 'url("' + file.__img.src + '")', backgroundSize: props.thumbnailFit }
         : null
     }, [
       h('div', {

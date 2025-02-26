@@ -16,7 +16,7 @@ function wait (time) {
 
 export class QuasarModeDevserver extends AppDevserver {
   #pid = 0
-  #server
+  #server = null
   #watcherList = []
   #killedPid = false
   #electronExecutable
@@ -57,8 +57,9 @@ export class QuasarModeDevserver extends AppDevserver {
   }
 
   async #runVite (quasarConf) {
-    if (this.#server) {
-      this.#server.close()
+    if (this.#server !== null) {
+      await this.#server.close()
+      this.#server = null
     }
 
     const viteConfig = await quasarElectronConfig.vite(quasarConf)
@@ -68,8 +69,7 @@ export class QuasarModeDevserver extends AppDevserver {
   }
 
   async #runElectronFiles (quasarConf) {
-    this.#watcherList.forEach(watcher => { watcher.close() })
-    this.#watcherList = []
+    await this.clearWatcherList(this.#watcherList, () => { this.#watcherList = [] })
 
     let isReady = false
 
@@ -115,7 +115,7 @@ export class QuasarModeDevserver extends AppDevserver {
       [
         '--inspect=' + quasarConf.electron.inspectPort,
         this.ctx.appPaths.resolve.entry(
-          `electron-main.${ quasarConf.metaConf.packageTypeBasedExtension }`
+          'electron-main.js'
         )
       ].concat(this.argv._),
       { cwd: this.ctx.appPaths.appDir },

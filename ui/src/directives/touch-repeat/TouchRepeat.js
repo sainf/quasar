@@ -1,10 +1,10 @@
 import { client } from '../../plugins/platform/Platform.js'
 
-import { createDirective } from '../../utils/private/create.js'
-import { addEvt, cleanEvt, position, leftClick, stopAndPrevent, noop } from '../../utils/event.js'
-import { clearSelection } from '../../utils/private/selection.js'
-import { isKeyCode } from '../../utils/private/key-composition.js'
-import getSSRProps from '../../utils/private/noop-ssr-directive-transform.js'
+import { createDirective } from '../../utils/private.create/create.js'
+import { addEvt, cleanEvt, position, leftClick, stopAndPrevent, noop } from '../../utils/event/event.js'
+import { clearSelection } from '../../utils/private.selection/selection.js'
+import { isKeyCode } from '../../utils/private.keyboard/key-composition.js'
+import getSSRProps from '../../utils/private.noop-ssr-directive-transform/noop-ssr-directive-transform.js'
 
 const
   keyCodes = {
@@ -46,9 +46,7 @@ export default createDirective(__QUASAR_SSR_SERVER__
           modifiers.mouse !== true
           && client.has.touch !== true
           && keyboard.length === 0
-        ) {
-          return
-        }
+        ) return
 
         const durations = typeof arg === 'string' && arg.length !== 0
           ? arg.split(':').map(val => parseInt(val, 10))
@@ -77,9 +75,7 @@ export default createDirective(__QUASAR_SSR_SERVER__
               if (durations[ 0 ] === 0 || ctx.event !== void 0) {
                 stopAndPrevent(evt)
                 el.focus()
-                if (ctx.event !== void 0) {
-                  return
-                }
+                if (ctx.event !== void 0) return
               }
 
               addEvt(ctx, 'temp', [
@@ -140,9 +136,7 @@ export default createDirective(__QUASAR_SSR_SERVER__
             const fn = () => {
               ctx.timer = void 0
 
-              if (ctx.event === void 0) {
-                return
-              }
+              if (ctx.event === void 0) return
 
               if (ctx.event.repeatCount === 0) {
                 ctx.event.evt = evt
@@ -190,9 +184,7 @@ export default createDirective(__QUASAR_SSR_SERVER__
           },
 
           end (evt) {
-            if (ctx.event === void 0) {
-              return
-            }
+            if (ctx.event === void 0) return
 
             ctx.styleCleanup !== void 0 && ctx.styleCleanup(true)
             evt !== void 0 && ctx.event.repeatCount > 0 && stopAndPrevent(evt)

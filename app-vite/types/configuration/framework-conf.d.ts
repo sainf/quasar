@@ -39,8 +39,8 @@ interface QuasarFrameworkConfiguration {
   /**
    * Quasar CSS addons have breakpoint aware versions of flex and spacing classes
    *
-   * @see https://quasar.dev/layout/grid/introduction-to-flexbox#flex-addons
-   * @see https://quasar.dev/style/spacing#flex-addons
+   * @see https://v2.quasar.dev/layout/grid/introduction-to-flexbox#flex-addons
+   * @see https://v2.quasar.dev/style/spacing#flex-addons
    */
   cssAddon?: boolean;
 

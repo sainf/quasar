@@ -163,9 +163,7 @@ export default {
 
       handleSelection ({ rows, added, evt }) {
         // ignore selection change from header of not from a direct click event
-        if (rows.length !== 1 || evt === void 0) {
-          return
-        }
+        if (rows.length !== 1 || evt === void 0) return
 
         const oldSelectedRow = storedSelectedRow
         const [newSelectedRow] = rows

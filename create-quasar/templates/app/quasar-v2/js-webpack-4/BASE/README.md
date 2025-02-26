@@ -13,7 +13,7 @@ npm install
 ```bash
 quasar dev
 ```
-<% if (preset.lint) { %>
+<% if (preset.eslint) { %>
 
 ### Lint the files
 ```bash
@@ -21,7 +21,7 @@ yarn lint
 # or
 npm run lint
 ```
-<% if (lintConfig === 'prettier') { %>
+<% if (prettier) { %>
 
 ### Format the files
 ```bash
@@ -29,8 +29,7 @@ yarn format
 # or
 npm run format
 ```
-<% } %>
-<% } %>
+<% } } %>
 
 ### Build the app for production
 ```bash

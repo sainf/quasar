@@ -10,9 +10,7 @@ function progressLog (str) {
 progressLog.isActive = false
 
 progressLog.start = function () {
-  if (progressLog.isActive === true) {
-    return
-  }
+  if (progressLog.isActive === true) return
 
   progressLog.isActive = true
 
@@ -40,9 +38,7 @@ progressLog.start = function () {
 }
 
 progressLog.stop = function () {
-  if (progressLog.isActive === false) {
-    return
-  }
+  if (progressLog.isActive === false) return
 
   progressLog.isActive = false
 

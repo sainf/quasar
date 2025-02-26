@@ -22,6 +22,10 @@
     <div class="q-mt-md">
       <q-file name="file1" filled v-model="multiAppend" label="Mutiple & Append" clearable multiple append @rejected="onRejected" />
     </div>
+
+    <div class="q-mt-md">
+      <q-file disable />
+    </div>
   </div>
 </template>
 

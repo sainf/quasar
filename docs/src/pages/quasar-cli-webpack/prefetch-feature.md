@@ -1,6 +1,6 @@
 ---
 title: PreFetch Feature
-desc: (@quasar/app-webpack) How to prefetch data and initialize your Vuex store, validate the route and redirect to another page in a Quasar app.
+desc: (@quasar/app-webpack) How to prefetch data and initialize your Pinia stores, validate the route and redirect to another page in a Quasar app.
 related:
   - /quasar-cli-webpack/quasar-config-file
 ---
@@ -25,7 +25,7 @@ return {
 ```
 
 ::: warning
-When you use it to pre-fetch data, you are required to use a Vuex Store, so make sure that your project folder has the `/src/store` folder when you create your project, otherwise generate a new project and copy the store folder contents to your current project.
+When you use it to pre-fetch data, you are required to use Pinia, so make sure that your project folder has the `/src/stores` folder when you create your project, otherwise generate a new project and copy the store folder contents to your current project.
 :::
 
 ## How PreFetch Helps SSR Mode
@@ -92,7 +92,8 @@ The hook is defined as a custom static function called `preFetch` on our route c
 </template>
 
 <script>
-import { useStore } from 'vuex'
+import { useRoute } from 'vue-router'
+import { useMyStore } from 'stores/myStore'
 
 export default {
   // our hook here
@@ -105,14 +106,16 @@ export default {
 
     // Return a Promise if you are running an async job
     // Example:
-    return store.dispatch('fetchItem', currentRoute.params.id)
+    const myStore = useMyStore() // useMyStore(store) for SSR
+    return myStore.fetchItem(currentRoute.params.id) // assumes it is async
   },
 
   setup () {
-    const $store = useStore()
+    const myStore = useMyStore()
+    const $route = useRoute()
 
     // display the item from store state.
-    const item = computed(() => $store.state.items[this.$route.params.id])
+    const item = computed(() => myStore.items[$route.params.id])
 
     return { item }
   }
@@ -130,7 +133,7 @@ If you are using `<script setup>` (and Vue 3.3+):
  * variables in <script setup> that are not literal constants.
  */
 defineOptions({
-  preFetch () {
+  preFetch ({ store }) {
     console.log('running preFetch')
   }
 })
@@ -146,9 +149,9 @@ If you are developing a SSR app, then you can check out the [ssrContext](/quasar
 // ...
 
 actions: {
-  fetchItem ({ commit }, id) {
+  fetchItem (id) {
     return axiosInstance.get(url, id).then(({ data }) => {
-      commit('mutation', data)
+      this.items = data
     })
   }
 }
@@ -161,9 +164,12 @@ Below is an example of redirecting the user under some circumstances, like when 
 
 ```js
 // We assume here we already wrote the authentication logic
-// in the Vuex Store, so take as a high-level example only.
+// in one Pinia Store, so take as a high-level example only.
+import { useMyStore } from 'stores/myStore'
+
 preFetch ({ store, redirect }) {
-  if (!store.state.authenticated) {
+  const myStore = useMyStore() // useMyStore(store) for SSR
+  if (!myStore.isAuthenticated) {
     redirect({ path: '/login' })
   }
 }
@@ -179,9 +185,9 @@ If `redirect(false)` is called (supported only on client-side!), it aborts the c
 
 The `redirect()` method requires a Vue Router location Object.
 
-### Using preFetch to Initialize Pinia or Vuex Store(s)
+### Using preFetch to Initialize Pinia
 
-The `preFetch` hook runs only once, when the app boots up, so you can use this opportunity to initialize the Pinia store(s) or the Vuex Store here.
+The `preFetch` hook runs only once, when the app boots up, so you can use this opportunity to initialize the Pinia store(s) here.
 
 ```tabs
 <<| js Pinia on Non SSR |>>
@@ -213,117 +219,6 @@ export default {
   }
 }
 ```
-
-```js Handling Vuex store
-// App.vue
-
-export default {
-  // ...
-  preFetch ({ store }) {
-    // initialize something in store here
-  }
-}
-```
-
-### Vuex Store Code Splitting
-In a large application, your Vuex store will likely be split into multiple modules. Of course, it is also possible to code-split these modules into corresponding route component chunks. Suppose we have the following store module:
-
-```js src/store/foo.js
-// we've merged everything into one file here;
-// an initialized Quasar project splits every component of a Vuex module
-// into separate files, but for the sake of the example
-// here in the docs, we show this module as a single file
-
-export default {
-  namespaced: true,
-  // IMPORTANT: state must be a function so the module can be
-  // instantiated multiple times
-  state: () => ({
-    count: 0
-  }),
-  actions: {
-    inc: ({ commit }) => commit('inc')
-  },
-  mutations: {
-    inc: state => state.count++
-  }
-}
-```
-
-Now, we can use `store.registerModule()` to lazy-register this module in a route component's `preFetch()` hook:
-
-```html Inside a route component
-<template>
-  <div>{{ fooCount }}</div>
-</template>
-
-<script>
-import { useStore } from 'vuex'
-import { onMounted, onUnmounted } from 'vue'
-
-// import the module here instead of in `src/store/index.js`
-import fooStoreModule from 'store/foo'
-
-export default {
-  preFetch ({ store }) {
-    store.registerModule('foo', fooStoreModule)
-    return store.dispatch('foo/inc')
-  },
-
-  setup () {
-    const $store = useStore()
-
-    onMounted(() => {
-      // Preserve the previous state if it was injected from the server
-      $store.registerModule('foo', fooStoreModule, { preserveState: true })
-    })
-
-    onUnmounted(() => {
-      // IMPORTANT: avoid duplicate module registration on the client
-      // when the route is visited multiple times.
-      $store.unregisterModule('foo')
-    })
-
-    const fooCount = computed(() => {
-      return $store.state.foo.count
-    })
-
-    return {
-      fooCount
-    }
-  }
-}
-</script>
-```
-
-Also note that because the module is now a dependency of the route component, it will be moved into the route component's async chunk by Webpack.
-
-::: warning
-Don't forget to use the `preserveState: true` option for `registerModule` so we keep the state injected by the server.
-:::
-
-### Usage with Vuex and TypeScript
-
-You can use `preFetch` helper to type-hint the store parameter (which will otherwise have an `any` type):
-
-```js
-import { preFetch } from 'quasar/wrappers'
-import { Store } from 'vuex'
-
-interface StateInterface {
-  // ...
-}
-
-export default {
-  preFetch: preFetch<StateInterface>(({ store }) => {
-    // Do something with your newly-typed store parameter
-  }),
-}
-```
-
-::: tip
-This is useful only to type `store` parameter, other parameters are automatically typed even when using the normal syntax.
-:::
 
 ## Loading State
 A good UX includes notifying the user that something is being worked on in the background while he/she waits for the page to be ready. Quasar CLI offers two options for this out of the box.

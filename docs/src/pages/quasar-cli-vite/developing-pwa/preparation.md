@@ -13,6 +13,10 @@ scope:
       e: Your PWA manifest file
     - l: custom-service-worker.js
       e: "(or .ts) Optional custom service worker file (injectManifest mode ONLY)"
+    - l: pwa-end.d.ts
+      e: "TypeScript only"
+    - l: tsconfig.json
+      e: "TypeScript only"
 ---
 
 We'll be using Quasar CLI to develop and build a PWA. The difference between building a SPA, Mobile App, Electron App, PWA or SSR is simply determined by the "mode" parameter in "quasar dev" and "quasar build" commands.
@@ -37,9 +41,9 @@ A new folder will appear in your project folder (which is explained in detail on
 
 All the files above are going to be detailed in the next pages, but the high overview is:
 
-* The `register-service-worker.[js|ts]` file is part of the UI code and communicates with the service worker.
+* The `register-service-worker.js` file is part of the UI code and communicates with the service worker.
 * The `manifest.json` is the PWA manifest file.
-* When using InjectManifest, you can write your own custom service worker (`custom-service-worker.[js|ts]`).
+* When using InjectManifest, you can write your own custom service worker (`custom-service-worker.js`).
 
 Should you want to use different filenames, you can do so by editing the `/quasar.config` file:
 

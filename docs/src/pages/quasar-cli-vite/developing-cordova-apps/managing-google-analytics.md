@@ -57,13 +57,14 @@ $ quasar new boot google-analytics [--format ts]
 Then we edit the newly created file: `/src/boot/google-analytics.js`:
 
 ```js
+import { defineRouter } from '#q-app/wrappers'
 import ga from 'analytics.js'
 
-export default ({ router }) => {
+export default defineRouter(({ router }) => {
   router.afterEach((to, from) => {
     ga.logPage(to.path, to.name, sessionId)
   })
-}
+})
 ```
 
 Finally we register the app boot file in the `/quasar.config` file. We can do so only for Cordova wrapped apps if we want:

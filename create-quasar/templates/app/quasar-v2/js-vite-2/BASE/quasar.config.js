@@ -1,14 +1,10 @@
-/* eslint-env node */
-
 // Configuration for your app
-// https://v2.quasar.dev/quasar-cli-vite/quasar-config-js
+// https://v2.quasar.dev/quasar-cli-vite/quasar-config-file
 
-<% if (preset.lint && lintConfig === 'airbnb') { %>/* eslint func-names: 0 */
-/* eslint global-require: 0 */<% } %>
-import { configure } from 'quasar/wrappers'
-<% if (preset.i18n) { %>import { fileURLToPath } from 'node:url';<% } %>
+import { defineConfig } from '#q-app/wrappers'<% if (preset.i18n) { %>
+import { fileURLToPath } from 'node:url'<% } %>
 
-export default configure((<% if (preset.i18n) { %>ctx<% } else { %>/* ctx */<% } %>) => {
+export default defineConfig((<% if (preset.i18n) { %>ctx<% } else { %>/* ctx */<% } %>) => {
   return {
     // https://v2.quasar.dev/quasar-cli-vite/prefetch-feature
     // preFetch: true,
@@ -16,12 +12,12 @@ export default configure((<% if (preset.i18n) { %>ctx<% } else { %>/* ctx */<% }
     // app boot file (/src/boot)
     // --> boot files are part of "main.js"
     // https://v2.quasar.dev/quasar-cli-vite/boot-files
-    boot: [
-      <% if (preset.i18n) { %>'i18n',<% } %>
-      <% if (preset.axios) { %>'axios',<% } %>
+    boot: [<% if (preset.i18n) { %>
+      'i18n'<% } %><% if (preset.axios) { %><% if (preset.i18n) { %>,<% } %>
+      'axios'<% } %>
     ],
 
-    // https://v2.quasar.dev/quasar-cli-vite/quasar-config-js#css
+    // https://v2.quasar.dev/quasar-cli-vite/quasar-config-file#css
     css: [
       'app.<%= css %>'
     ],
@@ -40,7 +36,7 @@ export default configure((<% if (preset.i18n) { %>ctx<% } else { %>/* ctx */<% }
       'material-icons', // optional, you are not bound to it
     ],
 
-    // Full list of options: https://v2.quasar.dev/quasar-cli-vite/quasar-config-js#build
+    // Full list of options: https://v2.quasar.dev/quasar-cli-vite/quasar-config-file#build
     build: {
       target: {
         browser: [ 'es2022', 'firefox115', 'chrome115', 'safari14' ],
@@ -65,8 +61,8 @@ export default configure((<% if (preset.i18n) { %>ctx<% } else { %>/* ctx */<% }
 
       // extendViteConf (viteConf) {},
       // viteVuePluginOptions: {},
-
-      <% if (preset.i18n || preset.lint) { %>vitePlugins: [<% if (preset.i18n) { %>
+      <% if (preset.i18n || preset.eslint) { %>
+      vitePlugins: [<% if (preset.i18n) { %>
         ['@intlify/unplugin-vue-i18n/vite', {
           // if you want to use Vue I18n Legacy API, you need to set `compositionOnly: false`
           // compositionOnly: false,
@@ -78,11 +74,13 @@ export default configure((<% if (preset.i18n) { %>ctx<% } else { %>/* ctx */<% }
           ssr: ctx.modeName === 'ssr',
 
           // you need to set i18n resource including paths !
-          include: [ fileURLToPath(new URL('./src/i18n', import.meta.url)) ],
-        }]<% } %><% if (preset.lint) { %><% if (preset.i18n) { %>,<% } %>
+          include: [ fileURLToPath(new URL('./src/i18n', import.meta.url)) ]
+        }]<% } %><% if (preset.eslint) { %><% if (preset.i18n) { %>,
+<% } %>
         ['vite-plugin-checker', {
           eslint: {
-            lintCommand: 'eslint "./**/*.{js,mjs,cjs,vue}"'
+            lintCommand: 'eslint -c ./eslint.config.js "./src*/**/*.{js,mjs,cjs,vue}"',
+            useFlatConfig: true
           }
         }, { server: false }]<% } %>
       ]<% } else { %>
@@ -91,13 +89,13 @@ export default configure((<% if (preset.i18n) { %>ctx<% } else { %>/* ctx */<% }
       // ]<% } %>
     },
 
-    // Full list of options: https://v2.quasar.dev/quasar-cli-vite/quasar-config-js#devServer
+    // Full list of options: https://v2.quasar.dev/quasar-cli-vite/quasar-config-file#devserver
     devServer: {
-      // https: true
+      // https: true,
       open: true // opens browser window automatically
     },
 
-    // https://v2.quasar.dev/quasar-cli-vite/quasar-config-js#framework
+    // https://v2.quasar.dev/quasar-cli-vite/quasar-config-file#framework
     framework: {
       config: {},
 
@@ -119,7 +117,7 @@ export default configure((<% if (preset.i18n) { %>ctx<% } else { %>/* ctx */<% }
     // https://v2.quasar.dev/options/animations
     animations: [],
 
-    // https://v2.quasar.dev/quasar-cli-vite/quasar-config-js#property-sourcefiles
+    // https://v2.quasar.dev/quasar-cli-vite/quasar-config-file#sourcefiles
     // sourceFiles: {
     //   rootComponent: 'src/App.vue',
     //   router: 'src/router/index',
@@ -150,9 +148,7 @@ export default configure((<% if (preset.i18n) { %>ctx<% } else { %>/* ctx */<% }
       // manualPostHydrationTrigger: true,
 
       pwa: false
-
       // pwaOfflineHtmlFilename: 'offline.html', // do NOT use index.html as name!
-                                                 // will mess up SSR
 
       // pwaExtendGenerateSWOptions (cfg) {},
       // pwaExtendInjectManifestOptions (cfg) {}
@@ -162,7 +158,7 @@ export default configure((<% if (preset.i18n) { %>ctx<% } else { %>/* ctx */<% }
     pwa: {
       workboxMode: 'GenerateSW' // 'GenerateSW' or 'InjectManifest'
       // swFilename: 'sw.js',
-      // manifestFilename: 'manifest.json'
+      // manifestFilename: 'manifest.json',
       // extendManifestJson (json) {},
       // useCredentialsForManifestTag: true,
       // injectPwaMetaTags: false,
@@ -221,9 +217,15 @@ export default configure((<% if (preset.i18n) { %>ctx<% } else { %>/* ctx */<% }
       // extendBexScriptsConf (esbuildConf) {},
       // extendBexManifestJson (json) {},
 
-      contentScripts: [
-        'my-content-script'
-      ]
+      /**
+       * The list of extra scripts (js/ts) not in your bex manifest that you want to
+       * compile and use in your browser extension. Maybe dynamic use them?
+       *
+       * Each entry in the list should be a relative filename to /src-bex/
+       *
+       * @example [ 'my-script.ts', 'sub-folder/my-other-script.js' ]
+       */
+      extraScripts: []
     }
   }
-});
+})

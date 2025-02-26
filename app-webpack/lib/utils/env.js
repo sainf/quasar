@@ -16,18 +16,24 @@ module.exports.readFileEnv = function readFileEnv ({ ctx, quasarConf }) {
 
   const opts = {
     envFolder: quasarConf.build.envFolder,
-    envFiles: quasarConf.build.envFiles
+    envFiles: quasarConf.build.envFiles,
+    envFilter: quasarConf.build.envFilter
   }
 
   const configHash = encodeForDiff(opts)
   const cache = cacheProxy.getRuntime(readFileEnvCacheKey, () => ({}))
 
   if (cache.configHash !== configHash) {
-    const result = getFileEnvResult(ctx.appPaths, {
+    const result = getFileEnvResult({
       ...opts,
+      appPaths: ctx.appPaths,
       quasarMode: ctx.modeName,
       buildType: ctx.dev ? 'dev' : 'prod'
     })
+
+    if (opts.envFilter !== void 0) {
+      result.fileEnv = opts.envFilter(result.fileEnv) || {}
+    }
 
     cacheProxy.setRuntime(readFileEnvCacheKey, {
       configHash,
@@ -43,15 +49,13 @@ module.exports.readFileEnv = function readFileEnv ({ ctx, quasarConf }) {
   return cache.result
 }
 
-function getFileEnvResult (
+function getFileEnvResult ({
   appPaths,
-  {
-    quasarMode,
-    buildType,
-    envFolder = appPaths.appDir,
-    envFiles = []
-  }
-) {
+  quasarMode,
+  buildType,
+  envFolder = appPaths.appDir,
+  envFiles = []
+}) {
   const fileList = [
     // .env
     // loaded in all cases
@@ -115,13 +119,28 @@ function getFileEnvResult (
     return {}
   }
 
-  const { parsed: fileEnv } = dotEnvExpand({ parsed: env })
+  const { parsed: rawFileEnv } = dotEnvExpand({ parsed: env })
 
   return {
-    fileEnv,
+    fileEnv: getFileEnv(rawFileEnv),
     usedEnvFiles,
     envFromCache: false
   }
+}
+
+const validKeyRE = /^[a-zA-Z_$][a-zA-Z0-9_$]+/
+
+/**
+ * Filter out keys that cannot be used in JS
+ * as process.env.[key]
+ * Examples: ProgramFiles(x86), BASH_FUNC_which%%
+ */
+function getFileEnv (env) {
+  const validKeys = Object.keys(env).filter(key => validKeyRE.test(key))
+  return validKeys.reduce((acc, key) => {
+    acc[ key ] = env[ key ]
+    return acc
+  }, {})
 }
 
 /**

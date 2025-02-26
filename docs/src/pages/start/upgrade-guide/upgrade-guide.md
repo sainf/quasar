@@ -1,5 +1,5 @@
 ---
-title: Upgrade Guide
+title: UI Upgrade Guide
 desc: How to upgrade Quasar from older versions to the latest one.
 ---
 
@@ -117,8 +117,25 @@ $ bun add vue@3 @quasar/extras@latest
 **This guide refers to Quasar CLI & UMD projects**, but information from here can be used for Vue CLI too. For developers already using Vue CLI on your projects you can check out how to install the [vue-cli-plugin-quasar](/start/vue-cli-plugin) package that works with Quasar v2. You will also need to make a few changes to your main.js (and also upgrade your Vue CLI project to support Vue 3) too (best way currently is to generate a new Vue CLI project for Vue 3 and then following the [install steps](/start/vue-cli-plugin#add-vue-cli-quasar-plugin) for the vue-cli-plugin-quasar and check out the changes incurred to that /src folder, then apply the same principle to your current Vue CLI project).
 
 ::: danger
-* Quasar CLI for Quasar v1 only had the option to use Webpack. But now you can choose between Quasar CLI with Vite and Quasar CLI with Webpack. If you want to use Quasar CLI with Vite, follow the instructions below to Quasar CLI with Webpack first, then [migrate to Quasar CLI with Vite](/quasar-cli-vite/convert-to-quasar-cli-with-vite).
+* Quasar CLI for Quasar v1 only had the option to use Webpack. But now you can choose between Quasar CLI with Vite and Quasar CLI with Webpack.
 * **The rest of this guide will focus on Quasar CLI with Webpack.**
+:::
+
+::: danger
+This guide refers to converting/upgrading to a project with `@quasar/app-webpack` v3 and `@quasar/app-vite` v1, both of which are no longer the latest versions. This means that you will have to convert to q/app-webpack v3 first, then to the newer versions.
+<br><br>
+All the other pages of the current documentation website that you are reading now refer to the latest version of both q/app-vite & q/app-webpack. For the old q/app-webpack or q/app-vite, the documentation is [here](https://legacy-app.quasar.dev/home).
+<br><br>
+The links for the upgrade guide to the newest CLI versions (to be processed after you've gone through all the information on this page):
+* [Quasar CLI with Vite Upgrade Guide](/quasar-cli-vite/upgrade-guide)
+* [Quasar CLI with Webpack Upgrade Guide](/quasar-cli-webpack/upgrade-guide).
+
+<br>
+After going through this page, we recommend you to eventually switch to the superior Quasar CLI with Vite (q/app-vite). The steps would be:
+
+1. Follow this page.
+2. Upgrade to latest q/app-webpack v4 ([Upgrade Guide](/quasar-cli-webpack/upgrade-guide))
+3. Convert from q/app-webpack to q/app-vite ([Convert to App CLI with Vite](/quasar-cli-vite/convert-to-quasar-cli-with-vite))
 :::
 
 ### Intro
@@ -172,7 +189,6 @@ Before starting, it is highly suggested to make a copy of your current working p
   <<| bash NPM |>>
   $ npm i -g @quasar/cli@latest
   <<| bash PNPM |>>
-  # experimental support
   $ pnpm add -g @quasar/cli@latest
   <<| bash Bun |>>
   # experimental support
@@ -234,7 +250,7 @@ Before starting, it is highly suggested to make a copy of your current working p
   $ bun add --dev @quasar/app-webpack@3
   $ bun add quasar@2 vue@3 vue-router@4
   ```
-7) **Remove** `.quasar` and `node_modules` folders, and `package-lock.json` / `yarn.lock` / `pnpm-lock.yaml` / `bun.lockb` file, then run `yarn/npm/pnpm/bun install` to regenerate the lock file. This forces the upgrade of the whole dependency graph (deep dependencies included) and avoids troubles with mismatching packages, especially webpack 5 related ones.
+7) **Remove** `.quasar` and `node_modules` folders, and `package-lock.json` / `yarn.lock` / `pnpm-lock.yaml` / `bun.lock` / `bun.lockb` file, then run `yarn/npm/pnpm/bun install` to regenerate the lock file. This forces the upgrade of the whole dependency graph (deep dependencies included) and avoids troubles with mismatching packages, especially webpack 5 related ones.
 8) If you are using ESLint, then edit `/.eslintrc.cjs` (also rename from `/.eslintrc.js`):
   ```js
   // old way
@@ -270,7 +286,7 @@ Before starting, it is highly suggested to make a copy of your current working p
 
   In the `/quasar.config` file, before the `module.exports = function (ctx)` add:
   ```js
-  const ESLintPlugin = require('eslint-webpack-plugin')
+  import ESLintPlugin from 'eslint-webpack-plugin'
   ```
 
   In quasar.config file > build add:
@@ -318,21 +334,20 @@ You can generate a new Quasar v2 project as shown below and then you can port yo
 ```tabs
 <<| bash Yarn |>>
 $ yarn create quasar
-# then pick "App with Quasar CLI" and "Quasar v2"
+# then pick "App with Quasar CLI"
 # decide if you want "Quasar CLI with Vite" or "Quasar CLI with Webpack"
 <<| bash NPM |>>
-$ npm init quasar
-# then pick "App with Quasar CLI" and "Quasar v2"
+$ npm init quasar@latest
+# then pick "App with Quasar CLI"
 # decide if you want "Quasar CLI with Vite" or "Quasar CLI with Webpack"
 <<| bash PNPM |>>
-# experimental support
-$ pnpm create quasar
-# then pick "App with Quasar CLI" and "Quasar v2"
+$ pnpm create quasar@latest
+# then pick "App with Quasar CLI"
 # decide if you want "Quasar CLI with Vite" or "Quasar CLI with Webpack"
 <<| bash Bun |>>
 # experimental support
-$ bun create quasar
-# then pick "App with Quasar CLI" and "Quasar v2"
+$ bun create quasar@latest
+# then pick "App with Quasar CLI"
 # decide if you want "Quasar CLI with Vite" or "Quasar CLI with Webpack"
 ```
 
@@ -347,9 +362,10 @@ These need to be addressed by the package owners. But if you don't want to wait 
 
 ```
 // quasar.config file
+import nodePolyfillWebpackPlugin from 'node-polyfill-webpack-plugin'
+
 build: {
   chainWebpack (chain) {
-    const nodePolyfillWebpackPlugin = require('node-polyfill-webpack-plugin')
     chain.plugin('node-polyfill').use(nodePolyfillWebpackPlugin)
   }
 }
@@ -1184,7 +1200,7 @@ electron: {
 
 ### Quasar App CLI PWA mode
 
-If you are using Workbox in InjectManifest mode, then it's useful to know that the `/src-pwa/custom-service-worker.[js|ts]` is now being compiled too. This means that in your code you can now import with relative path too.
+If you are using Workbox in InjectManifest mode, then it's useful to know that the `/src-pwa/custom-service-worker.js` is now being compiled too. This means that in your code you can now import with relative path too.
 
 Due to the upgrade to Webpack 5, you will need to also upgrade `workbox-webpack-plugin` to v6+.
 

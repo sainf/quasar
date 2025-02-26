@@ -17,7 +17,7 @@ function wait (time) {
 
 module.exports.QuasarModeDevserver = class QuasarModeDevserver extends AppDevserver {
   #pid = 0
-  #server
+  #server = null
   #watcherList = []
   #killedPid = false
   #electronExecutable
@@ -58,7 +58,7 @@ module.exports.QuasarModeDevserver = class QuasarModeDevserver extends AppDevser
   }
 
   async #runWebpack (quasarConf) {
-    if (this.#server) {
+    if (this.#server !== null) {
       await this.#server.stop()
       this.#server = null
     }
@@ -71,12 +71,10 @@ module.exports.QuasarModeDevserver = class QuasarModeDevserver extends AppDevser
       const compiler = webpack(webpackConf)
 
       compiler.hooks.done.tap('done-compiling', stats => {
-        if (started === true) { return }
+        if (started === true) return
 
         // start dev server if there are no errors
-        if (stats.hasErrors() === true) {
-          return
-        }
+        if (stats.hasErrors() === true) return
 
         started = true
         resolve()
@@ -89,8 +87,7 @@ module.exports.QuasarModeDevserver = class QuasarModeDevserver extends AppDevser
   }
 
   async #runElectronFiles (quasarConf) {
-    this.#watcherList.forEach(watcher => { watcher.close() })
-    this.#watcherList = []
+    await this.clearWatcherList(this.#watcherList, () => { this.#watcherList = [] })
 
     let isReady = false
 
@@ -135,7 +132,7 @@ module.exports.QuasarModeDevserver = class QuasarModeDevserver extends AppDevser
       this.#electronExecutable,
       [
         '--inspect=' + quasarConf.electron.inspectPort,
-        this.ctx.appPaths.resolve.entry('electron-main.mjs')
+        this.ctx.appPaths.resolve.entry('electron-main.js')
       ].concat(this.argv._),
       { cwd: this.ctx.appPaths.appDir },
       code => {

@@ -15,7 +15,7 @@ module.exports = {
       'sfcStyle',
       'css',
       'preset',
-      'lintConfig'
+      'prettier'
     ]
   }
 }

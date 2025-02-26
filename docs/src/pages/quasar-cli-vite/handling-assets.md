@@ -7,7 +7,7 @@ You will notice in the project structure we have two directories for assets: `/p
 So let's try to answer the question above. We'll first talk about using regular assets then we'll see what the difference is for static assets.
 
 ## Regular assets - /src/assets
-In `*.vue` components, all your templates and CSS are parsed by `vue-html-loader` and `css-loader` to look for asset URLs. For example, in `<img src="./logo.png">` and `background: url(./logo.png)`, `"./logo.png"` is a relative asset path and will be resolved by Vite as a module dependency.
+In `*.vue` components, all your templates and CSS are parsed by Vite to look for asset URLs. For example, in `<img src="./logo.png">` and `background: url(./logo.png)`, `"./logo.png"` is a relative asset path and will be resolved by Vite as a module dependency.
 
 Since these assets may be inlined/copied/renamed during build, they are essentially part of your source code. This is why it is recommended to place Vite-processed assets inside `/src/assets`, along side other source files. In fact, you don't even have to put them all in `/src/assets`: you can organize them based on the module/component using them. For example, you can put each component in its own directory, with its static assets right next to it.
 

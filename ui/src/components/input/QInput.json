@@ -1,5 +1,5 @@
 {
-  "mixins": [ "composables/private/use-field", "components/input/use-mask", "composables/private/use-form" ],
+  "mixins": [ "composables/private.use-field/use-field", "components/input/use-mask", "composables/use-form/private.use-form" ],
 
   "meta": {
     "docsUrl": "https://v2.quasar.dev/vue-components/input"
@@ -8,7 +8,7 @@
   "props": {
     "model-value": {
       "extends": "model-value",
-      "type": [ "String", "Number", "null", "undefined" ],
+      "type": [ "String", "Number", "FileList", "null", "undefined" ],
       "desc": "Model of the component; Either use this property (along with a listener for 'update:modelValue' event) OR use v-model directive",
       "examples": [ "# v-model=\"myText\"" ]
     },
@@ -79,7 +79,6 @@
 
   "events": {
     "update:model-value": {
-      "extends": "update:model-value",
       "params": {
         "value": {
           "type": [ "String", "Number", "null" ]
@@ -87,36 +86,20 @@
       }
     },
 
-    "focus": {
-      "desc": "Emitted when component gets focused",
-      "params": {
-        "evt": {
-          "extends": "evt"
-        }
-      }
-    },
-
-    "blur": {
-      "desc": "Emitted when component loses focus",
-      "params": {
-        "evt": {
-          "extends": "evt"
-        }
-      }
-    }
+    "click": { "internal": true },
+    "paste": { "internal": true },
+    "animationend": { "internal": true },
+    "change": { "internal": true },
+    "keydown": { "internal": true }
   },
 
   "methods": {
     "focus": {
-      "desc": "Focus underlying input tag",
-      "params": null,
-      "returns": null
+      "desc": "Focus underlying input tag"
     },
 
     "blur": {
-      "desc": "Lose focus on underlying input tag",
-      "params": null,
-      "returns": null
+      "desc": "Lose focus on underlying input tag"
     },
 
     "select": {

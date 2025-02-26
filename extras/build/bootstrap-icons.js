@@ -5,28 +5,31 @@ const prefix = 'bi'
 
 // ------------
 
-const glob = require('glob')
+const { globSync } = require('tinyglobby')
 const { copySync } = require('fs-extra')
 const { writeFileSync } = require('fs')
 const { resolve, join } = require('path')
 
 const skipped = []
 const distFolder = resolve(__dirname, '../bootstrap-icons')
-const { defaultNameMapper, extract, writeExports, copyCssFile } = require('./utils')
+const {
+  defaultNameMapper,
+  extract,
+  writeExports,
+  copyCssFile
+} = require('./utils')
 
 const svgFolder = resolve(__dirname, `../node_modules/${ packageName }/icons/`)
-const svgFiles = glob.sync(svgFolder + '/*.svg')
+const svgFiles = globSync(svgFolder + '/*.svg')
 let iconNames = new Set()
 
 const svgExports = []
 const typeExports = []
 
-svgFiles.forEach(file => {
+svgFiles.forEach((file) => {
   const name = defaultNameMapper(file, prefix)
 
-  if (iconNames.has(name)) {
-    return
-  }
+  if (iconNames.has(name)) return
 
   try {
     const { svgDef, typeDef } = extract(file, name)
@@ -52,16 +55,20 @@ iconNames.sort((a, b) => {
   return ('' + a).localeCompare(b)
 })
 
-writeExports(iconSetName, packageName, distFolder, svgExports, typeExports, skipped)
+writeExports(
+  iconSetName,
+  packageName,
+  distFolder,
+  svgExports,
+  typeExports,
+  skipped
+)
 
 // then update webfont files
 
-const webfont = [
-  'bootstrap-icons.woff',
-  'bootstrap-icons.woff2'
-]
+const webfont = [ 'bootstrap-icons.woff', 'bootstrap-icons.woff2' ]
 
-webfont.forEach(file => {
+webfont.forEach((file) => {
   copySync(
     resolve(__dirname, `../node_modules/${ packageName }/font/fonts/${ file }`),
     resolve(__dirname, `../bootstrap-icons/${ file }`)
@@ -69,10 +76,16 @@ webfont.forEach(file => {
 })
 
 copyCssFile({
-  from: resolve(__dirname, `../node_modules/${ packageName }/font/bootstrap-icons.css`),
+  from: resolve(
+    __dirname,
+    `../node_modules/${ packageName }/font/bootstrap-icons.css`
+  ),
   to: resolve(__dirname, '../bootstrap-icons/bootstrap-icons.css'),
-  replaceFn: content => {
-    return content.replace(/src:[^;]+;/, 'src: url("./bootstrap-icons.woff2") format("woff2"), url("./bootstrap-icons.woff") format("woff");')
+  replaceFn: (content) => {
+    return content.replace(
+      /src:[^;]+;/,
+      'src: url("./bootstrap-icons.woff2") format("woff2"), url("./bootstrap-icons.woff") format("woff");'
+    )
   }
 })
 

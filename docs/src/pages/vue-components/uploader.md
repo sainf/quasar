@@ -115,17 +115,16 @@ It is by no means required to use a Nodejs server or Spring or ASP.NET like belo
 Below is a basic server example written in Nodejs. It does nothing other than receiving the files, so consider it as a starting point.
 
 ```js
-const
-  express = require('express'),
-  app = express(),
-  formidable = require('formidable'),
-  path = require('node:path'),
-  fs = require('node:fs'),
-  throttle = require('express-throttle-bandwidth')
+import fs from 'node:fs'
+import path from 'node:path'
+import express from 'express'
+import formidable from 'formidable'
+import throttle from 'express-throttle-bandwidth'
 
-const
-  port = process.env.PORT || 4444,
-  folder = path.join(__dirname, 'files')
+const app = express()
+
+const port = process.env.PORT || 4444
+const folder = fileURLToPath(new URL('./files', import.meta.url))
 
 if (!fs.existsSync(folder)) {
   fs.mkdirSync(folder)
@@ -465,7 +464,7 @@ interface MyUploaderProps extends QUploaderProps {
   onFreeze: boolean;
 }
 
-declare module '@vue/runtime-core' {
+declare module 'vue' {
   interface GlobalComponents {
     MyUploader: GlobalComponentConstructor<MyUploaderProps, QUploaderSlots>;
   }

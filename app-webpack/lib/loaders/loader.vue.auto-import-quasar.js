@@ -13,9 +13,7 @@ function extract (content, ctx, { autoImportComponentCase, autoImportData, compR
   let comp = content.match(compRegex[ autoImportComponentCase ])
   let dir = content.match(dirRegex)
 
-  if (comp === null && dir === null) {
-    return
-  }
+  if (comp === null && dir === null) return
 
   let importStatements = ''
   let installStatements = ''

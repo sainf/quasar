@@ -1,9 +1,9 @@
 import { h, computed, getCurrentInstance } from 'vue'
 
-import useSize, { useSizeProps } from '../../composables/private/use-size.js'
+import useSize, { useSizeProps } from '../../composables/private.use-size/use-size.js'
 
-import { createComponent } from '../../utils/private/create.js'
-import { hSlot, hMergeSlot } from '../../utils/private/render.js'
+import { createComponent } from '../../utils/private.create/create.js'
+import { hSlot, hMergeSlot } from '../../utils/private.render/render.js'
 
 const defaultViewBox = '0 0 24 24'
 
@@ -42,7 +42,7 @@ const mRE = /^[Mm]\s?[-+]?\.?\d/
 const imgRE = /^img:/
 const svgUseRE = /^svguse:/
 const ionRE = /^ion-/
-const faRE = /^(fa-(sharp|solid|regular|light|brands|duotone|thin)|[lf]a[srlbdk]?) /
+const faRE = /^(fa-(classic|sharp|solid|regular|light|brands|duotone|thin)|[lf]a[srlbdk]?) /
 
 export default createComponent({
   name: 'QIcon',
@@ -186,7 +186,6 @@ export default createComponent({
         class: classes.value,
         style: sizeStyle.value,
         'aria-hidden': 'true',
-        role: 'presentation'
       }
 
       if (type.value.none === true) {

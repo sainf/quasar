@@ -43,6 +43,9 @@ $ pnpm test:specs --target <target_file>
 # withOUT Vitest UI:
 $ pnpm test:watch
 
+# to watch only a specific file pattern
+$ pnpm test:watch "QList"
+
 # with Vitest UI:
 $ pnpm test:watch:ui
 ```
@@ -170,6 +173,14 @@ $ pnpm test:specs --target <target_file>
 * Watch for `$computedStyle()` calls as these get cached, so you only get one chance per node to get the expected result. Usually leave this as the last expect() call.
 * Test the effect while not duplicating the implementation of what you are testing. Where you can, use `$computedStyle()`.
 * Be aware of the common formulas (below).
+* There are some custom matchers that you can use (`$any`, `$arrayValues`, `$objectValues`, `$ref`, `$reactive`) and also some extra @vue/test-utils mount() additions (`$style`, `$computedStyle`): [code](https://github.com/quasarframework/quasar/blob/dev/ui/testing/setup.js)
+* Use of Copilot when writing the tests is allowed ;)
+
+Important reading list:
+* https://vitest.dev/api/expect.html
+* https://test-utils.vuejs.org/api/
+* https://vitest.dev/api/
+* https://vitest.dev/api/vi.html
 
 ## Common formulas for writing tests
 

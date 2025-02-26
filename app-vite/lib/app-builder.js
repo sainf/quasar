@@ -36,9 +36,7 @@ export class AppBuilder extends AppTool {
         ? entry.from
         : this.ctx.appPaths.resolve.app(entry.from)
 
-      if (fse.existsSync(from) !== true) {
-        return
-      }
+      if (fse.existsSync(from) !== true) return
 
       const to = isAbsolute(entry.to) === true
         ? entry.to

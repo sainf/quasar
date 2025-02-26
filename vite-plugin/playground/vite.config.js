@@ -20,7 +20,7 @@ export default defineConfig(() => {
 
       quasar({
         devTreeshaking: true,
-        sassVariables: 'src/quasar-variables.sass',
+        sassVariables: resolve('src/quasar-variables.sass'),
         autoImportComponentCase: 'combined'
       }),
 
@@ -36,6 +36,10 @@ export default defineConfig(() => {
       alias: {
         assets: '/src/assets'
       }
+    },
+
+    server: {
+      open: '/'
     }
   }
 })

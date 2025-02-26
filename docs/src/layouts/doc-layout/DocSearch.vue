@@ -106,7 +106,7 @@ function fetchQuery (val, onResult, onError) {
   clearTimeout(fetchTimer)
 
   fetchTimer = setTimeout(() => {
-    if (localRequestId !== requestId) { return }
+    if (localRequestId !== requestId) return
 
     const xhr = new XMLHttpRequest()
     const data = JSON.stringify({
@@ -133,9 +133,7 @@ const startsWithRE = /^[a-z0-9]/
 const endsWithRE = /[a-z0-9]$/
 
 function parseContent (content) {
-  if (!content) {
-    return
-  }
+  if (!content) return
 
   let inToken = false
 
@@ -176,9 +174,7 @@ function parseResults (hits) {
 
   hits.forEach(hit => {
     // if we don't know how to display this API type then just abort
-    if (supportedHitTypes.includes(hit.type) === false) {
-      return
-    }
+    if (supportedHitTypes.includes(hit.type) === false) return
 
     const entry = {
       page: hit.menu.join(' » '),

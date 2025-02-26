@@ -6,10 +6,9 @@ import { cliDir, resolveToCliDir } from './cli-runtime.js'
 
 const quasarConfigList = [
   { name: 'quasar.config.js', inputFormat: 'esm', outputFormat: 'esm' },
-  { name: 'quasar.config.mjs', inputFormat: 'esm', outputFormat: 'esm' },
   { name: 'quasar.config.ts', inputFormat: 'ts', outputFormat: 'esm' },
-  { name: 'quasar.config.cjs', inputFormat: 'cjs', outputFormat: 'cjs' },
-  { name: 'quasar.conf.js', inputFormat: 'cjs', outputFormat: 'cjs' } // legacy (removed during v2)
+  { name: 'quasar.config.mjs', inputFormat: 'esm', outputFormat: 'esm' },
+  { name: 'quasar.config.cjs', inputFormat: 'cjs', outputFormat: 'cjs' }
 ]
 
 function getAppInfo (appDir) {

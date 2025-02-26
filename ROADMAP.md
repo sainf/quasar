@@ -22,7 +22,7 @@ LTS support ends 12 months after the release of a new major version.
 | Version | Status | Released   | Active support ends | LTS support ends |
 | ------- | ------ | ---------- | ------------------- | ---------------- |
 | 2.x     | Active | 2021-06-21 | Not planned yet     | Not planned yet  |
-| 1.x     | Active | 2019-03-07 | 2021-04-01          | 2023-06-30       |
+| 1.x     | Inactive | 2019-03-07 | 2021-04-01          | 2023-06-30       |
 
 Quasar v0.x versions are no longer supported.
 
@@ -34,21 +34,25 @@ We are updating this section constantly in order to keep you up to date with our
 
 ### Evergreens
 * 🚧 (WIP) Gradually add more automated tests to Quasar UI. **We're searching for contributors**, get in touch with the team on our [Discord server](https://chat.quasar.dev/) if you're willing to help!
-* 🚧 (WIP) Gather feedback about new Quasar website. [Let us know what do you like and what not!](https://github.com/quasarframework/quasar/discussions/15168)
+
+### Q1-Q2 2025
+* CLI Auto-routing
+
+### Q3-Q4 2025
+* CLI SSG mode ([#2299](https://github.com/quasarframework/quasar/issues/2299)) ([community support](https://github.com/freddy38510/quasar-app-extension-ssg))
+* Release of a new major version of `@quasar/app-vite` with Vite 7. Replace esbuild with rolldown for all Quasar modes compilation threads.
+
+## Archive
+
+### Q2-Q4 2024
+* Release of the new major version of `@quasar/app-vite`
+* Release of the new major version of `@quasar/app-webpack`
+* Rewrite Quasar UI automation testing (switching to vitest included)
+* Rewrite internal build system for Quasar UI itself (q/app work included)
 
 ### Q1 2024
 * New `@quasar/app-vite` major version -- beta release
 * New `@quasar/app-webpack` major version -- beta release
-
-### Q2 2024
-* CLI Auto-routing
-* Release of the new major version of `@quasar/app-vite`
-* Release of the new major version of `@quasar/app-webpack`
-
-### Q3 2024
-* CLI SSG mode ([#2299](https://github.com/quasarframework/quasar/issues/2299)) ([community support](https://github.com/freddy38510/quasar-app-extension-ssg))
-
-## Archive
 
 ### Q2-4 2023
 * Support Capacitor 4 and related bugfixes ([#14226](https://github.com/quasarframework/quasar/pull/14226))

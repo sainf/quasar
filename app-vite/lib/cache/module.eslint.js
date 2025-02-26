@@ -1,15 +1,19 @@
 import { existsSync } from 'node:fs'
-
 import { getPackage } from '../utils/get-package.js'
 
 export async function createInstance ({ appPaths }) {
   const eslintConfigFile = [
+    // flat configs (ESLint >= 9)
+    'eslint.config.js',
+    'eslint.config.mjs',
+    'eslint.config.cjs',
+
+    // legacy configs (ESLint <= 8)
     '.eslintrc.cjs',
     '.eslintrc.js',
     '.eslintrc.yaml',
     '.eslintrc.yml',
-    '.eslintrc.json',
-    'eslint.config.js'
+    '.eslintrc.json'
   ].find(path => existsSync(appPaths.resolve.app(path)))
 
   const acc = {

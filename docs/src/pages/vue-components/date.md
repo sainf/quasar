@@ -175,15 +175,18 @@ Connecting a QDate and QTime with same model on a QInput:
 The following are **helpers** for QInput `mask` and `rules` props. You can use these for convenience or write the string specifying your [custom needs](/vue-components/input#mask).
 
 * Property `mask` helpers: [full list](https://github.com/quasarframework/quasar/blob/dev/ui/src/components/input/use-mask.js#L6).
-* Property `rules` helpers: [full list](https://github.com/quasarframework/quasar/blob/dev/ui/src/utils/patterns.js).
+* Property `rules` helpers: [full list](https://github.com/quasarframework/quasar/blob/dev/ui/src/utils/patterns/patterns.js).
 
 Examples: "date", "time", "fulltime".
 
 More info: [QInput](/vue-components/input).
 
 ### Persian calendar
+
+You have to set `calendar` to `persian` to use this feature .
+
 ::: tip
-You can couple this with a Quasar [language pack](/options/quasar-language-packs) such as Persian (Farsi, `fa-ir`) to have the QDate strings translated too, for the full experience.
+You can couple this with a Quasar [language pack](/options/quasar-language-packs) such as Persian (Farsi, `fa-IR`) to have the QDate strings translated too, for the full experience.
 :::
 
 ::: warning

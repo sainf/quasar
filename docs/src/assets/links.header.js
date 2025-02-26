@@ -12,15 +12,17 @@ import { socialLinks } from './links.social.js'
 export const versionLinks = [{
   name: `v${Quasar.version}`,
   children: [
-    {
-      header: `Latest (v${Quasar.version})`
-    },
     { name: 'Release notes', icon: mdiClipboardText, path: '/start/release-notes' },
     { name: 'Report a bug', icon: mdiBug, path: 'https://github.com/quasarframework/quasar/issues', external: true },
     { name: 'Report a vulnerability', icon: mdiSecurity, path: '/security/report-a-vulnerability', external: true },
     { name: 'Repository', icon: mdiGithub, path: 'https://github.com/quasarframework', external: true },
     {
-      header: 'Older Releases'
+      header: 'Older CLI Releases'
+    },
+    { name: '@quasar/app-vite v1', path: 'https://legacy-app.quasar.dev/', external: true },
+    { name: '@quasar/app-webpack v3', path: 'https://legacy-app.quasar.dev/', external: true },
+    {
+      header: 'Older UI Releases'
     },
     { name: 'v1', path: 'https://v1.quasar.dev/', external: true },
     { name: 'v0.17', path: 'https://v0-17.quasar-framework.org/', external: true },
@@ -44,14 +46,14 @@ const gettingStarted = {
           separator: true
         },
         { name: 'Quasar CLI', path: '/start/quasar-cli' },
+        { name: 'Vite Plugin', path: '/start/vite-plugin' },
         { name: 'UMD / Standalone', path: '/start/umd' },
-        { name: 'Vue CLI Plugin', path: '/start/vue-cli-plugin' },
-        { name: 'Vite Plugin', path: '/start/vite-plugin' }
+        { name: 'Vue CLI Plugin', path: '/start/vue-cli-plugin' }
       ]
     },
     { name: 'How to use Vue', path: '/start/how-to-use-vue' },
     { name: 'Playground', path: '/start/playground' },
-    { name: 'Upgrade Guide', path: '/start/upgrade-guide' },
+    { name: 'UI Upgrade Guide', path: '/start/upgrade-guide' },
     { name: 'VS Code Configuration', path: '/start/vs-code-configuration' }
   ]
 }
@@ -96,8 +98,8 @@ export const secondaryToolbarLinks = [
   gettingStarted,
   tools,
   { name: 'Announcements', mq: 910, path: 'https://github.com/quasarframework/quasar/discussions/categories/announcements', external: true },
-  { name: 'Roadmap', mq: 1000, path: 'https://roadmap.quasar.dev', external: true },
-  { name: 'Video Tutorials', mq: 1130, path: '/video-tutorials' },
+  { name: 'Video Tutorials', mq: 1000, path: '/video-tutorials' },
+  { name: 'Roadmap', mq: 1130, path: 'https://roadmap.quasar.dev', external: true },
   { name: 'Brand resources', mq: 1400, path: 'https://github.com/quasarframework/quasar-art', external: true }
 ]
 
@@ -105,9 +107,7 @@ export const moreLinks = [{
   name: 'More',
   children: [
     ...primaryToolbarLinks,
-    {
-      separator: true
-    },
+    { separator: true },
     ...secondaryToolbarLinks,
     socialLinks
   ]

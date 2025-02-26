@@ -1,5 +1,5 @@
 {
-  "mixins": [ "composables/private/use-field", "composables/private/use-file", "composables/private/use-form" ],
+  "mixins": [ "composables/private.use-field/use-field", "composables/private.use-file/use-file", "composables/use-form/private.use-form" ],
 
   "meta": {
     "docsUrl": "https://v2.quasar.dev/vue-components/file"
@@ -68,7 +68,8 @@
     },
 
     "tabindex": {
-      "extends": "tabindex"
+      "extends": "tabindex",
+      "default": "0"
     },
 
     "input-class": {
@@ -124,7 +125,8 @@
       "desc": "Override default selection slot; Suggestion: QChip",
       "scope": {
         "files": {
-          "type": [ "Array", "FileList" ],
+          "type": "Array",
+          "tsType": "File",
           "desc": "Array of File objects"
         },
 
@@ -134,12 +136,6 @@
           "desc": "Reference to the QFile component"
         }
       }
-    }
-  },
-
-  "events": {
-    "update:model-value": {
-      "extends": "update:model-value"
     }
   },
 

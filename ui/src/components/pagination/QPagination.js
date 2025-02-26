@@ -3,12 +3,12 @@ import { h, ref, watch, computed, getCurrentInstance } from 'vue'
 import QBtn from '../btn/QBtn.js'
 import QInput from '../input/QInput.js'
 
-import useDark, { useDarkProps } from '../../composables/private/use-dark.js'
+import useDark, { useDarkProps } from '../../composables/private.use-dark/use-dark.js'
 import { btnDesignOptions, btnPadding, getBtnDesign } from '../btn/use-btn.js'
 
-import { createComponent } from '../../utils/private/create.js'
-import { between } from '../../utils/format.js'
-import { isKeyCode } from '../../utils/private/key-composition.js'
+import { createComponent } from '../../utils/private.create/create.js'
+import { between } from '../../utils/format/format.js'
+import { isKeyCode } from '../../utils/private.keyboard/key-composition.js'
 
 function getBool (val, otherwise) {
   return [ true, false ].includes(val)
@@ -133,9 +133,8 @@ export default createComponent({
       get: () => props.modelValue,
       set: val => {
         val = parseInt(val, 10)
-        if (props.disable || isNaN(val)) {
-          return
-        }
+        if (props.disable || isNaN(val)) return
+
         const value = between(val, minProp.value, maxProp.value)
         if (props.modelValue !== value) {
           emit('update:modelValue', value)

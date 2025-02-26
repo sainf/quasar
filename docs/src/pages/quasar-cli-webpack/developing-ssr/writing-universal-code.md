@@ -20,30 +20,40 @@ Another thing to note is that you should avoid code that produces global side ef
 ## Avoid Stateful Singletons
 When writing client-only code, we are used to the fact that our code will be evaluated in a fresh context every time. However, a Node.js server is a long-running process. When our code is required into the process, it will be evaluated once and then it stays in memory. This means if you create a singleton object, it will be shared between every incoming request.
 
-So, Quasar CLI creates a new root Vue instance with a new Router and Vuex Store instances for each request. This is similar to how each user will be using a fresh instance of the app in their own browser. If we would have used a shared instance across multiple requests, it will easily lead to cross-request state pollution.
+So, Quasar CLI creates a new root Vue instance with a new Router and Pinia instance for each request. This is similar to how each user will be using a fresh instance of the app in their own browser. If we would have used a shared instance across multiple requests, it will easily lead to cross-request state pollution.
 
-Instead of directly creating a Router and Vuex Store instances, you'll be exposing a factory function that can be repeatedly executed to create fresh app instances for each request:
+Instead of directly creating a Router and Pinia instance, you'll be exposing a factory function that can be repeatedly executed to create fresh app instances for each request:
 
 ```js /src/router/index.js
-export default function (/* { store, ssrContext } */) {
+import { defineRouter } from '#q-app/wrappers'
+
+export default defineRouter((/* { store, ssrContext } */) {
   const Router = new VueRouter({...})
   return Router
-}
+})
 ```
 
 ```js /src/store/index.js
-export default function (/* { ssrContext } */) {
-  const Store = new Vuex.Store({...})
-  return Store
-}
-```
+import { defineStore } from '#q-app/wrappers'
+import { createPinia } from 'pinia'
 
-If you're using [Vuex modules](https://vuex.vuejs.org/guide/modules.html) don't forget to export the state as a function otherwise a singleton will be created:
-```js /src/store/myModule/state.js
-export default () => ({
-  ...
+/*
+ * If not building with SSR mode, you can
+ * directly export the Store instantiation;
+ *
+ * The function below can be async too; either use
+ * async/await or return a Promise which resolves
+ * with the Store instance.
+ */
+
+export default defineStore((/* { ssrContext } */) => {
+  const pinia = createPinia()
+
+  // You can add Pinia plugins here
+  // pinia.use(SomePiniaPlugin)
+
+  return pinia
 })
-
 ```
 
 ## Access to Platform-Specific APIs
