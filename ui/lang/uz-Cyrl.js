@@ -43,6 +43,12 @@ export default {
     pagination: (start, end, total) => start + '-' + end + ' жами ' + total,
     columns: 'Устунлар'
   },
+  pagination: {
+    first: 'Биринчи саҳифа',
+    prev: 'Олдинги саҳифа',
+    next: 'Кейинги саҳифа',
+    last: 'Сўнгги саҳифа'
+  },
   editor: {
     url: 'УРЛ',
     bold: 'Қалин',

@@ -100,7 +100,7 @@
 
 <script setup>
 import { computed } from 'vue'
-import { mdiCompare, mdiFolderPound } from '@quasar/extras/mdi-v6'
+import { mdiCompare, mdiFolderPound } from '@quasar/extras/mdi-v7'
 
 import { versionLinks, primaryToolbarLinks, secondaryToolbarLinks, moreLinks } from 'src/assets/links.header.js'
 import { socialLinks } from 'src/assets/links.social.js'

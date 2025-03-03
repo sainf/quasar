@@ -41,6 +41,12 @@ export default {
     pagination: (start, end, total) => start + '-' + end + ' / ' + total,
     columns: 'Veerud'
   },
+  pagination: {
+    first: 'Esimene leht',
+    prev: 'Eelmine leht',
+    next: 'Järgmine leht',
+    last: 'Viimane leht'
+  },
   editor: {
     url: 'URL',
     bold: 'Rasvane',

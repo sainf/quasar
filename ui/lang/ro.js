@@ -41,6 +41,12 @@ export default {
     pagination: (start, end, total) => start + '-' + end + ' din ' + total,
     columns: 'Coloane'
   },
+  pagination: {
+    first: 'Prima pagină',
+    prev: 'Pagina anterioară',
+    next: 'Pagina următoare',
+    last: 'Ultima pagină'
+  },
   editor: {
     url: 'URL',
     bold: 'Îngroșat',

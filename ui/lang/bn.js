@@ -41,6 +41,12 @@ export default {
     pagination: (start, end, total) => start + '-' + end + ' মধ্যে ' + total,
     columns: 'কলাম'
   },
+  pagination: {
+    first: 'প্রথম পৃষ্ঠা',
+    prev: 'পূর্ববর্তী পৃষ্ঠা',
+    next: 'পরবর্তী পৃষ্ঠা',
+    last: 'শেষ পৃষ্ঠা'
+  },
   editor: {
     url: 'ইউ আর এল',
     bold: 'মোটা',

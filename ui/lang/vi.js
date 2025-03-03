@@ -41,6 +41,12 @@ export default {
     pagination: (start, end, total) => start + '-' + end + ' của ' + total,
     columns: 'Cột'
   },
+  pagination: {
+    first: 'Trang đầu tiên',
+    prev: 'Trang trước',
+    next: 'Trang tiếp theo',
+    last: 'Trang cuối cùng'
+  },
   editor: {
     url: 'URL',
     bold: 'Đậm',

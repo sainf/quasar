@@ -264,7 +264,7 @@ export default createComponent({
       for (let val = start, index = start; val <= end; val += step, index++) {
         const
           actualVal = val + offset,
-          disable = values !== void 0 && values.includes(actualVal) === false,
+          disable = values?.includes(actualVal) === false,
           label = view.value === 'hour' && val === 0
             ? (computedFormat24h.value === true ? '00' : '12')
             : val

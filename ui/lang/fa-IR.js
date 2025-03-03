@@ -42,6 +42,12 @@ export default {
     pagination: (start, end, total) => start + '-' + end + ' از ' + total,
     columns: 'ستون'
   },
+  pagination: {
+    first: 'صفحه اول',
+    prev: 'صفحه قبلی',
+    next: 'صفحه بعدی',
+    last: 'صفحه آخر'
+  },
   editor: {
     url: 'آدرس',
     bold: 'ضخیم',

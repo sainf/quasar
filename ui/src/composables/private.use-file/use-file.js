@@ -19,7 +19,10 @@ function filterFiles (files, rejectedFiles, failedPropValidation, filterFn) {
 }
 
 function stopAndPreventDrag (e) {
-  e && e.dataTransfer && (e.dataTransfer.dropEffect = 'copy')
+  if (e?.dataTransfer) {
+    e.dataTransfer.dropEffect = 'copy'
+  }
+
   stopAndPrevent(e)
 }
 
@@ -69,13 +72,13 @@ export default function ({
         e = { target: null }
       }
 
-      if (e.target !== null && e.target.matches('input[type="file"]') === true) {
+      if (e.target?.matches('input[type="file"]') === true) {
         // stop propagation if it's not a real pointer event
         e.clientX === 0 && e.clientY === 0 && stop(e)
       }
       else {
         const input = getFileInput()
-        input && input !== e.target && input.click(e)
+        if (input !== e.target) input?.click(e)
       }
     }
   }

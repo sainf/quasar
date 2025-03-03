@@ -25,7 +25,7 @@ export function closePortalMenus (proxy, evt) {
       // and hide it too
       const parent = getParentProxy(proxy)
 
-      if (parent !== void 0 && parent.$options.name === 'QPopupProxy') {
+      if (parent?.$options.name === 'QPopupProxy') {
         proxy.hide(evt)
         return parent
       }

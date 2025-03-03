@@ -41,6 +41,12 @@ export default {
     pagination: (start, end, total) => start + '-' + end + ' од ' + total,
     columns: 'Колони'
   },
+  pagination: {
+    first: 'Прва страница',
+    prev: 'Претходна страница',
+    next: 'Следната страница',
+    last: 'Последна страница'
+  },
   editor: {
     url: 'URL',
     bold: 'Задебелено',

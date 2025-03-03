@@ -21,7 +21,7 @@
 </template>
 
 <script setup>
-import { mdiMenuDown } from '@quasar/extras/mdi-v6'
+import { mdiMenuDown } from '@quasar/extras/mdi-v7'
 
 import DocHeaderMenu from './DocHeaderMenu.js'
 

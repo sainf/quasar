@@ -340,7 +340,7 @@ export default createComponent({
 
       updateModel(rgb, change)
 
-      if (evt !== void 0 && change !== true && evt.target.selectionEnd !== void 0) {
+      if (change !== true && evt?.target.selectionEnd !== void 0) {
         const index = evt.target.selectionEnd
         nextTick(() => {
           evt.target.setSelectionRange(index, index)

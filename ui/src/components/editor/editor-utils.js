@@ -54,7 +54,7 @@ function getBtn (eVm, btn, clickHandler, active = false) {
     disable: btn.disable ? (typeof btn.disable === 'function' ? btn.disable(eVm) : true) : false,
     size: 'sm',
     onClick (e) {
-      clickHandler && clickHandler()
+      clickHandler?.()
       run(e, btn, eVm)
     }
   }, () => child)
@@ -120,7 +120,7 @@ function getDropdown (eVm, btn) {
         dense: true,
         onClick (e) {
           closeDropdown()
-          eVm.contentRef.value !== null && eVm.contentRef.value.focus()
+          e?.qAvoidFocus !== true && eVm.contentRef.value?.focus()
           eVm.caret.restore()
           run(e, btn, eVm)
         }

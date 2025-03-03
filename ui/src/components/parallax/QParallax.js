@@ -134,7 +134,7 @@ export default createComponent({
 
     onBeforeUnmount(() => {
       stop()
-      observer !== void 0 && observer.disconnect()
+      observer?.disconnect()
       mediaEl.onload = mediaEl.onloadstart = mediaEl.loadedmetadata = null
     })
 

@@ -119,7 +119,7 @@ export default createComponent({
     ))
 
     function onActivate () {
-      blurRef.value !== null && blurRef.value.focus()
+      blurRef.value?.focus()
       isActive.value === false && props.goToPanel(props.step.name)
     }
 

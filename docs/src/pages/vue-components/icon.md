@@ -61,7 +61,7 @@ If you are using webfont-based icons, make sure that you [installed the icon lib
 | fontawesome-v6 | fa-[solid,regular,brands] fa- | "fa-solid fa-ambulance" | QIcon "name" property is same as "class" attribute value in Fontawesome docs examples (where they show `<i>` tags) |
 | fontawesome-v6 Pro| fa-[solid,regular,brands,thin,light,duotone] fa- | "fa-solid fa-ambulance" | Note: a license must be purchased from Fontawesome for this functionality) |
 | fontawesome-v5 | fa[s,r,l,d,b] fa- | "fas fa-ambulance" | QIcon "name" property is same as "class" attribute value in Fontawesome docs examples (where they show `<i>` tags) |
-| mdi-v6/v5/v4/v3 | mdi- | mdi-alert-circle-outline | Notice the use of dash characters; Use only one of mdi-v6, mdi-v5, mdi-v4 or mdi-v3 |
+| mdi-v7/v6/v5/v4/v3 | mdi- | mdi-alert-circle-outline | Notice the use of dash characters; Use only one of mdi-v7, mdi-v6, mdi-v5, mdi-v4 or mdi-v3 |
 | eva-icons | eva- | eva-shield-outline, eva-activity-outline | Notice the use of dash characters |
 | themify | ti- | ti-hand-point-up | Notice the use of dash characters |
 | line-awesome | la[s,r,l,d,b] la- | "las la-atom" | QIcon "name" property is same as "class" attribute value in Line Awesome docs examples (where they show `<i>` tags); **@quasar/extras v1.5+** |
@@ -144,7 +144,7 @@ This is the most convenient way. Just importing the variables is enough to make 
 ```html
 <script setup>
 import { matMenu } from '@quasar/extras/material-icons'
-import { mdiAbTesting } from '@quasar/extras/mdi-v6'
+import { mdiAbTesting } from '@quasar/extras/mdi-v7'
 import { fasFont } from '@quasar/extras/fontawesome-v5'
 </script>
 ```
@@ -154,7 +154,7 @@ import { fasFont } from '@quasar/extras/fontawesome-v5'
 ```html
 <script>
 import { matMenu } from '@quasar/extras/material-icons'
-import { mdiAbTesting } from '@quasar/extras/mdi-v6'
+import { mdiAbTesting } from '@quasar/extras/mdi-v7'
 import { fasFont } from '@quasar/extras/fontawesome-v5'
 
 export default {
@@ -177,7 +177,7 @@ Notice in the example below that we are injecting the icons through the `created
 ```html
 <script>
 import { matMenu } from '@quasar/extras/material-icons'
-import { mdiAbTesting } from '@quasar/extras/mdi-v6'
+import { mdiAbTesting } from '@quasar/extras/mdi-v7'
 import { fasFont } from '@quasar/extras/fontawesome-v5'
 
 export default {
@@ -204,8 +204,7 @@ If you are only using svg icons (and have configured a [Quasar Icon Set](/option
 | Material Symbols Outlined (Google) | svg-material-symbols-outlined | @quasar/extras/material-symbols-outlined | @quasar/extras v1.14+; |
 | Material Symbols Sharp (Google) | svg-material-symbols-sharp | @quasar/extras/material-symbols-sharp | @quasar/extras v1.14+ |
 | Material Symbols Round (Google) | svg-material-symbols-rounded | @quasar/extras/material-symbols-rounded | @quasar/extras v1.14+ |
-| MDI (Material Design Icons) (v3-v5) | svg-mdi-v5 | @quasar/extras/mdi-v5 | |
-| MDI (Material Design Icons) v6 | svg-mdi-v7 | @quasar/extras/mdi-v6 | @quasar/extras v1.11+ |
+| MDI (Material Design Icons) v3-v7 | svg-mdi-v7 | @quasar/extras/mdi-v7 etc | @quasar/extras v1.11+ |
 | Font Awesome v6 | svg-fontawesome-v6 | @quasar/extras/fontawesome-v6 | @quasar/extras v1.13+ |
 | Font Awesome | svg-fontawesome-v5 | @quasar/extras/fontawesome-v5 | |
 | Ionicons v6 | svg-ionicons-v6 | @quasar/extras/ionicons-v6 | @quasar/extras v1.12+ |
@@ -266,7 +265,7 @@ Svg icons are supplied by `@quasar/extras` (although you can supply [your own sv
 
 * Icon names are in camel-case and always begin with "mdi" prefix.
 * Go to [MDI](https://materialdesignicons.com/), look for your desired icon, click on it. A dialog box will appear. Get the title (eg. "account-key"), prefix it with "mdi" and camel-case the result (eg. "mdiAccountKey").
-* Import statement example: `import { mdiAccountKey } from '@quasar/extras/mdi-v6'`.
+* Import statement example: `import { mdiAccountKey } from '@quasar/extras/mdi-v7'`.
 
 #### SVG Fontawesome
 

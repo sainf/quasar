@@ -41,6 +41,12 @@ export default {
     pagination: (start, end, total) => start + 'tik -' + end + 'ra, guztira ' + total,
     columns: 'Zutabeak'
   },
+  pagination: {
+    first: 'Lehen orria',
+    prev: 'Aurreko orria',
+    next: 'Hurrengo orria',
+    last: 'Azken orria'
+  },
   editor: {
     url: 'URL',
     bold: 'Lodia',

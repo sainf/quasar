@@ -117,7 +117,7 @@ export default createComponent({
       function onObjLoad () {
         cleanup()
 
-        if (targetEl && targetEl.contentDocument) {
+        if (targetEl?.contentDocument) {
           curDocView = targetEl.contentDocument.defaultView
           curDocView.addEventListener('resize', trigger, listenOpts.passive)
           emitEvent()

@@ -55,13 +55,13 @@ export default createComponent({
 
       const
         child = [],
-        len = vnodes.filter(c => c.type !== void 0 && c.type.name === 'QBreadcrumbsEl').length,
+        len = vnodes.filter(c => c.type?.name === 'QBreadcrumbsEl').length,
         separator = slots.separator !== void 0
           ? slots.separator
           : () => props.separator
 
       vnodes.forEach(comp => {
-        if (comp.type !== void 0 && comp.type.name === 'QBreadcrumbsEl') {
+        if (comp.type?.name === 'QBreadcrumbsEl') {
           const middle = els < len
           const disabled = comp.props !== null && disabledValues.includes(comp.props.disable)
           const cls = (middle === true ? '' : ' q-breadcrumbs--last')

@@ -42,6 +42,12 @@ export default {
     pagination: (start, end, total) => start + '-' + end + ' / ' + total,
     columns: 'Sarakkeet'
   },
+  pagination: {
+    first: 'Ensimmäinen sivu',
+    prev: 'Edellinen sivu',
+    next: 'Seuraava sivu',
+    last: 'Viimeinen sivu'
+  },
   editor: {
     url: 'URL',
     bold: 'Lihavoitu',

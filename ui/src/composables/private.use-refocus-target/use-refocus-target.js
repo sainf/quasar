@@ -18,18 +18,19 @@ export default function (props, rootRef) {
   function refocusTarget (e) {
     const root = rootRef.value
 
-    if (e !== void 0 && e.type.indexOf('key') === 0) {
+    if (e?.qAvoidFocus === true) return
+
+    if (e?.type.indexOf('key') === 0) {
       if (
-        root !== null
-        && document.activeElement !== root
-        && root.contains(document.activeElement) === true
+        document.activeElement !== root
+        && root?.contains(document.activeElement) === true
       ) {
         root.focus()
       }
     }
     else if (
       refocusRef.value !== null
-      && (e === void 0 || (root !== null && root.contains(e.target) === true))
+      && ((e === void 0) || (root?.contains(e.target) === true))
     ) {
       refocusRef.value.focus()
     }

@@ -51,6 +51,12 @@ export default {
     pagination: (start, end, total) => start + '-' + end + ' لە ' + total,
     columns: 'ڕیز'
   },
+  pagination: {
+    first: 'پەڕەی یەکەمی',
+    prev: 'پەڕەی پێشوو',  
+    next: 'پەڕەی داهاتوو',
+    last: 'پەڕەی کۆتایی'
+  },
   editor: {
     url: 'لینک',
     bold: 'تۆخ',

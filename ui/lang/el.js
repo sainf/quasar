@@ -41,6 +41,12 @@ export default {
     pagination: (start, end, total) => start + '-' + end + ' από ' + total,
     columns: 'Στήλες'
   },
+  pagination: {
+    first: 'Πρώτη σελίδα',
+    prev: 'Προηγούμενη σελίδα',
+    next: 'Επόμενη σελίδα',
+    last: 'Τελευταία σελίδα'
+  },
   editor: {
     url: 'Διεύθυνση URL', // Needs Translation
     bold: 'Έντονα',

@@ -86,7 +86,7 @@ import {
   mdiPencil,
   mdiFlash,
   mdiLaunch
-} from '@quasar/extras/mdi-v6'
+} from '@quasar/extras/mdi-v7'
 
 import DocLink from 'src/components/DocLink.vue'
 import DocPageToc from './DocPageToc.vue'

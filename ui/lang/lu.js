@@ -41,6 +41,12 @@ export default {
     pagination: (start, end, total) => start + '-' + end + ' vun ' + total,
     columns: 'Kolonnen'
   },
+  pagination: {
+    first: 'Éischt Säit',
+    prev: 'Virdrun Säit',
+    next: 'Nächst Säit',
+    last: 'Lescht Säit'
+  },
   editor: {
     url: 'URL',
     bold: 'Fett',

@@ -10,7 +10,7 @@ import {
   mdiServer, mdiStarCircle, mdiSvg,
   mdiTelevisionPlay,
   mdiTestTube
-} from '@quasar/extras/mdi-v6'
+} from '@quasar/extras/mdi-v7'
 
 export const platformIcons = [
   'img:https://cdn.quasar.dev/img/custom-svg-icons/chrome.svg',

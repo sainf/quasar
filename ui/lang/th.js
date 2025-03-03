@@ -41,6 +41,12 @@ export default {
     pagination: (start, end, total) => start + '-' + end + ' of ' + total,
     columns: 'คอลัมน์'
   },
+  pagination: {
+    first: 'หน้าแรก',
+    prev: 'หน้าก่อนหน้า',
+    next: 'หน้าถัดไป',
+    last: 'หน้าสุดท้าย'
+  },
   editor: {
     url: 'URL',
     bold: 'ตัวหนา',

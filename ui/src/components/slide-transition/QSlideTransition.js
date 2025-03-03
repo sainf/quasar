@@ -20,7 +20,7 @@ export default createComponent({
     let timer = null, timerFallback = null, animListener, lastEvent
 
     function cleanup () {
-      doneFn && doneFn()
+      doneFn?.()
       doneFn = null
       animating = false
 
@@ -34,7 +34,7 @@ export default createComponent({
         timerFallback = null
       }
 
-      element !== void 0 && element.removeEventListener('transitionend', animListener)
+      element?.removeEventListener('transitionend', animListener)
       animListener = null
     }
 

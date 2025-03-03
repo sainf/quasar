@@ -40,6 +40,12 @@ export default {
     pagination: (start, end, total) => start + '-' + end + ' / ' + total,
     columns: '列'
   },
+  pagination: {
+    first: '第一页',
+    prev: '上一页',
+    next: '下一页',
+    last: '最后一页'
+  },
   editor: {
     url: 'URL',
     bold: '粗体',

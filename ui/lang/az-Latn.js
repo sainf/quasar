@@ -41,6 +41,12 @@ export default {
     pagination: (start, end, total) => start + '-' + end + ' cəmi ' + total,
     columns: 'Sütun'
   },
+  pagination: {
+    first: 'İlk səhifə',
+    prev: 'Əvvəlki səhifə',
+    next: 'Növbəti səhifə',
+    last: 'Son səhifə'
+  },
   editor: {
     url: 'URL',
     bold: 'Bold',

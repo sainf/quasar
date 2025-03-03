@@ -42,6 +42,12 @@ export default {
     pagination: (start, end, total) => start + 'မှ' + end + 'ထိ' + 'အားလုံး' + total + 'ရှိ',
     columns: 'ကော်လံ'
   },
+  pagination: {
+    first: 'ပထမစာမျက်နှာ',
+    prev: 'မူရင်းစာမျက်နှာ',
+    next: 'နောက်စာမျက်နှာ',
+    last: 'နောက်ဆုံးစာမျက်နှာ'
+  },
   editor: {
     url: 'URL',
     bold: 'Bold',

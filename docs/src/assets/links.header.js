@@ -5,7 +5,7 @@ import { fasCubes, fasBolt } from '@quasar/extras/fontawesome-v5'
 import {
   mdiBug, mdiClipboardText, mdiCodepen, mdiFlare, mdiFlask, mdiGithub, mdiJsfiddle, mdiPaletteSwatch, mdiPuzzle, mdiShoppingMusic,
   mdiStarCircle, mdiThemeLightDark, mdiViewDashboard, mdiSecurity, mdiMathIntegralBox
-} from '@quasar/extras/mdi-v6'
+} from '@quasar/extras/mdi-v7'
 
 import { socialLinks } from './links.social.js'
 

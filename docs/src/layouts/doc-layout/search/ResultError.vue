@@ -7,5 +7,5 @@
 </template>
 
 <script setup>
-import { mdiAlert } from '@quasar/extras/mdi-v6'
+import { mdiAlert } from '@quasar/extras/mdi-v7'
 </script>

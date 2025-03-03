@@ -22,10 +22,10 @@ function openWindow (url, reject, windowFeatures) {
   let open = window.open
 
   if (Platform.is.cordova === true) {
-    if (cordova !== void 0 && cordova.InAppBrowser !== void 0 && cordova.InAppBrowser.open !== void 0) {
+    if (cordova?.InAppBrowser?.open !== void 0) {
       open = cordova.InAppBrowser.open
     }
-    else if (navigator !== void 0 && navigator.app !== void 0) {
+    else if (navigator?.app !== void 0) {
       return navigator.app.loadUrl(url, {
         openExternal: true
       })
@@ -39,7 +39,7 @@ function openWindow (url, reject, windowFeatures) {
     return win
   }
   else {
-    reject && reject()
+    reject?.()
   }
 }
 

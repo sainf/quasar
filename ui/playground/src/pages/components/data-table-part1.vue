@@ -146,6 +146,8 @@
         :pagination="{rowsPerPage: 3}"
         :rows-per-page-options="[1, 2, 3, 4, 6]"
         row-key="name"
+        :table-row-class-fn="row => row.calories % 2 === 0 ? 'bg-red-1' : 'bg-yellow-1'"
+        :table-row-style-fn="row => row.calories % 2 === 0 ? 'color:blue' : 'color:green'"
       >
         <template v-slot:body="props">
           <q-tr :props="props">

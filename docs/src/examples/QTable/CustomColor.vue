@@ -2,9 +2,11 @@
   <div class="q-pa-md">
     <q-table
       color="primary"
-      card-class="bg-amber-5 text-brown"
-      table-class="text-grey-8"
+      card-class="bg-orange text-grey-10"
+      table-class="text-grey-1"
       table-header-class="text-brown"
+      :table-row-class-fn="rowClassFn"
+      :table-row-style-fn="rowStyleFn"
       flat
       bordered
       title="Treats"
@@ -142,7 +144,15 @@ export default {
   setup () {
     return {
       columns,
-      rows
+      rows,
+
+      rowClassFn (row) {
+        return row.calories % 2 === 0 ? 'bg-brown' : 'bg-primary'
+      },
+
+      rowStyleFn (row) {
+        return row.calories % 2 === 0 ? 'color:#ccc' : 'color:#fff'
+      }
     }
   }
 }

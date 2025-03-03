@@ -41,6 +41,12 @@ export default {
     pagination: (start, end, total) => start + '-' + end + ' மொத்தம் ' + total,
     columns: 'பத்திகள்'
   },
+  pagination: {
+    first: 'முதல் பக்கம்',
+    prev: 'முந்தைய பக்கம்',
+    next: 'அடுத்த பக்கம்',
+    last: 'கடைசி பக்கம்'
+  },
   editor: {
     url: 'URL',
     bold: 'தடித்த',

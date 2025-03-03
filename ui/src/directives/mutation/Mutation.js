@@ -12,7 +12,7 @@ const defaultCfg = {
 
 function update (el, ctx, value) {
   ctx.handler = value
-  ctx.observer !== void 0 && ctx.observer.disconnect()
+  ctx.observer?.disconnect()
 
   ctx.observer = new MutationObserver(list => {
     if (typeof ctx.handler === 'function') {
@@ -30,7 +30,7 @@ function destroy (el) {
   const ctx = el.__qmutation
 
   if (ctx !== void 0) {
-    ctx.observer !== void 0 && ctx.observer.disconnect()
+    ctx.observer?.disconnect()
     delete el.__qmutation
   }
 }

@@ -128,8 +128,8 @@ export default createComponent({
       onChildClick (evt) {
         hide(evt)
 
-        if (triggerRef.value !== null) {
-          triggerRef.value.$el.focus()
+        if (evt?.qAvoidFocus !== true) {
+          triggerRef.value?.$el.focus()
         }
       }
     })

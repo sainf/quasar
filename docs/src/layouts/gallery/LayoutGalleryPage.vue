@@ -18,7 +18,7 @@
 import { useMeta } from 'quasar'
 import { computed } from 'vue'
 import { useRoute } from 'vue-router'
-import { mdiCodeTags } from '@quasar/extras/mdi-v6'
+import { mdiCodeTags } from '@quasar/extras/mdi-v7'
 
 import getMeta from 'assets/get-meta.js'
 

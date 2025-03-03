@@ -41,6 +41,12 @@ export default {
     pagination: (start, end, total) => start + '-' + end + ' z ' + total,
     columns: 'Stĺpce'
   },
+  pagination: {
+    first: 'Prvá stránka',
+    prev: 'Predchádzajúca stránka',
+    next: 'Ďalšia stránka',
+    last: 'Posledná stránka'
+  },
   editor: {
     url: 'URL',
     bold: 'Tučné',

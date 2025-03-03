@@ -51,7 +51,7 @@ export default {
 
     const qConf = $q.config[ cordova === true ? 'cordova' : 'capacitor' ]
 
-    if (qConf !== void 0 && qConf.backButton === false) return
+    if (qConf?.backButton === false) return
 
     // if the '@capacitor/app' plugin is not installed
     // then we got nothing to do

@@ -149,7 +149,7 @@ export default createComponent({
       timer = setTimeout(() => {
         timer = null
         animating.value = false
-        done && done()
+        done?.()
       }, 300)
     }
 

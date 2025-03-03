@@ -8,7 +8,7 @@ import {
   mdiImageSizeSelectSmall,
   mdiTable,
   mdiHumanMaleBoard
-} from '@quasar/extras/mdi-v6'
+} from '@quasar/extras/mdi-v7'
 
 export const mostUsedPages = [
   {

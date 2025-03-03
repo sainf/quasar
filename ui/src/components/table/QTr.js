@@ -18,6 +18,9 @@ export default createComponent({
       + (props.noHover === true ? ' q-tr--no-hover' : '')
     )
 
-    return () => h('tr', { class: classes.value }, hSlot(slots.default))
+    return () => h('tr', {
+      style: props.props?.__trStyle,
+      class: classes.value
+    }, hSlot(slots.default))
   }
 })

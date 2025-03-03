@@ -41,6 +41,12 @@ export default {
     pagination: (start, end, total) => start + '-' + end + ' នៃ ' + total,
     columns: 'ជួរឈរ'
   },
+  pagination: {
+    first: 'ទំព័រដំបូង',
+    prev: 'ទំព័រមុន',
+    next: 'ទំព័របន្ទាប់',
+    last: 'ទំព័រចុងក្រោយ'
+  },
   editor: {
     url: 'URL',
     bold: 'ដិត',

@@ -1,6 +1,6 @@
 import { QMenu, QIcon, QList, QItem, QItemSection, QItemLabel, QSeparator, Screen } from 'quasar'
 import { h } from 'vue'
-import { mdiMenuRight } from '@quasar/extras/mdi-v6'
+import { mdiMenuRight } from '@quasar/extras/mdi-v7'
 
 const offset = [ 0, 4 ]
 

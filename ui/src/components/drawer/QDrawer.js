@@ -120,7 +120,7 @@ export default createComponent({
 
       if (belowBreakpoint.value === true) {
         const otherInstance = $layout.instances[ otherSide.value ]
-        if (otherInstance !== void 0 && otherInstance.belowBreakpoint === true) {
+        if (otherInstance?.belowBreakpoint === true) {
           otherInstance.hide(false)
         }
 
@@ -472,9 +472,7 @@ export default createComponent({
       timerMini = setTimeout(() => {
         timerMini = null
         flagMiniAnimate.value = false
-        if (vm && vm.proxy && vm.proxy.$el) {
-          vm.proxy.$el.classList.remove('q-drawer--mini-animate')
-        }
+        vm?.proxy?.$el?.classList.remove('q-drawer--mini-animate')
       }, 150)
     }
 
@@ -622,7 +620,7 @@ export default createComponent({
     })
 
     onBeforeUnmount(() => {
-      layoutTotalWidthWatcher !== void 0 && layoutTotalWidthWatcher()
+      layoutTotalWidthWatcher?.()
 
       if (timerMini !== null) {
         clearTimeout(timerMini)

@@ -41,6 +41,12 @@ export default {
     pagination: (start, end, total) => start + '-' + end + ' di ' + total,
     columns: 'Colonne'
   },
+  pagination: {
+    first: 'Prima pagina',
+    prev: 'Pagina precedente',
+    next: 'Prossima pagina',
+    last: 'Ultima pagina'
+  },
   editor: {
     url: 'URL',
     bold: 'Grassetto',

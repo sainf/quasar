@@ -563,6 +563,50 @@
       "category": "style"
     },
 
+    "table-row-style-fn": {
+      "type": "Function",
+      "desc": "CSS style to apply to the table rows (which are TR elements); For best performance, reference it from your scope and do not define it inline",
+      "params": {
+        "row": {
+          "type": "Object",
+          "desc": "The current row being processed",
+          "examples": [ "{ name: 'Frozen Yogurt', calories: 159 }" ]
+        }
+      },
+      "returns": {
+        "type": "String",
+        "desc": "CSS style to apply to the row",
+        "examples": [
+          "'color: blue'",
+          "'background-color: #ff0000; color: green'"
+        ]
+      },
+      "category": "style",
+      "addedIn": "v2.18"
+    },
+
+    "table-row-class-fn": {
+      "type": "Function",
+      "desc": "CSS class(es) to apply the table rows (which are TR elements); For best performance, reference it from your scope and do not define it inline",
+      "params": {
+        "row": {
+          "type": "Object",
+          "desc": "The current row being processed",
+          "examples": [ "{ name: 'Frozen Yogurt', calories: 159 }" ]
+        }
+      },
+      "returns": {
+        "type": "String",
+        "desc": "CSS class(es) to apply to the row, space separated",
+        "examples": [
+          "'my-special-class'",
+          "'my-class my-second-class'"
+        ]
+      },
+      "category": "style",
+      "addedIn": "v2.18"
+    },
+
     "card-container-style": {
       "type": [ "String", "Array", "Object" ],
       "tsType": "VueStyleProp",
@@ -606,6 +650,50 @@
         "{ 'my-special-class': true }"
       ],
       "category": "style"
+    },
+
+    "card-style-fn": {
+      "type": "Function",
+      "desc": "(Grid mode only) CSS style to apply to the row/record card; Has no effect when the 'item' slot is used; For best performance, reference it from your scope and do not define it inline",
+      "params": {
+        "row": {
+          "type": "Object",
+          "desc": "The current row/record being processed",
+          "examples": [ "{ name: 'Frozen Yogurt', calories: 159 }" ]
+        }
+      },
+      "returns": {
+        "type": "String",
+        "desc": "CSS style to apply to the row/record",
+        "examples": [
+          "'color: blue'",
+          "'background-color: #ff0000; color: green'"
+        ]
+      },
+      "category": "style",
+      "addedIn": "v2.18"
+    },
+
+    "card-class-fn": {
+      "type": "Function",
+      "desc": "(Grid mode only) CSS class(es) to apply the row/record card; Has no effect when the 'item' slot is used; For best performance, reference it from your scope and do not define it inline",
+      "params": {
+        "row": {
+          "type": "Object",
+          "desc": "The current row/record being processed",
+          "examples": [ "{ name: 'Frozen Yogurt', calories: 159 }" ]
+        }
+      },
+      "returns": {
+        "type": "String",
+        "desc": "CSS class(es) to apply to the row, space separated",
+        "examples": [
+          "'my-special-class'",
+          "'my-class my-second-class'"
+        ]
+      },
+      "category": "style",
+      "addedIn": "v2.18"
     },
 
     "title-class": {
@@ -896,6 +984,12 @@
         "__trClass": {
           "type": "String",
           "desc": "Internal prop passed down to QTr (if used)"
+        },
+        "__trStyle": {
+          "type": "String",
+          "required": false,
+          "desc": "Internal prop passed down to QTr (if used)",
+          "addedIn": "v2.18"
         }
       }
     },
@@ -1848,6 +1942,10 @@
           "type": "String",
           "desc": "The suggested icon name (following Quasar convention)",
           "examples": [ "'warning'" ]
+        },
+        "filter": {
+          "type": [ "String", "Object" ],
+          "desc": "String/Object to filter table with (the 'filter' prop)"
         }
       }
     }

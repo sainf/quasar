@@ -53,6 +53,12 @@ export default {
     pagination: (start, end, total) => start + '-' + end + ' iš ' + total,
     columns: 'Stulpeliai'
   },
+  pagination: {
+    first: 'Pirmasis puslapis',
+    prev: 'Ankstesnis puslapis',
+    next: 'Kitas puslapis',
+    last: 'Paskutinis puslapis'
+  },
   editor: {
     url: 'URL',
     bold: 'Paryškintasis',

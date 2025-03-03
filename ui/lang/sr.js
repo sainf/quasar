@@ -41,6 +41,12 @@ export default {
     pagination: (start, end, total) => start + '-' + end + ' od ' + total,
     columns: 'Kolone'
   },
+  pagination: {
+    first: 'Prva stranica',
+    prev: 'Prethodna stranica',
+    next: 'Sledeća stranica',
+    last: 'Poslednja stranica'
+  },
   editor: {
     url: 'URL',
     bold: 'Podebljano',

@@ -256,7 +256,7 @@ export default function morph (_options) {
 
     // we clean the clone of the initial element
     elFromClone.remove()
-    elFromTween !== void 0 && elFromTween.remove()
+    elFromTween?.remove()
 
     options.hideFromClone === true && elFromClone.classList.remove('q-morph--internal')
 
@@ -301,7 +301,7 @@ export default function morph (_options) {
 
       // we clean the clone of the initial element
       elFromClone.remove()
-      elFromTween !== void 0 && elFromTween.remove()
+      elFromTween?.remove()
 
       options.hideFromClone === true && elFromClone.classList.remove('q-morph--internal')
 
@@ -516,12 +516,15 @@ export default function morph (_options) {
           elTo.style.cssText = elToStyleSaved
           elTo.className = elToClassSaved
         }
-        elToClone.parentNode === elToParent && elToParent.insertBefore(elTo, elToClone)
+
+        if (elToClone.parentNode === elToParent) {
+          elToParent.insertBefore(elTo, elToClone)
+        }
 
         // we clean the spacers
         elFromClone.remove()
         elToClone.remove()
-        elFromTween !== void 0 && elFromTween.remove()
+        elFromTween?.remove()
 
         // cancel will be no longer available
         cancel = () => false
@@ -677,9 +680,9 @@ export default function morph (_options) {
         })
 
         const cleanup = abort => {
-          animationFromClone !== void 0 && animationFromClone.cancel()
-          animationFromTween !== void 0 && animationFromTween.cancel()
-          animationToClone !== void 0 && animationToClone.cancel()
+          animationFromClone?.cancel()
+          animationFromTween?.cancel()
+          animationToClone?.cancel()
           animationTo.cancel()
 
           animationTo.removeEventListener('finish', cleanup)
@@ -721,9 +724,9 @@ export default function morph (_options) {
 
           endElementTo = endElementTo !== true
 
-          animationFromClone !== void 0 && animationFromClone.reverse()
-          animationFromTween !== void 0 && animationFromTween.reverse()
-          animationToClone !== void 0 && animationToClone.reverse()
+          animationFromClone?.reverse()
+          animationFromTween?.reverse()
+          animationToClone?.reverse()
           animationTo.reverse()
 
           return true

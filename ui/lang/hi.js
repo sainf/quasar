@@ -41,6 +41,12 @@ export default {
     pagination: (start, end, total) => start + '-' + end + ' कुल ' + total,
     columns: 'कॉलम'
   },
+  pagination: {
+    first: 'पहला पृष्ठ',
+    prev: 'पिछला पृष्ठ',
+    next: 'अगला पृष्ठ',
+    last: 'अंतिम पृष्ठ'
+  },
   editor: {
     url: 'URL',
     bold: 'बोल्ड',

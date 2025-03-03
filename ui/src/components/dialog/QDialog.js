@@ -180,7 +180,7 @@ export default createComponent({
       animating.value = true
 
       if (props.noFocus !== true) {
-        document.activeElement !== null && document.activeElement.blur()
+        document.activeElement?.blur()
         registerTick(focus)
       }
       else {
@@ -230,7 +230,7 @@ export default createComponent({
       hidePortal()
 
       if (refocusTarget !== null) {
-        ((evt && evt.type.indexOf('key') === 0
+        ((evt?.type.indexOf('key') === 0
           ? refocusTarget.closest('[tabindex]:not([tabindex^="-"])')
           : void 0
         ) || refocusTarget).focus()

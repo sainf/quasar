@@ -34,7 +34,7 @@ const originalDefaults = {
 const defaults = { ...originalDefaults }
 
 function registerProps (opts) {
-  if (opts && opts.group !== void 0 && activeGroups[ opts.group ] !== void 0) {
+  if (opts?.group !== void 0 && activeGroups[ opts.group ] !== void 0) {
     return Object.assign(activeGroups[ opts.group ], opts)
   }
 

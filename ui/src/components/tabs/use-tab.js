@@ -99,13 +99,13 @@ export default function (props, slots, emit, routeData) {
   ))
 
   function onClick (e, keyboard) {
-    if (keyboard !== true && blurTargetRef.value !== null) {
-      blurTargetRef.value.focus()
+    if (keyboard !== true && e?.qAvoidFocus !== true) {
+      blurTargetRef.value?.focus()
     }
 
     if (props.disable === true) {
       // we should hinder native navigation though
-      if (routeData !== void 0 && routeData.hasRouterLink.value === true) {
+      if (routeData?.hasRouterLink.value === true) {
         stopAndPrevent(e)
       }
       return
@@ -140,7 +140,7 @@ export default function (props, slots, emit, routeData) {
               if (
                 hardError === void 0 && (
                   softError === void 0
-                  || (softError.message !== void 0 && softError.message.startsWith('Avoided redundant navigation') === true)
+                  || (softError.message?.startsWith('Avoided redundant navigation') === true)
                 )
               ) {
                 $tabs.updateModel({ name: props.name })

@@ -203,7 +203,7 @@ export default createComponent({
     }
 
     function select () {
-      inputRef.value !== null && inputRef.value.select()
+      inputRef.value?.select()
     }
 
     function onPaste (e) {
@@ -340,7 +340,7 @@ export default createComponent({
         emitTimer = null
       }
 
-      emitValueFn !== void 0 && emitValueFn()
+      emitValueFn?.()
 
       emit('change', e.target.value)
     }
@@ -353,7 +353,7 @@ export default createComponent({
         emitTimer = null
       }
 
-      emitValueFn !== void 0 && emitValueFn()
+      emitValueFn?.()
 
       typedNumber = false
       stopValueWatcher = false

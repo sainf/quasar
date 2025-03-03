@@ -45,6 +45,12 @@ export default {
     pagination: (start, end, total) => start + '-' + end + ' из ' + total,
     columns: 'Бағандар'
   },
+  pagination: {
+    first: 'Бірінші бет',
+    prev: 'Алдыңғы бет',
+    next: 'Келесі бет',
+    last: 'Соңғы бет'
+  },
   editor: {
     url: 'URL',
     bold: 'Қалың',

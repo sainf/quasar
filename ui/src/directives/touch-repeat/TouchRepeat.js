@@ -186,8 +186,8 @@ export default createDirective(__QUASAR_SSR_SERVER__
           end (evt) {
             if (ctx.event === void 0) return
 
-            ctx.styleCleanup !== void 0 && ctx.styleCleanup(true)
-            evt !== void 0 && ctx.event.repeatCount > 0 && stopAndPrevent(evt)
+            ctx.styleCleanup?.(true)
+            if ((evt !== void 0) && (ctx.event.repeatCount > 0)) stopAndPrevent(evt)
 
             cleanEvt(ctx, 'temp')
 
@@ -248,7 +248,7 @@ export default createDirective(__QUASAR_SSR_SERVER__
           cleanEvt(ctx, 'main')
           cleanEvt(ctx, 'temp')
 
-          ctx.styleCleanup !== void 0 && ctx.styleCleanup()
+          ctx.styleCleanup?.()
 
           delete el.__qtouchrepeat
         }

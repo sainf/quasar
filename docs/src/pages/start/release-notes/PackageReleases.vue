@@ -35,7 +35,7 @@
 
 <script setup>
 import { ref, computed, watch } from 'vue'
-import { mdiMagnify } from '@quasar/extras/mdi-v6'
+import { mdiMagnify } from '@quasar/extras/mdi-v7'
 
 const props = defineProps(['releases'])
 

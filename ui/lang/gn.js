@@ -41,6 +41,12 @@ export default {
     pagination: (start, end, total) => start + '-' + end + ' de ' + total,
     columns: 'Columnakuéra'
   },
+  pagination: {
+    first: 'Aña kuatia',
+    prev: 'Kuatia ohasáva',
+    next: 'Kuatia ohasáva',
+    last: 'Kuatia última'
+  },
   editor: {
     url: 'URL',
     bold: 'Negrita',

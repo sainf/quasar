@@ -221,8 +221,8 @@ export default createDirective(__QUASAR_SSR_SERVER__
 
             cleanEvt(ctx, 'temp')
             client.is.firefox === true && preventDraggable(el, false)
-            ctx.styleCleanup !== void 0 && ctx.styleCleanup(true)
-            evt !== void 0 && ctx.event.dir !== false && stopAndPrevent(evt)
+            ctx.styleCleanup?.(true)
+            if ((evt !== void 0) && (ctx.event.dir !== false)) stopAndPrevent(evt)
 
             ctx.event = void 0
           }
@@ -268,7 +268,7 @@ export default createDirective(__QUASAR_SSR_SERVER__
           cleanEvt(ctx, 'temp')
 
           client.is.firefox === true && preventDraggable(el, false)
-          ctx.styleCleanup !== void 0 && ctx.styleCleanup()
+          ctx.styleCleanup?.()
 
           delete el.__qtouchswipe
         }

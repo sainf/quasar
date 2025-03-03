@@ -157,6 +157,10 @@ Pay attention to the code in the "style" section in the following examples, espe
 
 <DocExample title="Custom column" file="CustomColumn" />
 
+::: tip
+For all the styling component properties, please check the API card at the top of the page.
+:::
+
 <DocExample title="Custom coloring" file="CustomColor" />
 
 <DocExample title="No header/footer" file="NoHeaderFooter" />

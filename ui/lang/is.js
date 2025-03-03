@@ -41,6 +41,12 @@ export default {
     pagination: (start, end, total) => start + '-' + end + ' af ' + total,
     columns: 'Dálkar'
   },
+  pagination: {
+    first: 'Fyrsta blaðsíða',
+    prev: 'Fyrri blaðsíða',
+    next: 'Næsta blaðsíða',
+    last: 'Síðasta blaðsíða'
+  },
   editor: {
     url: 'Slóð',
     bold: 'Feitletra',

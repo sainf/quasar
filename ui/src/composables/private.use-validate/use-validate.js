@@ -201,7 +201,7 @@ export default function (focused, innerLoading) {
   const debouncedValidate = debounce(validate, 0)
 
   onBeforeUnmount(() => {
-    unwatchRules !== void 0 && unwatchRules()
+    unwatchRules?.()
     debouncedValidate.cancel()
   })
 

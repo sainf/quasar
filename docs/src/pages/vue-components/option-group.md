@@ -62,6 +62,12 @@ The objects within the `options` array can hold any of the props found in QToggl
 
 <DocExample title="Disable Certain Options" file="DisableCertainOptions" />
 
+### Custom Label, Value and Disable props <q-badge label="v2.17+" />
+
+By default, QOptionGroup looks at `label`, `value`, `disable` props of each option from the options array Objects. But you can override those:
+
+<DocExample title="Custom Label, Value and Disable props" file="CustomOptionProps" />
+
 ### Force dark mode
 
 <DocExample title="Force dark mode" file="Dark" />

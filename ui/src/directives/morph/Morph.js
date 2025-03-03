@@ -44,7 +44,7 @@ function trigger (group) {
     },
     ...to.opts,
     onEnd (dir, aborted) {
-      to.opts.onEnd !== void 0 && to.opts.onEnd(dir, aborted)
+      to.opts.onEnd?.(dir, aborted)
 
       if (aborted === true) return
 
@@ -206,7 +206,7 @@ export default createDirective(__QUASAR_SSR_SERVER__
             group.queue = group.queue.filter(item => item !== ctx)
 
             if (group.queue.length === 0) {
-              group.cancel !== void 0 && group.cancel()
+              group.cancel?.()
               delete morphGroups[ ctx.group ]
             }
           }

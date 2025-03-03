@@ -265,12 +265,12 @@ export default function (state) {
 
   function focusHandler () {
     const el = document.activeElement
-    let target = state.targetRef !== void 0 && state.targetRef.value
+    let target = state.targetRef?.value
 
     if (target && (el === null || el.id !== state.targetUid.value)) {
       target.hasAttribute('tabindex') === true || (target = target.querySelector('[tabindex]'))
-      if (target && target !== el) {
-        target.focus({ preventScroll: true })
+      if (target !== el) {
+        target?.focus({ preventScroll: true })
       }
     }
   }
@@ -318,7 +318,7 @@ export default function (state) {
         emit('blur', e)
       }
 
-      then !== void 0 && then()
+      then?.()
     })
   }
 
@@ -327,7 +327,7 @@ export default function (state) {
     stopAndPrevent(e)
 
     if ($q.platform.is.mobile !== true) {
-      const el = (state.targetRef !== void 0 && state.targetRef.value) || state.rootRef.value
+      const el = state.targetRef?.value || state.rootRef.value
       el.focus()
     }
     else if (state.rootRef.value.contains(document.activeElement) === true) {

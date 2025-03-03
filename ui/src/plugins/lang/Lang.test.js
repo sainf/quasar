@@ -61,6 +61,12 @@ describe('[Lang API]', () => {
             pagination: expect.any(Function),
             columns: expect.any(String)
           },
+          pagination: {
+            first: expect.any(String),
+            last: expect.any(String),
+            next: expect.any(String),
+            prev: expect.any(String)
+          },
           editor: {
             url: expect.any(String),
             bold: expect.any(String),
@@ -172,6 +178,12 @@ describe('[Lang API]', () => {
               allRows: 'All',
               pagination: (start, end, total) => start + '-' + end + ' of ' + total,
               columns: 'Columns'
+            },
+            pagination: {
+              first: expect.any(String),
+              last: expect.any(String),
+              next: expect.any(String),
+              prev: expect.any(String)
             },
             editor: {
               url: 'URL',

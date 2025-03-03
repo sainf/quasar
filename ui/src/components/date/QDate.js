@@ -906,7 +906,7 @@ export default createComponent({
 
     function toggleDate (date, monthHash) {
       const month = daysMap.value[ monthHash ]
-      const fn = month !== void 0 && month.includes(date.day) === true
+      const fn = month?.includes(date.day) === true
         ? removeFromModel
         : addToModel
 

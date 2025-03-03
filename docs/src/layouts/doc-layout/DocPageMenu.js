@@ -8,7 +8,7 @@ import {
   Ripple
 } from 'quasar'
 
-import { mdiMenuDown } from '@quasar/extras/mdi-v6'
+import { mdiMenuDown } from '@quasar/extras/mdi-v7'
 import { h, ref, watch, onBeforeUpdate, withDirectives } from 'vue'
 import { useRoute } from 'vue-router'
 

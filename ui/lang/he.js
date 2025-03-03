@@ -42,6 +42,12 @@ export default {
     pagination: (start, end, total) => start + '-' + end + ' מתוך ' + total,
     columns: 'עמודות'
   },
+  pagination: {
+    first: 'עמוד ראשון', 
+    prev: 'עמוד קודם',
+    next: 'העמוד הבא',
+    last: 'העמוד האחרון'
+  },
   editor: {
     url: 'כתובת אתר',
     bold: 'בולט',

@@ -11,5 +11,5 @@
 </template>
 
 <script setup>
-import { mdiTextBoxSearchOutline } from '@quasar/extras/mdi-v6'
+import { mdiTextBoxSearchOutline } from '@quasar/extras/mdi-v7'
 </script>

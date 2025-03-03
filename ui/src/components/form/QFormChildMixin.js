@@ -30,13 +30,15 @@ export default {
 
   mounted () {
     // register to parent QForm
-    const $form = this.$.provides[ formKey ]
-    $form !== void 0 && this.disable !== true && $form.bindComponent(this)
+    if (this.disable !== true) {
+      this.$.provides[ formKey ]?.bindComponent(this)
+    }
   },
 
   beforeUnmount () {
     // un-register from parent QForm
-    const $form = this.$.provides[ formKey ]
-    $form !== void 0 && this.disable !== true && $form.unbindComponent(this)
+    if (this.disable !== true) {
+      this.$.provides[ formKey ]?.unbindComponent(this)
+    }
   }
 }

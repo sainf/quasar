@@ -149,7 +149,7 @@ function addNotification (config, $q, originalApi) {
       ? defaults.actions
       : []
   ).concat(
-    notifTypes[ config.type ] !== void 0 && Array.isArray(notifTypes[ config.type ].actions) === true
+    Array.isArray(notifTypes[ config.type ]?.actions) === true
       ? notifTypes[ config.type ].actions
       : []
   )

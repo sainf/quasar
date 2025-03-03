@@ -63,6 +63,19 @@
       :rows="rows"
       :columns="columns"
       row-key="name"
+      :table-row-class-fn="row => row.calories % 2 === 0 ? 'bg-red-1' : 'bg-yellow-1'"
+      :table-row-style-fn="row => row.calories % 2 === 0 ? 'color:blue' : 'color:green'"
+    />
+
+    <q-table
+      class="q-mt-lg"
+      grid
+      :rows="rows"
+      :columns="columns"
+      card-container-class="justify-center"
+      row-key="name"
+      :card-class-fn="row => row.fat % 2 === 0 ? 'bg-blue-1' : 'bg-yellow-1'"
+      :card-style-fn="row => row.fat % 2 === 0 ? 'color:blue' : 'color:red'"
     />
   </div>
 </template>

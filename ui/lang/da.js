@@ -41,6 +41,12 @@ export default {
     pagination: (start, end, total) => start + '-' + end + ' af ' + total,
     columns: 'Kolonner'
   },
+  pagination: {
+    first: 'Første side',
+    prev: 'Forrige side',
+    next: 'Næste side',
+    last: 'Sidste side'
+  },
   editor: {
     url: 'URL',
     bold: 'Fed',

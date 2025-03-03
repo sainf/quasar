@@ -57,14 +57,14 @@ export default function (DefaultComponent, supportsCustomComponent, parentApp) {
     const el = createGlobalNode(false, 'dialog')
 
     const applyState = cmd => {
-      if (dialogRef.value !== null && dialogRef.value[ cmd ] !== void 0) {
+      if (dialogRef.value?.[ cmd ] !== void 0) {
         dialogRef.value[ cmd ]()
         return
       }
 
       const target = vm.$.subTree
 
-      if (target && target.component) {
+      if (target?.component) {
         // account for "script setup" way of declaring component
         if (target.component.proxy && target.component.proxy[ cmd ]) {
           target.component.proxy[ cmd ]()

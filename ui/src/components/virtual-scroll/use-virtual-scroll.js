@@ -40,7 +40,7 @@ const setOverflowAnchor = __QUASAR_SSR__ || window.getComputedStyle(document.bod
 
       const el = children[ index ]
 
-      if (el && el.dataset) {
+      if (el?.dataset) {
         el.dataset.qVsAnchor = ''
       }
     })
@@ -422,7 +422,7 @@ export function useVirtualScroll ({
       contentEl.addEventListener('focusout', onBlurRefocusFn)
 
       setTimeout(() => {
-        contentEl !== null && contentEl.removeEventListener('focusout', onBlurRefocusFn)
+        contentEl?.removeEventListener('focusout', onBlurRefocusFn)
       })
     }
 
@@ -533,7 +533,7 @@ export function useVirtualScroll ({
   }
 
   function onBlurRefocusFn () {
-    contentRef.value !== null && contentRef.value !== void 0 && contentRef.value.focus()
+    contentRef.value?.focus()
   }
 
   function localResetVirtualScroll (toIndex, fullReset) {

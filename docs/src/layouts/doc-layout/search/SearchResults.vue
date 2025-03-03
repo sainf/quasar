@@ -24,7 +24,7 @@
 </template>
 
 <script setup>
-import { mdiArrowUpBold, mdiArrowDownBold, mdiKeyboardReturn, mdiKeyboardEsc } from '@quasar/extras/mdi-v6'
+import { mdiArrowUpBold, mdiArrowDownBold, mdiKeyboardReturn, mdiKeyboardEsc } from '@quasar/extras/mdi-v7'
 
 import ResultEntry from './ResultEntry.vue'
 

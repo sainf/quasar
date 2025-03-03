@@ -1,7 +1,7 @@
 import { h, ref } from 'vue'
 import { QBadge, QBtn, Notify, QBtnToggle } from 'quasar'
 import { copyToClipboard } from 'assets/page-utils.js'
-import { mdiMinusBox, mdiPlusBox } from '@quasar/extras/mdi-v6'
+import { mdiMinusBox, mdiPlusBox } from '@quasar/extras/mdi-v7'
 
 function copyPropName (propName) {
   copyToClipboard(propName)

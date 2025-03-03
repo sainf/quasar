@@ -46,6 +46,12 @@ export default {
     pagination: (start, end, total) => start + '-' + end + ' من ' + total,
     columns: 'أعمدة'
   },
+  pagination: {
+    first: 'الصفحة الأولى',
+    prev: 'الصفحة السابقة',
+    next: 'الصفحة التالية',
+    last: 'الصفحة الأخيرة'
+  },
   editor: {
     url: 'رابط',
     bold: 'عريض',

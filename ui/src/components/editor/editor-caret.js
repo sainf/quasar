@@ -91,7 +91,7 @@ export default class Caret {
   get range () {
     const sel = this.selection
 
-    if (sel !== null && sel.rangeCount) {
+    if (sel?.rangeCount) {
       return sel.getRangeAt(0)
     }
 

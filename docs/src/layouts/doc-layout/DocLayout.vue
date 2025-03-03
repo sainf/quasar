@@ -34,7 +34,7 @@
 
 <script setup>
 import { computed } from 'vue'
-import { mdiArrowUp } from '@quasar/extras/mdi-v6'
+import { mdiArrowUp } from '@quasar/extras/mdi-v7'
 
 import { provideDocStore } from './store/index.js'
 

@@ -40,6 +40,12 @@ export default {
     pagination: (start, end, total) => start + '-' + end + ' ／ ' + total,
     columns: '列' // 'Columns'
   },
+  pagination: {
+    first: '最初のページ',
+    prev: '前のページ',
+    next: '次のページ',
+    last: '最後のページ'
+  },
   editor: {
     url: 'URL', // 'URL',
     bold: '太字', // 'Bold',

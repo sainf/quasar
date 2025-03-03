@@ -126,9 +126,7 @@ export default createComponent({
         isWorking.value = false
         isFetching.value = false
         localScrollTarget.removeEventListener('scroll', poll, passive)
-        if (poll !== void 0 && poll.cancel !== void 0) {
-          poll.cancel()
-        }
+        poll?.cancel?.()
       }
     }
 
@@ -240,7 +238,7 @@ export default createComponent({
     // expose public methods
     const vm = getCurrentInstance()
     Object.assign(vm.proxy, {
-      poll: () => { poll !== void 0 && poll() },
+      poll: () => { poll?.() },
       trigger, stop, reset, resume, setIndex, updateScrollTarget
     })
 

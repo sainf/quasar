@@ -273,7 +273,7 @@ export default createComponent({
     const needsHtmlFn = computed(() => (
       props.optionsHtml === true
         ? () => true
-        : opt => opt !== void 0 && opt !== null && opt.html === true
+        : opt => opt?.html === true
     ))
 
     const valueAsHtml = computed(() => (
@@ -533,7 +533,7 @@ export default createComponent({
           hidePopup()
         }
 
-        targetRef.value !== null && targetRef.value.focus()
+        targetRef.value?.focus()
 
         if (
           innerValue.value.length === 0
@@ -545,7 +545,9 @@ export default createComponent({
         return
       }
 
-      (hasDialog !== true || dialogFieldFocused.value === true) && state.focus()
+      if (hasDialog !== true || dialogFieldFocused.value === true) {
+        state.focus()
+      }
 
       selectInputText()
 
@@ -894,7 +896,7 @@ export default createComponent({
           fn(val, mode === 'add-unique')
 
           if (props.multiple !== true) {
-            targetRef.value !== null && targetRef.value.focus()
+            targetRef.value?.focus()
             hidePopup()
           }
         }
@@ -1214,7 +1216,7 @@ export default createComponent({
 
     function onDialogFieldFocus (e) {
       stop(e)
-      targetRef.value !== null && targetRef.value.focus()
+      targetRef.value?.focus()
       dialogFieldFocused.value = true
       window.scrollTo(window.pageXOffset || window.scrollX || document.body.scrollLeft || 0, 0)
     }
@@ -1511,7 +1513,7 @@ export default createComponent({
 
           if (hasDialog !== true && menu.value === true) {
             closeMenu()
-            targetRef.value !== null && targetRef.value.focus()
+            targetRef.value?.focus()
             return
           }
 

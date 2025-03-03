@@ -163,8 +163,8 @@ export default createComponent({
     Object.assign(proxy, {
       set,
       cancel,
-      show (e) { menuRef.value !== null && menuRef.value.show(e) },
-      hide (e) { menuRef.value !== null && menuRef.value.hide(e) },
+      show (e) { menuRef.value?.show(e) },
+      hide (e) { menuRef.value?.hide(e) },
       updatePosition
     })
 

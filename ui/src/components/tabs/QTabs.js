@@ -424,7 +424,7 @@ export default createComponent({
     function updateActiveRoute () {
       let name = null, bestScore = { matchedLen: 0, queryDiff: 9999, hrefLen: 0 }
 
-      const list = tabDataList.filter(tab => tab.routeData !== void 0 && tab.routeData.hasRouterLink.value === true)
+      const list = tabDataList.filter(tab => tab.routeData?.hasRouterLink.value === true)
       const { hash: currentHash, query: currentQuery } = proxy.$route
       const currentQueryLen = Object.keys(currentQuery).length
 
@@ -632,7 +632,7 @@ export default createComponent({
     function cleanup () {
       animateTimer !== null && clearTimeout(animateTimer)
       stopAnimScroll()
-      unwatchRoute !== void 0 && unwatchRoute()
+      unwatchRoute?.()
     }
 
     let hadRouteWatcher, hadActivated

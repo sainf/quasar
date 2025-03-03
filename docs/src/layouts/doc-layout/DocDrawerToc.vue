@@ -25,7 +25,7 @@
 </template>
 
 <script setup>
-import { mdiClose } from '@quasar/extras/mdi-v6'
+import { mdiClose } from '@quasar/extras/mdi-v7'
 
 import { useDocStore } from './store/index.js'
 

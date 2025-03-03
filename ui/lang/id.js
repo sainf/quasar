@@ -41,6 +41,12 @@ export default {
     pagination: (start, end, total) => start + '-' + end + ' dari ' + total,
     columns: 'Kolom'
   },
+  pagination: {
+    first: 'Halaman pertama',
+    prev: 'Halaman sebelumnya',
+    next: 'Halaman berikutnya',
+    last: 'Halaman terakhir'
+  },
   editor: {
     url: 'URL',
     bold: 'Tebal',

@@ -53,7 +53,7 @@ export default createComponent({
     })
 
     function emitEvent () {
-      clearTimer !== null && clearTimer()
+      clearTimer?.()
 
       const top = Math.max(0, getVerticalScrollPosition(localScrollTarget))
       const left = getHorizontalScrollPosition(localScrollTarget)
@@ -123,7 +123,7 @@ export default createComponent({
     })
 
     onBeforeUnmount(() => {
-      clearTimer !== null && clearTimer()
+      clearTimer?.()
       unconfigureScrollTarget()
     })
 

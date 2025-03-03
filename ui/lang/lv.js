@@ -41,6 +41,12 @@ export default {
     pagination: (start, end, total) => start + '-' + end + ' no ' + total,
     columns: 'Kolonnas'
   },
+  pagination: {
+    first: 'Pirmā lapa',
+    prev: 'Iepriekšējā lapa',
+    next: 'Nākamā lapa',
+    last: 'Pēdējā lapa'
+  },
   editor: {
     url: 'URL',
     bold: 'Trekns',

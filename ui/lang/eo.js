@@ -41,6 +41,12 @@ export default {
     pagination: (start, end, total) => start + '-' + end + ' el ' + total,
     columns: 'Kolumnoj'
   },
+  pagination: {
+    first: 'Unua paĝo',
+    prev: 'Antaŭa paĝo',
+    next: 'Sekva paĝo',
+    last: 'Lasta paĝo'
+  },
   editor: {
     url: 'URL',
     bold: 'Grasa',

@@ -114,7 +114,7 @@ export default createComponent({
           if (props.onSubmit !== void 0) {
             emit('submit', evt)
           }
-          else if (evt !== void 0 && evt.target !== void 0 && typeof evt.target.submit === 'function') {
+          else if (evt?.target !== void 0 && typeof evt.target.submit === 'function') {
             evt.target.submit()
           }
         }
@@ -143,7 +143,7 @@ export default createComponent({
           || rootRef.value.querySelector('[autofocus], [data-autofocus]')
           || Array.prototype.find.call(rootRef.value.querySelectorAll('[tabindex]'), el => el.tabIndex !== -1)
 
-        target !== null && target !== void 0 && target.focus({ preventScroll: true })
+        target?.focus({ preventScroll: true })
       })
     }
 

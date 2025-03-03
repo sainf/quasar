@@ -41,6 +41,12 @@ export default {
     pagination: (start, end, total) => start + '-' + end + ' o ' + total,
     columns: 'Poutū'
   },
+  pagination: {
+    first: 'Itulau muamua',
+    prev: 'Itulau muamua',
+    next: 'Isi Itulau',
+    last: 'Itulau mulimuli'
+  },
   editor: {
     url: 'Tuātusi initaneti',
     bold: 'Fa\'aolaola',

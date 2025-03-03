@@ -37,6 +37,12 @@ export default {
     pagination: (start, end, total) => start + '-' + end + ' toplam ' + total,
     columns: 'Sütunlar'
   },
+  pagination: {
+    first: 'İlk sayfa',
+    prev: 'Önceki sayfa',
+    next: 'Sonraki Sayfa',
+    last: 'Son Sayfa'
+  },
   editor: {
     url: 'URL',
     bold: 'Kalın',

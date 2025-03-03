@@ -41,6 +41,12 @@ export default {
     pagination: (start, end, total) => start + '-' + end + ' / ' + total,
     columns: 'Oszlopok'
   },
+  pagination: {
+    first: 'Első oldal',
+    prev: 'Előző oldal',
+    next: 'Következő oldal',
+    last: 'Utolsó oldal'
+  },
   editor: {
     url: 'URL',
     bold: 'Félkövér',

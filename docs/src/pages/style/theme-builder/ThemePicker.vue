@@ -110,7 +110,7 @@ import {
 
 import {
   mdiArrowLeft, mdiMagnify, mdiMenu, mdiMapMarkerRadius
-} from '@quasar/extras/mdi-v6'
+} from '@quasar/extras/mdi-v7'
 
 import DocCode from 'src/components/DocCode.vue'
 

@@ -87,7 +87,7 @@ export function useTableSort (props, computedPagination, colList, setPagination)
     }
     else {
       const def = colList.value.find(def => def.name === col)
-      if (def !== void 0 && def.sortOrder) {
+      if (def?.sortOrder) {
         sortOrder = def.sortOrder
       }
     }

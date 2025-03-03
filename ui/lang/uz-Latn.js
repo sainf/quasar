@@ -47,6 +47,12 @@ export default {
     pagination: (start, end, total) => start + '-' + end + ' jami ' + total,
     columns: 'Ustunlar'
   },
+  pagination: {
+    first: 'Birinchi sahifa',
+    prev: 'Oldingi sahifa',
+    next: 'Keyingi sahifa',
+    last: 'So\'nggi sahifa'
+  },
   editor: {
     url: 'URL',
     bold: 'Qalin',

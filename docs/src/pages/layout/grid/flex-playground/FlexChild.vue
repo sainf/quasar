@@ -28,7 +28,7 @@
 
 <script setup>
 import { computed, onMounted } from 'vue'
-import { mdiClose, mdiCloseCircle } from '@quasar/extras/mdi-v6'
+import { mdiClose, mdiCloseCircle } from '@quasar/extras/mdi-v7'
 
 const widthOptions = [
   { label: 'none', value: '' },

@@ -371,7 +371,7 @@ import { ref, reactive, computed } from 'vue'
 
 import {
   mdiMenu, mdiViewDashboard, mdiCog, mdiPlayCircleOutline
-} from '@quasar/extras/mdi-v6'
+} from '@quasar/extras/mdi-v7'
 
 import getMeta from 'assets/get-meta.js'
 import DocCode from 'src/components/DocCode.vue'

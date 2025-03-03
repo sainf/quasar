@@ -40,6 +40,12 @@ export default {
     pagination: (start, end, total) => start + '-' + end + ' / ' + total,
     columns: 'Senaraikan'
   },
+  pagination: {
+    first: 'Halaman pertama',
+    prev: 'Halaman sebelumnya',
+    next: 'Halaman seterusnya',
+    last: 'Halaman terakhir'
+  },
   editor: {
     url: 'URL',
     bold: 'berani',

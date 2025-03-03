@@ -41,8 +41,11 @@ export default createComponent({
 
     cover: Boolean,
     persistent: Boolean,
+    noEscDismiss: Boolean,
     noRouteDismiss: Boolean,
     autoClose: Boolean,
+    noRefocus: Boolean,
+    noFocus: Boolean,
 
     menuAnchor: {
       type: String,
@@ -102,7 +105,7 @@ export default createComponent({
     const btnProps = computed(() => passBtnProps(props))
 
     watch(() => props.modelValue, val => {
-      menuRef.value !== null && menuRef.value[ val ? 'show' : 'hide' ]()
+      menuRef.value?.[ val ? 'show' : 'hide' ]()
     })
 
     watch(() => props.split, hide)
@@ -138,15 +141,15 @@ export default createComponent({
     }
 
     function toggle (evt) {
-      menuRef.value !== null && menuRef.value.toggle(evt)
+      menuRef.value?.toggle(evt)
     }
 
     function show (evt) {
-      menuRef.value !== null && menuRef.value.show(evt)
+      menuRef.value?.show(evt)
     }
 
     function hide (evt) {
-      menuRef.value !== null && menuRef.value.hide(evt)
+      menuRef.value?.hide(evt)
     }
 
     // expose public methods
@@ -175,8 +178,11 @@ export default createComponent({
           cover: props.cover,
           fit: true,
           persistent: props.persistent,
+          noEscDismiss: props.noEscDismiss,
           noRouteDismiss: props.noRouteDismiss,
           autoClose: props.autoClose,
+          noFocus: props.noFocus,
+          noRefocus: props.noRefocus,
           anchor: props.menuAnchor,
           self: props.menuSelf,
           offset: props.menuOffset,

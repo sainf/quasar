@@ -41,6 +41,12 @@ export default {
     pagination: (start, end, total) => start + '-' + end + ' od ' + total,
     columns: 'Stolpci'
   },
+  pagination: {
+    first: 'Prva stran',
+    prev: 'Prejšnja stran',
+    next: 'Naslednja stran',
+    last: 'Zadnja stran'
+  },
   editor: {
     url: 'URL',
     bold: 'Krepko',

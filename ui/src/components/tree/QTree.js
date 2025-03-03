@@ -334,7 +334,7 @@ export default createComponent({
             node[ props.childrenKey ] = Array.isArray(children) === true ? children : []
             nextTick(() => {
               const localMeta = meta.value[ key ]
-              if (localMeta && localMeta.isParent === true) {
+              if (localMeta?.isParent === true) {
                 localSetExpanded(key, true)
               }
             })
@@ -627,8 +627,7 @@ export default createComponent({
     }
 
     function blur (key) {
-      const blurTarget = blurTargets[ key ]
-      blurTarget && blurTarget.focus()
+      blurTargets[ key ]?.focus()
     }
 
     function onClick (node, meta, e, keyboard) {

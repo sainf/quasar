@@ -73,6 +73,13 @@
       "category": "behavior"
     },
 
+    "no-esc-dismiss": {
+      "type": "Boolean",
+      "desc": "User cannot dismiss the popup by hitting ESC key; No need to set it if 'persistent' prop is also set",
+      "category": "behavior",
+      "addedIn": "v2.18"
+    },
+
     "no-route-dismiss": {
       "type": "Boolean",
       "desc": "Changing route app won't dismiss the popup; No need to set it if 'persistent' prop is also set",
@@ -83,6 +90,20 @@
       "type": "Boolean",
       "desc": "Allows any click/tap in the menu to close it; Useful instead of attaching events to each menu item that should close the menu on click/tap",
       "category": "behavior"
+    },
+
+    "no-refocus": {
+      "type": "Boolean",
+      "desc": "(Accessibility) When the dropdown gets hidden, do not refocus on the DOM element that previously had focus",
+      "category": "behavior",
+      "addedIn": "v2.18"
+    },
+
+    "no-focus": {
+      "type": "Boolean",
+      "desc": "(Accessibility) When the dropdown gets shown, do not switch focus on it",
+      "category": "behavior",
+      "addedIn": "v2.18"
     },
 
     "menu-anchor": {

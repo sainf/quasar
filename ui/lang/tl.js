@@ -41,6 +41,12 @@ export default {
     pagination: (start, end, total) => start + '-' + end + ' ng ' + total,
     columns: 'Mga hanay'
   },
+  pagination: {
+    first: 'Unang pahina',
+    prev: 'Nakaraang pahina',
+    next: 'Susunod na pahina',
+    last: 'Huling pahina'
+  },
   editor: {
     url: 'URL',
     bold: 'Matapang',

@@ -150,7 +150,7 @@ export default createComponent({
     })
 
     watch(() => props.group, name => {
-      exitGroup !== void 0 && exitGroup()
+      exitGroup?.()
       name !== void 0 && enterGroup()
     })
 
@@ -164,7 +164,10 @@ export default createComponent({
     }
 
     function toggleIcon (e, keyboard) {
-      keyboard !== true && blurTargetRef.value !== null && blurTargetRef.value.focus()
+      if (keyboard !== true && e.qAvoidFocus !== true) {
+        blurTargetRef.value?.focus()
+      }
+
       toggle(e)
       stopAndPrevent(e)
     }
@@ -360,7 +363,7 @@ export default createComponent({
     props.group !== void 0 && enterGroup()
 
     onBeforeUnmount(() => {
-      exitGroup !== void 0 && exitGroup()
+      exitGroup?.()
     })
 
     return () => h('div', { class: classes.value }, [

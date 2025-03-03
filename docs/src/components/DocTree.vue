@@ -32,7 +32,7 @@
 </template>
 
 <script setup>
-import { mdiLaunch, mdiInformationOutline } from '@quasar/extras/mdi-v6'
+import { mdiLaunch, mdiInformationOutline } from '@quasar/extras/mdi-v7'
 
 const props = defineProps({
   def: Object

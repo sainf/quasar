@@ -71,7 +71,7 @@ export default createReactivePlugin({
           visualViewport.height * visualViewport.scale + window.innerHeight - scrollingElement.clientHeight
         ]
 
-    const classes = $q.config.screen !== void 0 && $q.config.screen.bodyClasses === true
+    const classes = $q.config.screen?.bodyClasses === true
 
     this.__update = force => {
       const [ w, h ] = getSize()

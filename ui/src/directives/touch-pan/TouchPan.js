@@ -355,7 +355,7 @@ export default createDirective(__QUASAR_SSR_SERVER__
             client.is.firefox === true && preventDraggable(el, false)
 
             if (abort === true) {
-              ctx.styleCleanup !== void 0 && ctx.styleCleanup()
+              ctx.styleCleanup?.()
 
               if (ctx.event.detected !== true && ctx.initialEvent !== void 0) {
                 ctx.initialEvent.target.dispatchEvent(ctx.initialEvent.event)
@@ -426,7 +426,7 @@ export default createDirective(__QUASAR_SSR_SERVER__
           cleanEvt(ctx, 'temp')
 
           client.is.firefox === true && preventDraggable(el, false)
-          ctx.styleCleanup !== void 0 && ctx.styleCleanup()
+          ctx.styleCleanup?.()
 
           delete el.__qtouchpan
         }

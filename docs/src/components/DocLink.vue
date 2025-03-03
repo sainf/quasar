@@ -22,7 +22,7 @@
 
 <script setup>
 import { computed } from 'vue'
-import { mdiLaunch } from '@quasar/extras/mdi-v6'
+import { mdiLaunch } from '@quasar/extras/mdi-v7'
 
 const props = defineProps({ to: String })
 const internal = computed(() => props.to.charAt(0) === '/')

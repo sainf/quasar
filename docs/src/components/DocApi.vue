@@ -81,7 +81,7 @@
 
 <script setup>
 import { ref, computed, watch, onMounted } from 'vue'
-import { mdiClose, mdiMagnify } from '@quasar/extras/mdi-v6'
+import { mdiClose, mdiMagnify } from '@quasar/extras/mdi-v7'
 
 import DocCardTitle from './DocCardTitle.vue'
 import DocApiEntry from './DocApiEntry.js'
