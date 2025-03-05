@@ -15,8 +15,9 @@ import { Options as OpenOptions } from "open";
 import { ServerOptions as ViteServerOptions } from "vite";
 import { QuasarContext } from "./context";
 
-type DevServerOptions = Omit<ViteServerOptions, "open"> & {
+type DevServerOptions = Omit<ViteServerOptions, "open" | "https"> & {
   open?: Omit<OpenOptions, "wait"> | boolean;
+  https?: ViteServerOptions["https"] | boolean;
 };
 
 type QuasarAnimationsConfiguration = "all" | QuasarAnimations[];

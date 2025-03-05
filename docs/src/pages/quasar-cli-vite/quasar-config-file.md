@@ -316,8 +316,9 @@ More info: [Vite server options](https://vitejs.dev/config/#server-options)
 ```js
 import { ServerOptions as ViteServerOptions } from "vite";
 import { Options as OpenOptions } from "open";
-type DevServerOptions = Omit<ViteServerOptions, "open"> & {
+type DevServerOptions = Omit<ViteServerOptions, "open" | "https"> & {
   open?: Omit<OpenOptions, "wait"> | boolean;
+  https?: ViteServerOptions["https"] | boolean;
 };
 
 /**

@@ -16,7 +16,7 @@
   },
   "dependencies": {
     <% if (preset.axios) { %>"axios": "^1.2.1",<% } %>
-    <% if (preset.i18n) { %>"vue-i18n": "^9.0.0",<% } %>
+    <% if (preset.i18n) { %>"vue-i18n": "^11.0.0",<% } %>
     <% if (preset.pinia) { %>"pinia": "^3.0.1",<% } %>
     "@quasar/extras": "^1.16.4",
     "quasar": "^2.16.0",
@@ -24,7 +24,7 @@
     "vue-router": "^4.0.0"
   },
   "devDependencies": {
-    <% if (preset.i18n) { %>"@intlify/unplugin-vue-i18n": "^2.0.0",<% } %>
+    <% if (preset.i18n) { %>"@intlify/unplugin-vue-i18n": "^4.0.0",<% } %>
     <% if (preset.eslint) { %>
     "@eslint/js": "^9.14.0",
     "eslint": "^9.14.0",
