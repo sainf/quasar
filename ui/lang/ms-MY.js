@@ -28,7 +28,14 @@ export default {
     }).format(date),
     firstDayOfWeek: 0, // 0-6, 0 - Sunday, 1 Monday, ...
     format24h: false,
-    pluralDay: 'hari'
+    pluralDay: 'hari',
+    prevMonth: 'Bulan sebelumnya',
+    nextMonth: 'Bulan depan',
+    prevYear: 'Tahun sebelumnya',
+    nextYear: 'Tahun depan',
+    today: 'Hari ini',
+    prevRangeYears: range => `Sebelumnya ${ range } tahun`,
+    nextRangeYears: range => `Seterusnya ${ range } tahun`
   },
   table: {
     noData: 'Tiada data tersedia',

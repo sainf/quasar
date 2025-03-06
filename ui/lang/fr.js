@@ -28,7 +28,14 @@ export default {
     }).format(date),
     firstDayOfWeek: 1, // 0-6, 0 - Sunday, 1 Monday, ...
     format24h: true,
-    pluralDay: 'jours'
+    pluralDay: 'jours',
+    prevMonth: 'Mois précédent',
+    nextMonth: 'Mois suivant',
+    prevYear: 'Année précédente',
+    nextYear: 'Année suivante',
+    today: 'Aujourd\'hui',
+    prevRangeYears: range => `Précédent ${ range } années`,
+    nextRangeYears: range => `Suivant ${ range } années`
   },
   table: {
     noData: 'Aucune donnée à afficher',

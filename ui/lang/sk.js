@@ -25,7 +25,14 @@ export default {
     monthsShort: 'Jan_Feb_Mar_Apr_Máj_Jún_Júl_Aug_Sep_Okt_Nov_Dec'.split('_'),
     firstDayOfWeek: 1, // 0-6, 0 - Sunday, 1 Monday, ...
     format24h: true,
-    pluralDay: 'dní'
+    pluralDay: 'dní',
+    prevMonth: 'Predchádzajúci mesiac',
+    nextMonth: 'Budúci mesiac',
+    prevYear: 'Predchádzajúci rok',
+    nextYear: 'Budúci rok',
+    today: 'Dnes',
+    prevRangeYears: range => `Predchádzajúce ${ range } roky`,
+    nextRangeYears: range => `Ďalej ${ range } roky`
   },
   table: {
     noData: 'Nie sú dostupné údaje',

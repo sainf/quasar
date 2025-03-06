@@ -25,7 +25,14 @@ export default {
     monthsShort: 'Gen_Feb_Mar_Abr_Mai_Jun_Jul_Ago_Set_Oct_Nov_Des'.split('_'),
     firstDayOfWeek: 1, // 0-6, 0 - Sunday, 1 Monday, ...
     format24h: true,
-    pluralDay: 'dies'
+    pluralDay: 'dies',
+    prevMonth: 'Mes anterior',
+    nextMonth: 'El mes vinent',
+    prevYear: 'Any anterior',
+    nextYear: 'L\'any vinent',
+    today: 'Avui',
+    prevRangeYears: range => `Anterior ${ range } anys`,
+    nextRangeYears: range => `A continuació ${ range } anys`
   },
   table: {
     noData: 'No hi ha dades disponibles',

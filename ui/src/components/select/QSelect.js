@@ -962,6 +962,7 @@ export default createComponent({
 
       return [
         h('span', {
+          class: 'ellipsis',
           [ valueAsHtml.value === true ? 'innerHTML' : 'textContent' ]: ariaCurrentValue.value
         })
       ]

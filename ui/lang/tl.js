@@ -25,7 +25,14 @@ export default {
     monthsShort: 'Ene_Peb_Mar_Abr_Mayo_Hun_Hul_Ago_Set_Okt_Nob_Dis'.split('_'),
     firstDayOfWeek: 0, // 0-6, 0 - Sunday, 1 Monday, ...
     format24h: false,
-    pluralDay: 'araw'
+    pluralDay: 'araw',
+    prevMonth: 'Nakaraang buwan',
+    nextMonth: 'Susunod na buwan',
+    prevYear: 'Nakaraang taon',
+    nextYear: 'Susunod na taon',
+    today: 'Ngayon',
+    prevRangeYears: range => `Nakaraang ${ range } taon`,
+    nextRangeYears: range => `Susunod na ${ range } taon`
   },
   table: {
     noData: 'Walang available na data',

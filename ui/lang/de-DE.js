@@ -25,7 +25,14 @@ export default {
     monthsShort: 'Jan_Feb_März_Apr_Mai_Jun_Jul_Aug_Sep_Okt_Nov_Dez'.split('_'),
     firstDayOfWeek: 1, // 0-6, 0 - Sunday, 1 Monday, ...
     format24h: true,
-    pluralDay: 'Tage'
+    pluralDay: 'Tage',
+    prevMonth: 'Vorheriger Monat',
+    nextMonth: 'Nächster Monat',
+    prevYear: 'Vorheriges Jahr',
+    nextYear: 'Nächstes Jahr',
+    today: 'Heute',
+    prevRangeYears: range => `Vorherige ${ range } Jahre`,
+    nextRangeYears: range => `Nächste ${ range } Jahre`
   },
   table: {
     noData: 'Keine Daten vorhanden.',

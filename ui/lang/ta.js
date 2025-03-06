@@ -25,7 +25,14 @@ export default {
     monthsShort: 'ஜன_பிப்_மார்_ஏப்_மே_ஜூன்_ஜூலை_ஆக_செப்_அக்_நவ_டிச'.split('_'),
     firstDayOfWeek: 0, // 0-6, 0 - Sunday, 1 Monday, ...
     format24h: false,
-    pluralDay: 'நாட்கள்'
+    pluralDay: 'நாட்கள்',
+    prevMonth: 'முந்தைய மாதம்',
+    nextMonth: 'அடுத்த மாதம்',
+    prevYear: 'முந்தைய ஆண்டு',
+    nextYear: 'அடுத்த வருடம்',
+    today: 'இன்று',
+    prevRangeYears: range => `முந்தைய ${ range } ஆண்டுகள்`,
+    nextRangeYears: range => `அடுத்து ${ range } ஆண்டுகள்`
   },
   table: {
     noData: 'தரவு எதுவும் கிடைக்கவில்லை',

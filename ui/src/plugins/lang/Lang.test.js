@@ -49,7 +49,14 @@ describe('[Lang API]', () => {
             monthsShort: expect.any(Array),
             firstDayOfWeek: expect.any(Number),
             format24h: expect.any(Boolean),
-            pluralDay: expect.any(String)
+            pluralDay: expect.any(String),
+            prevMonth: expect.any(String),
+            nextMonth: expect.any(String),
+            prevYear: expect.any(String),
+            nextYear: expect.any(String),
+            today: expect.any(String),
+            prevRangeYears: expect.any(Function),
+            nextRangeYears: expect.any(Function)
           },
           table: {
             noData: expect.any(String),
@@ -167,7 +174,14 @@ describe('[Lang API]', () => {
               monthsShort: [ 'Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec' ],
               firstDayOfWeek: 0,
               format24h: true,
-              pluralDay: 'days'
+              pluralDay: 'days',
+              prevMonth: expect.any(String),
+              nextMonth: expect.any(String),
+              prevYear: expect.any(String),
+              nextYear: expect.any(String),
+              today: expect.any(String),
+              prevRangeYears: expect.any(Function),
+              nextRangeYears: expect.any(Function)
             },
             table: {
               noData: 'No data available',

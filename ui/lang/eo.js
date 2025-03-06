@@ -25,7 +25,14 @@ export default {
     monthsShort: 'Jan_Feb_Mar_Apr_Maj_Jun_Jul_Aŭg_Sep_Okt_Nov_Dec'.split('_'),
     firstDayOfWeek: 1, // 0-6, 0 - Sunday, 1 Monday, ...
     format24h: true,
-    pluralDay: 'tagoj'
+    pluralDay: 'tagoj',
+    prevMonth: 'Antaŭa monato',
+    nextMonth: 'Venontan monaton',
+    prevYear: 'Antaŭa jaro',
+    nextYear: 'Venontjare',
+    today: 'Hodiaŭ',
+    prevRangeYears: range => `Antaŭ ${ range } jaroj`,
+    nextRangeYears: range => `Post ${ range } jaroj`
   },
   table: {
     noData: 'Neniu datumo afiŝenda',

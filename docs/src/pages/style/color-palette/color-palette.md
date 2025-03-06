@@ -171,7 +171,7 @@ setCssVar('primary-darkened', lighten(newPrimaryColor, -10))
 
 You can set up some brand colors without tampering with the Sass/SCSS variables.
 
-See the [Configuration](/style/color-palette#configuration) section above for setting it during initial configuration for Quasar CLI, Vite plugin/Vue CLI, and UMD projects.
+See the [Configuration](/style/color-palette#configuration) section above for setting it during initial configuration for Quasar CLI, Quasar Vite plugin, and UMD projects.
 
 If you are using Quasar CLI, you can also use a [@quasar/app-vite Boot File](/quasar-cli-vite/boot-files) or a [@quasar/app-webpack Boot File](/quasar-cli-webpack/boot-files).
 This is especially useful if you want to change the colors dynamically at initial load time, perhaps after fetching them from an API.

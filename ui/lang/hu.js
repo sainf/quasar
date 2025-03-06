@@ -25,7 +25,14 @@ export default {
     monthsShort: 'Jan_Feb_Már_Ápr_Máj_Jún_Júl_Aug_Szep_Okt_Nov_Dec'.split('_'),
     firstDayOfWeek: 1, // 0-6, 0 - Sunday, 1 Monday, ...
     format24h: true,
-    pluralDay: 'nap'
+    pluralDay: 'nap',
+    prevMonth: 'Előző hónap',
+    nextMonth: 'Következő hónapban',
+    prevYear: 'Előző év',
+    nextYear: 'Jövőre',
+    today: 'Ma',
+    prevRangeYears: range => `Előző ${ range } évek`,
+    nextRangeYears: range => `Következő ${ range } évek`
   },
   table: {
     noData: 'Nincs elérhető adat',

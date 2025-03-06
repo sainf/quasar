@@ -32,7 +32,14 @@ export default {
     ),
     firstDayOfWeek: 1, // 0-6, 0 - Yakshanba, 1 Dushanba, ...
     format24h: true,
-    pluralDay: 'Kunlar'
+    pluralDay: 'Kunlar',
+    prevMonth: 'Oldingi oy',
+    nextMonth: 'Keyingi oy',
+    prevYear: 'O\'tgan yili',
+    nextYear: 'Keyingi yil',
+    today: 'Bugun',
+    prevRangeYears: range => `Oldingi ${ range } Yillar`,
+    nextRangeYears: range => `Keyingi ${ range } Yillar`
   },
   table: {
     noData: 'Ma\'lumotlar topilmadi',

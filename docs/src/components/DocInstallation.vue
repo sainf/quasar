@@ -17,7 +17,7 @@
         <DocCode :code="QuasarCli" />
       </q-tab-panel>
 
-      <q-tab-panel class="q-pa-none" name="Vite plugin / Vue CLI">
+      <q-tab-panel class="q-pa-none" name="Vite plugin">
         <DocCode :code="ExternalCli" />
       </q-tab-panel>
 
@@ -47,7 +47,7 @@ const props = defineProps({
   }
 })
 
-const tabList = [ 'Quasar CLI', 'Vite plugin / Vue CLI', 'UMD' ]
+const tabList = [ 'Quasar CLI', 'Vite plugin', 'UMD' ]
 const currentTab = ref('Quasar CLI')
 
 const id = computed(() => slugify(props.title))

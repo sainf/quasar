@@ -26,9 +26,7 @@ animations: [
 
 If you are building a website, you can also skip configuring the quasar.config file and use a CDN link which points to Animate.css like this (following is just an example, Google for latest link). Remember this will require an Internet connection for your user, as opposed to bundling from within the quasar.config file.
 
-```html
-<!-- @quasar/app-vite: /index.html -->
-<!-- @quasar/app-webpack: src/index.template.html -->
+```html /index.html
 <head>
   ...
 

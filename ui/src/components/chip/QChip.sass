@@ -18,15 +18,19 @@
     .q-chip__icon
       color: inherit
 
-  &--outline
-    background: transparent !important
-    border: 1px solid currentColor
-
   .q-avatar
     font-size: $chip-avatar-font-size
     margin-left: -.45em
     margin-right: .2em
     border-radius: 16px
+
+  &--outline
+    background: transparent !important
+    border: 1px solid currentColor
+
+    .q-avatar
+      // half padding and border width:
+      margin-left: calc(-.45em - 1px)
 
   &--selected
     .q-avatar

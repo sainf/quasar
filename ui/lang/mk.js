@@ -25,7 +25,14 @@ export default {
     monthsShort: 'Јан_Фев_Мар_Апр_Мај_Јун_Јул_Авг_Сеп_Окт_Ное_Дек'.split('_'),
     firstDayOfWeek: 0, // 0-6, 0 - Недела, 1 - Понеделник, ...
     format24h: false,
-    pluralDay: 'денови'
+    pluralDay: 'денови',
+    prevMonth: 'Претходниот месец',
+    nextMonth: 'Следниот месец',
+    prevYear: 'Претходна година',
+    nextYear: 'Следната година',
+    today: 'Денес',
+    prevRangeYears: range => `Претходно ${ range } години`,
+    nextRangeYears: range => `Следно ${ range } години`
   },
   table: {
     noData: 'Нема достапни податоци',

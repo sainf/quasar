@@ -358,6 +358,12 @@
         <q-chip v-bind="chipProps" outline icon="bookmark">
           Bookmark
         </q-chip>
+        <q-chip v-bind="chipProps" outline color="orange">
+          <q-avatar>
+            <img src="https://cdn.quasar.dev/img/boy-avatar.png">
+          </q-avatar>
+          Add to calendar
+        </q-chip>
         <q-chip v-bind="chipProps" outline color="primary" icon="event" removable>
           Add to calendar
         </q-chip>

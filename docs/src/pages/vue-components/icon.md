@@ -525,7 +525,7 @@ Should you want, you can customize the mapping of icon names. This can be done b
 
 - Set `IconSet.iconMapFn` in an entry file:
   - In a boot file if using Quasar CLI (with Vite or Webpack)
-  - In `main.js`/`main.ts`(_or similar_) if using Vite plugin and Vue CLI
+  - In `main.js`/`main.ts`(_or similar_) if using Quasar Vite plugin
   - In any suitable file or script tag if using UMD
 - Set `$q.iconMapFn` in the root component, e.g. `App.vue`:
   - At the top-level if using Composition API with `<script setup>`

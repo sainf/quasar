@@ -67,7 +67,7 @@
           <q-tab name="sass" no-caps label="Sass" />
           <q-tab name="scss" no-caps label="SCSS" />
           <q-tab name="quasar-cli" no-caps label="Quasar CLI" />
-          <q-tab name="umd" no-caps label="Vite / UMD / Vue CLI" />
+          <q-tab name="umd" no-caps label="Quasar Vite Plugin / UMD" />
         </q-tabs>
 
         <q-separator />
@@ -84,9 +84,6 @@
           </q-tab-panel>
           <q-tab-panel class="q-pa-none" name="umd">
             <doc-code copy :code="umdExport" />
-          </q-tab-panel>
-          <q-tab-panel class="q-pa-none" name="vue-cli">
-            <doc-code copy :code="vueCliExport" />
           </q-tab-panel>
         </q-tab-panels>
 

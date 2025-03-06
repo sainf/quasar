@@ -28,21 +28,19 @@ For a complete list of available Quasar Languages, check [Quasar Languages on Gi
 Unless configured otherwise (see below), Quasar uses the `en-US` Language Pack by default.
 
 ### Hardcoded
+
 If the default Quasar Language Pack is not dynamically determined (does not depend on cookies for example), then you can:
 
-#### Quasar CLI
-Edit the `/quasar.config` file:
+```tabs
+<<| js Quasar CLI |>>
+// quasar.config file
 
-```js /quasar.config file
 framework: {
   lang: 'de'
 }
-```
+<<| js Vite Plugin |>>
+// main.js file
 
-#### Quasar Vite Plugin
-Edit your `main.js`:
-
-```js
 // ...
 import { Quasar } from 'quasar'
 // ...
@@ -52,27 +50,7 @@ app.use(Quasar, {
   // ...,
   lang: langDe
 })
-```
-
-#### Vue CLI
-Edit your `main.js`:
-
-```js
-// ...
-import { Quasar } from 'quasar'
-// ...
-import langDe from 'quasar/lang/de'
-// ...
-app.use(Quasar, {
-  // ...,
-  lang: langDe
-})
-```
-
-#### Quasar UMD
-Include the language pack JS tag for your Quasar version and also tell Quasar to use it. Example:
-
-```html
+<<| html Quasar UMD |>>
 <!-- include this after Quasar JS tag -->
 <script src="https://cdn.jsdelivr.net/npm/quasar@2/dist/lang/de.umd.prod.js"></script>
 <script>
@@ -80,13 +58,16 @@ Include the language pack JS tag for your Quasar version and also tell Quasar to
 </script>
 ```
 
-Check what tags you need to include in your HTML files on [UMD / Standalone](/start/umd) page.
+::: tip
+For **Quasar UMD**, check what tags you may still need to include in your HTML files on [UMD / Standalone](/start/umd) page.
+:::
 
 ### Dynamical (non-SSR)
 Quasar CLI: If your desired Quasar Language Pack must be dynamically selected (example: depends on a cookie), then you need to create a boot file: `$ quasar new boot quasar-lang-pack [--format ts]`. This will create `/src/boot/quasar-lang-pack.js` file. Edit it to:
 
 ```tabs
 <<| js With @quasar/app-vite |>>
+import { defineBoot } from '#q-app/wrappers'
 import { Lang } from 'quasar'
 
 // relative path to your node_modules/quasar/..
@@ -95,7 +76,7 @@ const langList = import.meta.glob('../../node_modules/quasar/lang/*.js')
 // or just a select few (example below with only DE and FR):
 // import.meta.glob('../../node_modules/quasar/lang/(de|fr).js')
 
-export default async () => {
+export default defineBoot(async () => {
   const langIso = 'de' // ... some logic to determine it (use Cookies Plugin?)
 
   try {
@@ -108,11 +89,12 @@ export default async () => {
     // Requested Quasar Language Pack does not exist,
     // let's not break the app, so catching error
   }
-}
+})
 <<| js With @quasar/app-webpack |>>
+import { defineBoot } from '#q-app/wrappers'
 import { Lang } from 'quasar'
 
-export default async () => {
+export default defineBoot(async () => {
   const langIso = 'de' // ... some logic to determine it (use Cookies Plugin?)
 
   try {
@@ -128,7 +110,7 @@ export default async () => {
     // Requested Quasar Language Pack does not exist,
     // let's not break the app, so catching error
   }
-}
+})
 ```
 
 Then register this boot file into the `/quasar.config` file:
@@ -148,6 +130,7 @@ When dealing with SSR, we can't use singleton objects because that would pollute
 
 ```tabs
 <<| js With @quasar/app-vite |>>
+import { defineBoot } from '#q-app/wrappers'
 import { Lang } from 'quasar'
 
 // relative path to your node_modules/quasar/..
@@ -157,7 +140,7 @@ const langList = import.meta.glob('../../node_modules/quasar/lang/*.js')
 // import.meta.glob('../../node_modules/quasar/lang/(de|fr).js')
 
 // ! NOTICE ssrContext param:
-export default async ({ ssrContext }) => {
+export default defineBoot(async ({ ssrContext }) => {
   const langIso = 'de' // ... some logic to determine it (use Cookies Plugin?)
 
   try {
@@ -170,12 +153,13 @@ export default async ({ ssrContext }) => {
     // Requested Quasar Language Pack does not exist,
     // let's not break the app, so catching error
   }
-}
+})
 <<| js With @quasar/app-webpack |>>
+import { defineBoot } from '#q-app/wrappers'
 import { Lang } from 'quasar'
 
 // ! NOTICE ssrContext param:
-export default async ({ ssrContext }) => {
+export default defineBoot(async ({ ssrContext }) => {
   const langIso = 'de' // ... some logic to determine it (use Cookies Plugin?)
 
   try {
@@ -191,7 +175,7 @@ export default async ({ ssrContext }) => {
     // Requested Quasar Language Pack does not exist,
     // let's not break the app, so catching error
   }
-}
+})
 ```
 
 ## Change Quasar Language Pack at Runtime
@@ -329,17 +313,18 @@ methods: {
 If you want to do this outside of a .vue file (and you are NOT on SSR mode) then you can
 
 ```js /src/boot/some-boot-file.js
+import { defineBoot } from '#q-app/wrappers'
 import { Lang } from 'quasar'
 
-export default () {
+export default defineBoot(() {
   Lang.props.table.noData = 'Hey... there is no data...'
-}
+})
 ```
 
 ## Using Quasar Language Pack in App Space
 Although the Quasar Language Packs **are designed only for Quasar components internal usage**, you can still use their labels for your own website/app components too.
 
-```html
+```
 "Close" label in current Quasar Language Pack is:
 {{ $q.lang.label.close }}
 ```

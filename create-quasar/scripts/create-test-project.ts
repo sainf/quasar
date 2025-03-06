@@ -1,7 +1,7 @@
 import prompts from 'prompts';
 
 type ScriptType = 'js' | 'ts';
-type AppEngine = 'vite-1' | 'vite-2' | 'webpack-3' | 'webpack-4';
+type AppEngine = 'vite-2' | 'webpack-4';
 type PackageManager = 'yarn' | 'npm' | 'pnpm';
 
 type CreateProjectOptions = {
@@ -23,7 +23,6 @@ export async function createProject({ scriptType, appEngine, packageManager }: C
     projectFolder: 'test-project',
     overwrite: true,
 
-    quasarVersion: 'v2',
     scriptType: scriptType,
     engine: appEngine,
 
@@ -35,15 +34,9 @@ export async function createProject({ scriptType, appEngine, packageManager }: C
     // The defaults
     sfcStyle: 'composition-setup',
     css: 'scss',
-    ...(appEngine === 'vite-1' || appEngine === 'webpack-3'
-      ? {
-          preset: ['lint'],
-          lintConfig: 'prettier',
-        }
-      : {
-          preset: ['eslint'],
-          prettier: true,
-        }),
+
+    preset: ['eslint'],
+    prettier: true,
 
     packageManager,
   });

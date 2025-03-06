@@ -25,14 +25,14 @@ This guide assumes you have already installed VS Code(Visual Studio Code).
 - [Quasar Docs](https://marketplace.visualstudio.com/items?itemName=CodeCoaching.quasar-docs)
 - [Common Intellisense](https://marketplace.visualstudio.com/items?itemName=simonhe.common-intellisense)
 
-## Quasar CLI
+## Quasar CLI (Vite/Webpack)
 
 If you created your project with Quasar CLI, you already have the recommended VS Code configuration. 💪
 
 When you open your project on VS Code, it will prompt you to install our recommended extensions if you haven't installed them already.
 Just restart VS Code after installing them and you are ready to go! 🚀
 
-## Vite & Vue CLI & UMD
+## Quasar Vite Plugin
 
 Depending on which features/presets you are using, you can add the related options to `.vscode/settings.json`.
 

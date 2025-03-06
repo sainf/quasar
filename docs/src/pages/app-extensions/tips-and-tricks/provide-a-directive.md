@@ -78,7 +78,7 @@ function extendConf (conf, api) {
   // @quasar/app-vite does not need this
   if (api.hasVite !== true) {
     // make sure boot & other files get transpiled
-    conf.build.transpileDependencies.push(/quasar-app-extension-my-directive[\\/]src/)
+    conf.build.webpackTranspileDependencies.push(/quasar-app-extension-my-directive[\\/]src/)
   }
 }
 ```

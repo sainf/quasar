@@ -86,32 +86,6 @@ $ pnpm add vue@3 @quasar/extras@latest
 $ bun add vue@3 @quasar/extras@latest
 ```
 
-### With Vue CLI
-
-```bash
-$ yarn upgrade quasar
-# or other package manager equivalent
-```
-
-Optionally, you may also want to make sure that you have the latest `vue-cli-plugin-quasar` package.
-
-It's recommended to keep `vue` and `@quasar/extras` packages up to date too:
-
-```tabs
-<<| bash Yarn |>>
-# optional, but recommended
-$ yarn add vue@3 @quasar/extras@latest
-<<| bash NPM |>>
-# optional, but recommended
-$ npm install --save vue@3 @quasar/extras@latest
-<<| bash PNPM |>>
-# optional, but recommended
-$ pnpm add vue@3 @quasar/extras@latest
-<<| bash Bun |>>
-# optional, but recommended
-$ bun add vue@3 @quasar/extras@latest
-```
-
 ## Migrate to v2 from v1
 
 **This guide refers to Quasar CLI & UMD projects**, but information from here can be used for Vue CLI too. For developers already using Vue CLI on your projects you can check out how to install the [vue-cli-plugin-quasar](/start/vue-cli-plugin) package that works with Quasar v2. You will also need to make a few changes to your main.js (and also upgrade your Vue CLI project to support Vue 3) too (best way currently is to generate a new Vue CLI project for Vue 3 and then following the [install steps](/start/vue-cli-plugin#add-vue-cli-quasar-plugin) for the vue-cli-plugin-quasar and check out the changes incurred to that /src folder, then apply the same principle to your current Vue CLI project).

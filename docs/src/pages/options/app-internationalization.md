@@ -24,32 +24,67 @@ If you missed enabling i18n during `yarn create quasar` (or `npm init quasar@lat
 
 ```tabs
 <<| bash Yarn |>>
-$ yarn add vue-i18n@next
+$ yarn add vue-i18n
 <<| bash NPM |>>
-$ npm install --save vue-i18n@next
+$ npm install --save vue-i18n
 <<| bash PNPM |>>
-$ pnpm add vue-i18n@next
+$ pnpm add vue-i18n
 <<| bash Bun |>>
-$ bun add vue-i18n@next
+$ bun add vue-i18n
 ```
 
 2. Create a file `src/boot/i18n.js` with following content:
 
-```js
+```tabs
+<<| js JS |>>
+import { defineBoot } from '#q-app/wrappers'
 import { createI18n } from 'vue-i18n'
 import messages from 'src/i18n'
 
-export default ({ app }) => {
-  // Create I18n instance
+export default defineBoot(({ app }) => {
   const i18n = createI18n({
     locale: 'en-US',
-    legacy: false, // comment this out if not using Composition API
+    globalInjection: true,
     messages
   })
 
-  // Tell app to use the I18n instance
+  // Set i18n instance on app
   app.use(i18n)
+})
+<<| js TypeScript |>>
+import { defineBoot } from '#q-app/wrappers';
+import { createI18n } from 'vue-i18n';
+
+import messages from 'src/i18n';
+
+export type MessageLanguages = keyof typeof messages;
+// Type-define 'en-US' as the master schema for the resource
+export type MessageSchema = typeof messages['en-US'];
+
+// See https://vue-i18n.intlify.dev/guide/advanced/typescript.html#global-resource-schema-type-definition
+/* eslint-disable @typescript-eslint/no-empty-object-type */
+declare module 'vue-i18n' {
+  // define the locale messages schema
+  export interface DefineLocaleMessage extends MessageSchema {}
+
+  // define the datetime format schema
+  export interface DefineDateTimeFormat {}
+
+  // define the number format schema
+  export interface DefineNumberFormat {}
 }
+/* eslint-enable @typescript-eslint/no-empty-object-type */
+
+export default defineBoot(({ app }) => {
+  const i18n = createI18n<{ message: MessageSchema }, MessageLanguages>({
+    locale: 'en-US',<% if (sfcStyle === 'composition' || sfcStyle === 'composition-setup') { %>
+    legacy: false,<% } %>
+    messages,
+  });
+
+  // Set i18n instance on app
+  app.use(i18n);
+});
 ```
 
 3. Create a folder (/src/i18n/) in your app which will hold the definitions for each language that you'll support. Example: [src/i18n](https://github.com/quasarframework/quasar-starter-kit/tree/master/template/src/i18n). Notice the "import messages from 'src/i18n'" from step 2. This is step where you write the content that gets imported.
@@ -69,50 +104,50 @@ return {
 
 Now you are ready to use it in your pages.
 
-## Setting up Translation Blocks in your SFCs
+## Setting up Translation Blocks in your SFCs <q-badge label="@quasar/app-vite only" />
+
+::: warning
+The following section applies to projects that use @quasar/app-vite only!
+:::
 
 If we want to add support to the `<i18n>` tag inside a SFC (single file component) in a Quasar CLI project then we need to modify the existing configuration.
 
-We first install the `@intlify/vue-i18n-loader` package:
+We first install the `@intlify/unplugin-vue-i18n` package:
 
 ```tabs
 <<| bash Yarn |>>
-$ yarn add --dev @intlify/vue-i18n-loader
+$ yarn add --dev @intlify/unplugin-vue-i18n
 <<| bash NPM |>>
-$ npm install --save-dev @intlify/vue-i18n-loader
+$ npm install --save-dev @intlify/unplugin-vue-i18n
 <<| bash PNPM |>>
-$ pnpm add -D @intlify/vue-i18n-loader
+$ pnpm add -D @intlify/unplugin-vue-i18n
 <<| bash Bun |>>
-$ bun add --dev @intlify/vue-i18n-loader
+$ bun add --dev @intlify/unplugin-vue-i18n
 ```
 
-We then edit the `quasar.config` file at the root of our project. We have to include the following:
+Then we edit the /quasar.config file:
 
 ```js /quasar.config file
 import { fileURLToPath } from 'node:url'
 
-build: {
-  chainWebpack: chain => {
-    chain.module
-      .rule('i18n-resource')
-        .test(/\.(json5?|ya?ml)$/)
-          .include.add(
-            fileURLToPath(
-              new URL('./src/i18n', import.meta.url)
-            )
-          )
-          .end()
-        .type('javascript/auto')
-        .use('i18n-resource')
-          .loader('@intlify/vue-i18n-loader')
+// ...
 
-    chain.module
-      .rule('i18n')
-        .resourceQuery(/blockType=i18n/)
-        .type('javascript/auto')
-        .use('i18n')
-          .loader('@intlify/vue-i18n-loader')
-  }
+build: {
+  vitePlugins: [
+    ['@intlify/unplugin-vue-i18n/vite', {
+      // if you want to use Vue I18n Legacy API, you need to set `compositionOnly: false`
+      // compositionOnly: false,
+
+      // if you want to use named tokens in your Vue I18n messages, such as 'Hello {name}',
+      // you need to set `runtimeOnly: false`
+      // runtimeOnly: false,
+
+      ssr: ctx.modeName === 'ssr',
+
+      // you need to set i18n resource including paths !
+      include: [ fileURLToPath(new URL('./src/i18n', import.meta.url)) ]
+    }]
+  ]
 }
 ```
 
@@ -135,7 +170,6 @@ Here is an example displaying the main use cases:
 </template>
 
 <script setup>
-// Composition API variant
 import { computed } from 'vue'
 import { useI18n } from 'vue-i18n'
 
@@ -154,20 +188,6 @@ function notify() {
     type: 'positive',
     message: t('hello')
   })
-}
-</script>
-```
-
-```html
-<script>
-// Options API variant
-export default {
-  data() {
-    return {
-      // bound to a reactive variable, but one-time assignment, locale changes will not update the value
-      content: this.$t('hello')
-    }
-  }
 }
 </script>
 ```
@@ -208,22 +228,15 @@ export default {
   <!-- ...... -->
 </template>
 
-<script>
+<script setup>
 import { useI18n } from 'vue-i18n'
 
-export default {
-  setup () {
-    const { locale } = useI18n({ useScope: 'global' })
+const { locale } = useI18n({ useScope: 'global' })
 
-    return {
-      locale,
-      localeOptions: [
-        { value: 'en-US', label: 'English' },
-        { value: 'de', label: 'German' }
-      ]
-    }
-  }
-}
+const localeOptions: [
+  { value: 'en-US', label: 'English' },
+  { value: 'de', label: 'German' }
+]
 </script>
 ```
 
