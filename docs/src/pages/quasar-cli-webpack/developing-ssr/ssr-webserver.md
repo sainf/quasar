@@ -19,7 +19,7 @@ The `/src-ssr/server.js` file is used for both DEV and PROD, so please be carefu
  */
 
 /**
- * Make sure to yarn add / npm install (in your project root)
+ * Make sure to yarn/npm/pnpm/bun install (in your project root)
  * anything you import here (except for express and compression).
  */
 import express from 'express'
@@ -38,6 +38,21 @@ import {
  * connect-like middlewares.
  *
  * Can be async: defineSsrCreate(async ({ ... }) => { ... })
+ *
+ * Param: ({
+ *   port, // on dev: devServer port; on prod: process.env.PORT or quasar.config > ssr > prodPort
+ *   resolve: {
+ *      urlPath, // (url) => path string with publicPath ensured to be included,
+ *      root, // (pathPart1, ...pathPartN) => path string (joins to the root folder),
+ *      public // (pathPart1, ...pathPartN) => path string (joins to the public folder)
+ *   },
+ *   publicPath, // string
+ *   folders: {
+ *     root, // path string of the root folder
+ *     public // path string of the public folder
+ *   },
+ *   render // (ssrContext) => html string
+ * })
  */
 export const create = defineSsrCreate((/* { ... } */) => {
   const app = express()
@@ -67,6 +82,27 @@ export const create = defineSsrCreate((/* { ... } */) => {
  * handler for serverless use or whatever else fits your needs.
  *
  * Can be async: defineSsrListen(async ({ app, devHttpsApp, port }) => { ... })
+ *
+ * Param: ({
+ *   app, // Expressjs app or whatever is returned from create()
+ *   devHttpsApp, // DEV only, if using HTTPS
+ *   port, // on dev: devServer port; on prod: process.env.PORT or quasar.config > ssr > prodPort
+ *   resolve: {
+ *      urlPath, // (url) => path string with publicPath ensured to be included,
+ *      root, // (pathPart1, ...pathPartN) => path string (joins to the root folder),
+ *      public // (pathPart1, ...pathPartN) => path string (joins to the public folder)
+ *   },
+ *   publicPath, // string
+ *   folders: {
+ *     root, // path string of the root folder
+ *     public // path string of the public folder
+ *   },
+ *   render, // (ssrContext) => html string
+ *   serve: {
+ *     static, // ({ urlPath = '/', pathToServe = '.', opts = {} }) => void (OR whatever returned by serveStaticContent())
+ *     error // DEV only; ({ err, req, res }) => void
+ *   },
+ * })
  */
 export const listen = defineSsrListen(({ app, devHttpsApp, port }) => {
   const server = devHttpsApp || app
@@ -86,6 +122,28 @@ export const listen = defineSsrListen(({ app, devHttpsApp, port }) => {
  * you can use the "listenResult" param.
  *
  * Can be async: defineSsrClose(async ({ listenResult }) => { ... })
+ *
+ * Param: ({
+ *   app, // Expressjs app or whatever is returned from create()
+ *   devHttpsApp, // DEV only, if using HTTPS
+ *   port, // on dev: devServer port; on prod: process.env.PORT or quasar.config > ssr > prodPort
+ *   resolve: {
+ *      urlPath, // (url) => path string with publicPath ensured to be included,
+ *      root, // (pathPart1, ...pathPartN) => path string (joins to the root folder),
+ *      public // (pathPart1, ...pathPartN) => path string (joins to the public folder)
+ *   },
+ *   publicPath, // string
+ *   folders: {
+ *     root, // path string of the root folder
+ *     public // path string of the public folder
+ *   },
+ *   serve: {
+ *     static, // ({ urlPath = '/', pathToServe = '.', opts = {} }) => void (OR whatever returned by serveStaticContent())
+ *     error // DEV only; ({ err, req, res }) => void
+ *   },
+ *   render, // (ssrContext) => html string
+ *   listenResult // whatever returned from listen()
+ * })
  */
 export const close = defineSsrClose(({ listenResult }) => {
   return listenResult.close()
@@ -103,6 +161,22 @@ const maxAge = process.env.DEV
  *
  * Can be async: defineSsrServeStaticContent(async ({ app, resolve }) => {
  * Can return an async function: return async ({ urlPath = '/', pathToServe = '.', opts = {} }) => {
+ *
+ * Param: ({
+ *   app, // Expressjs app or whatever is returned from create()
+ *   port, // on dev: devServer port; on prod: process.env.PORT or quasar.config > ssr > prodPort
+ *   resolve: {
+ *      urlPath: (url) => path string with publicPath ensured to be included,
+ *      root: (pathPart1, ...pathPartN) => path string (joins to the root folder),
+ *      public: (pathPart1, ...pathPartN) => path string (joins to the public folder)
+ *   },
+ *   publicPath, // string
+ *   folders: {
+ *     root, // path string of the root folder
+ *     public // path string of the public folder
+ *   },
+ *   render: (ssrContext) => html string
+ * })
  */
 export const serveStaticContent = defineSsrServeStaticContent(({ app, resolve }) => {
   return ({ urlPath = '/', pathToServe = '.', opts = {} }) => {
@@ -159,54 +233,6 @@ export const renderPreloadTag = defineSsrRenderPreloadTag((file/* , { ssrContext
 ::: tip
 Remember that whatever the `listen()` function returns (if anything) will be exported from your built `dist/ssr/index.js`. You can return your ssrHandler for a serverless architecture should you need it.
 :::
-
-## Parameters
-
-```js
-export function <functionName> ({
-  app, port, isReady, ssrHandler,
-  resolve, publicPath, folders, render, serve
-}) => {
-```
-
-Detailing the Object:
-
-```js
-{
-  app,     // Expressjs app instance (or whatever you return from create())
-
-  port,    // on production: process∙env∙PORT or quasar.config file > ssr > prodPort
-           // on development: quasar.config file > devServer > port
-
-  isReady, // Function to call returning a Promise
-           // when app is ready to serve clients
-
-  ssrHandler, // Prebuilt app handler if your serverless service
-              // doesn't require a specific way to provide it.
-              // Form: ssrHandler (req, res, next)
-              // Tip: it uses isReady() under the hood already
-
-  // all of the following are the same as
-  // for the SSR middlewares (check its docs page);
-  // normally you don't need these here
-  // (use a real SSR middleware instead)
-  resolve: {
-    urlPath(path)
-    root(arg1, arg2),
-    public(arg1, arg2)
-  },
-  publicPath, // String
-  folders: {
-    root,     // String
-    public    // String
-  },
-  render(ssrContext),
-  serve: {
-    static({ urlPath, pathToServe, opts }),
-    error({ err, req, res })
-  }
-}
-```
 
 ## Usage
 
@@ -270,13 +296,13 @@ export const listen = defineSsrListen(({ app, devHttpsApp, port }) => {
   }
   else { // in production
     // return an object with a "handler" property
-    // that the server script will named-export
+    // that the server script will be named-export
     return { handler: app }
   }
 })
 ```
 
-Please note that the provided `ssrHandler` is a Function of form: `(req, res, next) => void`.
+Please note that the provided `app` is a Function of form: `(req, res, next) => void`.
 Should you require to export a handler of form `(event, context, callback) => void` then you will most likely want to use the `serverless-http` package (see below).
 
 #### Example: serverless-http
@@ -296,7 +322,7 @@ export const listen = defineSsrListen(({ app, devHttpsApp, port }) => {
     })
   }
   else { // in production
-    return { handler: serverless(ssrHandler) }
+    return { handler: serverless(app) }
   }
 })
 ```
@@ -317,7 +343,7 @@ export const listen = defineSsrListen(({ app, devHttpsApp, port }) => {
   }
   else { // in production
     return {
-      handler: functions.https.onRequest(ssrHandler)
+      handler: functions.https.onRequest(app)
     }
   }
 })

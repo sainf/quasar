@@ -64,22 +64,22 @@ Detailing the Object:
 
 ```js
 {
-  app, // Node.js app instance
-  port, // Nodej.js webserver configured port
+  app, // Expressjs app or whatever is returned from src-ssr/server -> create()
+  port, // on dev: devServer port; on prod: process.env.PORT or quasar.config > ssr > prodPort
   resolve: {
-    urlPath(path)
-    root(arg1, arg2),
-    public(arg1, arg2)
+    urlPath, // (url) => path string with publicPath ensured to be included,
+    root, // (pathPart1, ...pathPartN) => path string (joins to the root folder),
+    public // (pathPart1, ...pathPartN) => path string (joins to the public folder)
   },
-  publicPath, // String
+  publicPath, // string
   folders: {
-    root,     // String
-    public    // String
+    root, // path string of the root folder
+    public // path string of the public folder
   },
-  render(ssrContext),
+  render, // (ssrContext) => html string
   serve: {
-    static(path, opts),
-    error({ err, req, res })
+    static, // ({ urlPath = '/', pathToServe = '.', opts = {} }) => void (OR whatever returned by src-ssr/server -> serveStaticContent())
+    error // DEV only; ({ err, req, res }) => void
   }
 }
 ```
