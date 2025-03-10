@@ -242,6 +242,9 @@
             </q-td>
           </q-tr>
         </template>
+        <template #bottom-left>
+          Bottom Left Row
+        </template>
       </q-table>
 
       <h2>Grid style</h2>
