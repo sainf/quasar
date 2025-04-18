@@ -66,7 +66,7 @@ This is why you must always make sure to add `"Cache-Control": "no-cache"` to th
 
 As an example how this is done for Google Firebase, you would add the following to the `firebase.json` configuration:
 
-```json
+```json firebase.json
 {
   "hosting": {
     "headers": [
@@ -93,9 +93,97 @@ As an example how this is done for Google Firebase, you would add the following 
 }
 ```
 
+## Deploying with Cloudflare Pages
+
+Cloudflare Pages offers a powerful platform for deploying Quasar SPAs with built-in performance, security, and scalability features. Let's set up your Quasar application for deployment.
+
+First, install the required dependencies:
+
+```tabs
+<<| bash Yarn |>>
+$ yarn add -D @cloudflare/vite-plugin wrangler
+<<| bash NPM |>>
+$ npm install -D @cloudflare/vite-plugin wrangler
+<<| bash PNPM |>>
+$ pnpm add -D @cloudflare/vite-plugin wrangler
+<<| bash Bun |>>
+$ bun add -D @cloudflare/vite-plugin wrangler
+```
+
+Next, modify your `/quasar.config` file to include the Cloudflare Vite plugin:
+
+```js /quasar.config file
+import { cloudflare } from "@cloudflare/vite-plugin"
+
+export default defineConfig(() => {
+  return {
+    build: {
+      vitePlugins: [
+        cloudflare()
+      ]
+    }
+    // ... rest of your config
+  }
+})
+```
+
+Create a `wrangler.jsonc` file in your project root:
+
+```json wrangler.jsonc
+{
+  "$schema": "node_modules/wrangler/config-schema.json",
+  "name": "your-project-name",
+  "compatibility_date": "2025-04-12",
+  "pages_build_output_dir": "./dist/spa"
+}
+```
+
+Add the deploy script to your `package.json`:
+
+```json /package.json
+"scripts": {
+  "build": "quasar build",
+  "deploy": "wrangler pages deploy"
+}
+```
+
+Now you can build and deploy your application using:
+
+```tabs
+<<| bash Yarn |>>
+$ yarn build
+$ yarn deploy
+<<| bash NPM |>>
+$ npm run build
+$ npm run deploy
+<<| bash PNPM |>>
+$ pnpm run build
+$ pnpm run deploy
+<<| bash Bun |>>
+$ bun run build
+$ bun run deploy
+```
+
+For existing Git repositories, you can set up continuous deployment by connecting your repository to Cloudflare Pages:
+
+```bash
+$ wrangler pages project create my-quasar-app
+$ git remote add cloudflare https://github.com/your-username/your-repo.git
+$ git push cloudflare main
+```
+
+Configure your build settings in the Cloudflare Pages dashboard:
+- Build command: `quasar build`
+- Build output directory: `dist/spa`
+- Environment variables (if needed)
+
+For more information about Cloudflare Pages features and configuration options, visit the [Cloudflare Pages documentation](https://developers.cloudflare.com/pages).
+
 ## Deploying with Vercel
+
 Deploying your Quasar application with [Vercel](https://vercel.com/) is really easy.
 All you have to do is to download the [vercel-cli](https://vercel.com/download#now-cli) and log in by running:
+
 ```bash
 $ vercel login
 ```
@@ -103,6 +191,7 @@ $ vercel login
 Then proceed to build your Quasar application using the steps described in "General deployment" section.
 
 After the build is finished, change directory into your deploy root (example: `/dist/spa`) and run:
+
 ```bash
 # from /dist/spa (or your distDir)
 $ vercel
@@ -111,24 +200,23 @@ $ vercel
 The Vercel CLI should now display information regarding your deployment, like the URL. That's it. You're done.
 
 ### Vercel configuration tips
+
 You should consider adding some additional configurations to your project.
 
 * Important: Vercel expects the build results to be in `/public` directory, and _Quasar_ has it in `/dist/spa` by default, so you will need to override the `Output Directory` in your Vercel project. Set it to `dist/spa` through the Vercel web ui under your project's settings > Build & Development Settings.
 
 * Since Vercel expects the _build_ script to be defined, you may add in `package.json` the following scripts:
-```json
-  {
-    ..
-    "scripts": {
-      ...
-      "build": "quasar build",
-      "deploy": "vercel"
-    }
-  }
+
+```json /package.json
+"scripts": {
+  "build": "quasar build",
+  "deploy": "vercel"
+}
 ```
 
 * In order to support SPA routing in the deployed app, consider adding `vercel.json` file in your root folder:
-```json
+
+```json vercel.json
 {
   "routes": [
     { "handle": "filesystem" },
@@ -136,6 +224,7 @@ You should consider adding some additional configurations to your project.
   ]
 }
 ```
+
 ## Deploying with Heroku
 
 Unfortunately, Heroku does not support static sites out of the box. But don't worry, we just need to add an HTTP server to our project so Heroku can serve our Quasar application.
@@ -172,10 +261,12 @@ app.listen(port)
 
 Heroku assumes a set of npm scripts to be available, so we have to alter our `package.json` and add the following under the `script` section:
 
-```js
-"build": "quasar build",
-"start": "node server.js",
-"heroku-postbuild": "yarn && yarn build"
+```js /package.json
+"scripts": {
+  "build": "quasar build",
+  "start": "node server.js",
+  "heroku-postbuild": "yarn && yarn build"
+}
 ```
 
 Now it is time to create an app on Heroku by running:
@@ -256,7 +347,7 @@ $ bun add --dev push-dir
 
 Then add a `deploy` script command to your `package.json`:
 
-```json
+```json /package.json
 "scripts": {
   "deploy": "push-dir --dir=dist/spa --remote=gh-pages --branch=master"
 }

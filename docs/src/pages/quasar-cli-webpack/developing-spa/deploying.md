@@ -66,7 +66,7 @@ This is why you must always make sure to add `"Cache-Control": "no-cache"` to th
 
 As an example how this is done for Google Firebase, you would add the following to the `firebase.json` configuration:
 
-```json
+```json firebase.json
 {
   "hosting": {
     "headers": [
@@ -94,8 +94,10 @@ As an example how this is done for Google Firebase, you would add the following 
 ```
 
 ## Deploying with Vercel
+
 Deploying your Quasar application with [Vercel](https://vercel.com/) is really easy.
 All you have to do is to download the [vercel-cli](https://vercel.com/download#now-cli) and log in by running:
+
 ```bash
 $ vercel login
 ```
@@ -103,6 +105,7 @@ $ vercel login
 Then proceed to build your Quasar application using the steps described in "General deployment" section.
 
 After the build is finished, change directory into your deploy root (example: `/dist/spa`) and run:
+
 ```bash
 # from /dist/spa (or your distDir)
 $ vercel
@@ -111,24 +114,23 @@ $ vercel
 The Vercel CLI should now display information regarding your deployment, like the URL. That's it. You're done.
 
 ### Vercel configuration tips
+
 You should consider adding some additional configurations to your project.
 
 * Important: Vercel expects the build results to be in `/public` directory, and _Quasar_ has it in `/dist/spa` by default, so you will need to override the `Output Directory` in your Vercel project. Set it to `dist/spa` through the Vercel web ui under your project's settings > Build & Development Settings.
 
 * Since Vercel expects the _build_ script to be defined, you may add in `package.json` the following scripts:
-```json
-  {
-    ..
-    "scripts": {
-      ...
-      "build": "quasar build",
-      "deploy": "vercel"
-    }
-  }
+
+```json /package.json
+"scripts": {
+  "build": "quasar build",
+  "deploy": "vercel"
+}
 ```
 
 * In order to support SPA routing in the deployed app, consider adding `vercel.json` file in your root folder:
-```json
+
+```json vercel.json
 {
   "routes": [
     { "handle": "filesystem" },
@@ -136,6 +138,7 @@ You should consider adding some additional configurations to your project.
   ]
 }
 ```
+
 ## Deploying with Heroku
 
 Unfortunately, Heroku does not support static sites out of the box. But don't worry, we just need to add an HTTP server to our project so Heroku can serve our Quasar application.
@@ -172,10 +175,12 @@ app.listen(port)
 
 Heroku assumes a set of npm scripts to be available, so we have to alter our `package.json` and add the following under the `script` section:
 
-```js
-"build": "quasar build",
-"start": "node server.js",
-"heroku-postbuild": "yarn && yarn build"
+```js /package.json
+"scripts": {
+  "build": "quasar build",
+  "start": "node server.js",
+  "heroku-postbuild": "yarn && yarn build"
+}
 ```
 
 Now it is time to create an app on Heroku by running:
@@ -256,7 +261,7 @@ $ bun add --dev push-dir
 
 Then add a `deploy` script command to your `package.json`:
 
-```json
+```json /package.json
 "scripts": {
   "deploy": "push-dir --dir=dist/spa --remote=gh-pages --branch=master"
 }
